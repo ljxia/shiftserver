@@ -7,8 +7,9 @@ import schema
 shift.create({"content":{"foo":"bar"}})
 
 shift.create({
+  "id": "ed35c52d7c60f9b99e355357f570f843",
   "createdBy": "1",
-  "space": "Notes",
+  "space": {"name": "Notes", "version": 0.1},
   "summary": "My note.",
   "content": {
     "position": {"x": 100, "y": 150},
@@ -47,9 +48,10 @@ def update(data):
   """
   db = core.connect()
 
-  id = data.id
+  id = data["id"]
   doc = db[id]
   doc.update(data)
+  doc["modified"] = utils.isotime()
   
   db[id] = doc
 

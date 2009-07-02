@@ -20,9 +20,10 @@ def shift():
     "createdBy": None,
     "href": None,
     "domain": None,
-    "space": None,
-    "name": None,
-    "version": None,
+    "space": {
+      "name": None,
+      "version": None,
+    },
     "summary": None,
     "created": None,
     "modified": None,
