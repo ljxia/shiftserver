@@ -56,11 +56,4 @@ def update(data):
   db[id] = doc
 
   return doc
-
-
-def forUser(userId):
-  """
-  Return all the shifts for a particular user
-  """
-  pass
   
