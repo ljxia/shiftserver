@@ -1,27 +1,29 @@
 import core
-import time
+import utils
+import schema
 
 # define a decorator to make the function call
 
+# shift.create({"content":{"foo":"bar"}})
 def create(data):
   """
   Create a shift in the database.
   """
   db = core.connect()
 
-  now = time.time()
   data["type"] = "shift"
-  data["created"] = now
+  data["created"] = utils.isotime()
   
-  doc = db.create(data)
-  return doc
+  newShift = schema.shift()
+  newShift.update(data)
+
+  return db.create(newShift)
 
 
 def delete(docId):
   """
   Delete a shift from the database.
   """
-  # don't delete the stream, user doesn't own it
   db = core.connect()
   del db[docId]
 
