@@ -1,5 +1,4 @@
-from couchdb.client import Server
-import ShiftUtils
+import core
 import time
 
 # define a decorator to make the function call
@@ -8,7 +7,7 @@ def create(data):
   """
   Create a shift in the database.
   """
-  db = ShiftUtils.connect()
+  db = core.connect()
 
   now = time.time()
   data["type"] = "shift"
@@ -23,7 +22,7 @@ def delete(docId):
   Delete a shift from the database.
   """
   # don't delete the stream, user doesn't own it
-  db = ShiftUtils.connect()
+  db = core.connect()
   del db[docId]
 
 
