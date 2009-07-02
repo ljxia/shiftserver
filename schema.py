@@ -9,9 +9,9 @@ def user():
     "password": None,
     "joined": None,
     "lastSeen": None,
-    "subscriptions": None,
-    "streams": None,
-    "preferences": None
+    "subscriptions": [],
+    "streams": [],
+    "preferences": {}
   }
 
 def shift():
@@ -39,13 +39,32 @@ def shift():
 
 def stream():
   return {
+    "type": "stream",
+    "createdBy": None,
+    "displayName": None,
+    "uniqueName": None,
+    "created": None,
+    "modified": None,
+    "private": True,
+    "objectRef": None
   }
 
 def event(): 
   return {
+    "type": "event",
+    "createdBy": None,
+    "streamId": None,
+    "displayString": None,
+    "created": None,
+    "modified": None,
+    "objectRef": None,
+    "content": {}
   }
 
 def permission():
   return {
+    "type": "permission",
+    "userId": None,
+    "level": 0
   }
 
