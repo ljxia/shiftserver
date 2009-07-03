@@ -1,4 +1,4 @@
-def user(): 
+def user():
   return {
     "type": "user",
     "userName": None,
