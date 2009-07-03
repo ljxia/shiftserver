@@ -10,6 +10,8 @@ def inGroup(id):
   db = core.connect()
 
   options = {"key": id}
+  theGroups = db.view("_design/groups/_view/all", None, **options)
+  print theGroups
   for user in db.view("_design/groups/_view/all", None, **options):
     print user
   #for row in  db.view("_all_docs"):
