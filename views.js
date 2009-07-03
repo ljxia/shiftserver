@@ -1,27 +1,20 @@
 // =============================================================================
-// By Group
+// Groups
+// =============================================================================
 
+// all
+// -----------------------------------------------------------------------------
 function(doc)
 {
+  var type = doc.type;
   var groups = doc.groups;
-  for(var i = 0; i < groups.length; i++)
+  if(type == "user" && groups.length > 0)
   {
-    emit(groups[i], doc);
+    for(var i = 0; i < groups.length; i++)
+    {
+      emit(groups[i], doc);
+    }
   }
 }
 
-function(key, values, rereduce)
-{
-  var set = [];
-  var seen = [];
-  for(var i = 0; i < values.length; i++)
-  {
-    var _id = values[i]._id;
-    if(seen.indexOf(_id) == -1)
-    {
-      seen.push(_id);
-      set.push(values[i]);
-    }
-  }
-  return set;
-}
+
