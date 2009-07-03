@@ -9,8 +9,8 @@ class Root:
     index.exposed = True
 
 class Shift:
-    def index(self, id):
-        return str(id)
+    def index(self):
+        return "This is the shift controller"
     index.exposed = True
 
 root = Root()
