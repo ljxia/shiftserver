@@ -15,15 +15,33 @@ import simplejson as json
 class User:
     exposed = True
 
+    def PUT(self, data):
+        return "Trying to create a user"
+
     def GET(self, userName):
         return "User name is %s" % userName
+
+    def POST(self, data):
+        return "Updating a user"
+
+    def DELETE(self, userName):
+        return "Trying to delete %s" % userName
 
 
 class Shift:
     exposed = True
 
+    def PUT(self, data):
+        return "Trying to create a shift"
+
     def GET(self, id):
-        return "Shift id is %s" % id
+        return "Getting shift %s" % id
+
+    def POST(self, data):
+        return "Updating a shift"
+
+    def DELETE(self, id):
+        return "Trying to delete a shift"
 
 
 class Shifts:
@@ -49,21 +67,6 @@ class ShiftSpaceServer:
 
     def GET(self):
         return "ShiftSpace Server 1.0"
-
-"""
-def setupRoutes():
-    d = cherrypy.dispatch.RoutesDispatcher()
-
-    d.connect("", ":action", controller=Root(), action="index")
-    d.connect("", "shift/", controller=Shift(), action="index") 
-    d.connect(None, "shift/:id", controller=Shift(), action="shift",
-              conditions=dict(method=["GET"]))
-    d.connect(None, "group/:id", controller=Groups(), action="inGroup",
-              conditions=dict(method=["GET"]))
-
-    dispatcher = d
-    return dispatcher
-"""
 
 
 # configuration, serves same purpose as server.conf file
