@@ -3,6 +3,7 @@ import cherrypy
 import routes
 import shift
 import groups
+import simplejson as json
 
 
 class Root:
@@ -11,20 +12,44 @@ class Root:
     index.exposed = True
 
 
+class User:
+    @cherrypy.expose
+    def index(self):
+        pass
+
+
 class Shift:
+    @cherrypy.expose
     def index(self):
         return "This is the shift controller"
+
+    @cherrypy.expose
     def shift(self, id):
         return "Shift id is %s" % id
-    index.exposed = True
-    shift.exposed = True
+
+
+class Groups:
+    @cherrypy.expose
+    def index(self):
+        return "This is the groups controller"
+
+    @cherrypy.expose
+    def inGroup(self, id):
+        # set response to say json
+        # cherrypy.response.headers['Content-Type'] = 'application/json'
+        return json.dumps(groups.inGroup(int(id)))
 
 
 def setupRoutes():
     d = cherrypy.dispatch.RoutesDispatcher()
-    d.connect("root", ":action", controller=Root())
-    #d.connect("shiftIndex", "shift/:action", controller=Shift()) # why doesn't this work
-    d.connect("serveShift", "shift/:id", controller=Shift(), action="shift")
+
+    d.connect(None, ":action", controller=Root(), action="index")
+    d.connect("shift", "shift/", controller=Shift()) # why doesn't this work
+    d.connect("shift", "shift/:id", controller=Shift(), action="shift",
+              conditions=dict(method=["GET"]))
+    d.connect("group", "group/:id", controller=Groups(), action="inGroup",
+              conditions=dict(method=["GET"]))
+
     dispatcher = d
     return dispatcher
 

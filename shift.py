@@ -34,6 +34,14 @@ def create(data):
   return db.create(newShift)
 
 
+def get(id):
+  """
+  Get a specific shift.
+  """
+  db = core.connect()
+  return db[id]
+
+
 def delete(id):
   """
   Delete a shift from the database.
