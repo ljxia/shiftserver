@@ -1,10 +1,24 @@
 import cherrypy
 import routes
+import shift
+import groups
 
-
-class HelloWorld(object):
+class Root:
     def index(self):
-        return "Hello World!"
+        return "ShiftSpace Server 1.0"
     index.exposed = True
 
-cherrypy.quickstart(HelloWorld())
+class Shift:
+    def index(self, id):
+        return str(id)
+    index.exposed = True
+
+root = Root()
+root.shift = Shift()
+cherrypy.tree.mount(root)
+
+if __name__ == '__main__':
+    import os.path
+    thisdir = os.path.dirname(__file__)
+    cherrypy.quickstart(config=os.path.join(thisdir, 'server.conf'))
+
