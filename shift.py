@@ -7,7 +7,6 @@ import schema
 shift.create({"content":{"foo":"bar"}})
 
 shift.create({
-  "id": "ed35c52d7c60f9b99e355357f570f843",
   "createdBy": "1",
   "space": {"name": "Notes", "version": 0.1},
   "summary": "My note.",
@@ -64,4 +63,18 @@ def update(data):
   db[id] = doc
 
   return doc
+
+
+def byUserName(userName):
+  db = core.connect()
+
+  options = {"key": userName}
+  result = []
   
+  for row in db.view("_design/users/_view/byname", None, **options):
+    options = {"key": row.value["_id"]}
+    result = []
+    for row in db.view("_design/shifts/_view/byuser", **options):
+      row.value.update({"id":row.id})
+      result.append(row.value)
+    return result

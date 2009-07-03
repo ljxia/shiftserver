@@ -6,59 +6,71 @@ import groups
 import simplejson as json
 
 
-class Root:
-    def index(self):
-        return "ShiftSpace Server 1.0"
-    index.exposed = True
+# TODO:
+# 1. Authentication
+# 2. Sessions
+# 3. Tool for handling response
 
 
 class User:
-    @cherrypy.expose
-    def index(self):
-        pass
+    exposed = True
+
+    def GET(self, userName):
+        return "User name is %s" % userName
 
 
 class Shift:
-    @cherrypy.expose
-    def index(self):
-        return "This is the shift controller"
+    exposed = True
 
-    @cherrypy.expose
-    def shift(self, id):
+    def GET(self, id):
         return "Shift id is %s" % id
 
 
-class Groups:
-    @cherrypy.expose
-    def index(self):
-        return "This is the groups controller"
+class Shifts:
+    exposed = True
 
-    @cherrypy.expose
-    def inGroup(self, id):
-        # set response to say json
-        # cherrypy.response.headers['Content-Type'] = 'application/json'
+    def GET(self, userName):
+        return json.dumps(shift.byUserName(userName))
+
+
+class Groups:
+    exposed = True
+
+    def GET(self, id):
         return json.dumps(groups.inGroup(int(id)))
 
 
+class ShiftSpaceServer:
+    exposed = True
+    shift = Shift()
+    shifts = Shifts()
+    group = Groups()
+    user = User()
+
+    def GET(self):
+        return "ShiftSpace Server 1.0"
+
+"""
 def setupRoutes():
     d = cherrypy.dispatch.RoutesDispatcher()
 
-    d.connect(None, ":action", controller=Root(), action="index")
-    d.connect("shift", "shift/", controller=Shift()) # why doesn't this work
-    d.connect("shift", "shift/:id", controller=Shift(), action="shift",
+    d.connect("", ":action", controller=Root(), action="index")
+    d.connect("", "shift/", controller=Shift(), action="index") 
+    d.connect(None, "shift/:id", controller=Shift(), action="shift",
               conditions=dict(method=["GET"]))
-    d.connect("group", "group/:id", controller=Groups(), action="inGroup",
+    d.connect(None, "group/:id", controller=Groups(), action="inGroup",
               conditions=dict(method=["GET"]))
 
     dispatcher = d
     return dispatcher
+"""
 
 
 # configuration, serves same purpose as server.conf file
 conf = {
 
     '/': {
-        'request.dispatch': setupRoutes()
+        'request.dispatch': cherrypy.dispatch.MethodDispatcher()
         },
 
     '/static': {
@@ -74,7 +86,7 @@ conf = {
 def start(config=None):
     if config:
         cherrypy.config.update(config)
-    app = cherrypy.tree.mount(None, config=conf)
+    app = cherrypy.tree.mount(ShiftSpaceServer(), config=conf)
     cherrypy.quickstart(app)
 
 
