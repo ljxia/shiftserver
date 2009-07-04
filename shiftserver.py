@@ -29,7 +29,7 @@ class Shift:
         return "Trying to create a shift"
 
     def GET(self, id):
-        return "Getting shift %s" % id
+        return json.dumps(shift.get(id))
 
     def PUT(self, data):
         return "Updating a shift"
