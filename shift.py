@@ -66,6 +66,9 @@ def update(data):
 
 
 def byUserName(userName):
+  """
+  Return the list of shifts a user has created.
+  """
   db = core.connect()
 
   options = {"key": userName}

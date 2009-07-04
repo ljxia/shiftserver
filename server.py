@@ -15,13 +15,13 @@ import simplejson as json
 class User:
     exposed = True
 
-    def PUT(self, data):
+    def POST(self, data):
         return "Trying to create a user"
 
     def GET(self, userName):
         return "User name is %s" % userName
 
-    def POST(self, data):
+    def PUT(self, data):
         return "Updating a user"
 
     def DELETE(self, userName):
@@ -31,13 +31,13 @@ class User:
 class Shift:
     exposed = True
 
-    def PUT(self, data):
+    def POST(self, data):
         return "Trying to create a shift"
 
     def GET(self, id):
         return "Getting shift %s" % id
 
-    def POST(self, data):
+    def PUT(self, data):
         return "Updating a shift"
 
     def DELETE(self, id):
