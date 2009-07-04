@@ -25,8 +25,8 @@ class User:
 class Shift:
     exposed = True
 
-    def POST(self, data):
-        return "Trying to create a shift"
+    def POST(self):
+        return shift.create(json.loads(cherrypy.request.body.read()))
 
     def GET(self, id):
         return json.dumps(shift.get(id))
