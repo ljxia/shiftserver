@@ -1,10 +1,12 @@
 import time
 import cherrypy
 
+import user
 import routes
 import shift
 import groups
 import simplejson as json
+
 
 class User:
     exposed = True
@@ -13,7 +15,7 @@ class User:
         return "Trying to create a user"
 
     def GET(self, userName):
-        return "User name is %s" % userName
+        return json.dumps(user.get(userName))
 
     def PUT(self, data):
         return "Updating a user"

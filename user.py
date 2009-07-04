@@ -14,13 +14,16 @@ def create(data):
   return db.create(newUser)
 
 
-
-def get(id):
+def get(userName):
   """
   Returns a user.
   """
   db = core.connect()
-  return db[id]
+
+  options = {"key": userName}
+
+  for row in db.view("_design/users/_view/byname", None, **options):
+    return row.value
 
 
 def update(data):
@@ -36,14 +39,6 @@ def delete(id):
   """
   db = core.connect()
   del db[i]
-
-
-def shifts(id):
-  """
-  Returns all shifts for a user.
-  """
-  db = core.connect()
-  pass
 
 
 def feeds(id):

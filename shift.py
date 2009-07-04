@@ -72,7 +72,6 @@ def byUserName(userName):
   db = core.connect()
 
   options = {"key": userName}
-  result = []
   
   # TODO: find a better way to handle this - David 7/3/09
   for row in db.view("_design/users/_view/byname", None, **options):
