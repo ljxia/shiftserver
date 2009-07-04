@@ -6,10 +6,9 @@
 // -----------------------------------------------------------------------------
 function(doc)
 {
-  var type = doc.type;
-  var groups = doc.groups;
-  if(type == "user" && groups.length > 0)
+  if(doc.type == "user")
   {
+    var groups = doc.groups;
     for(var i = 0; i < groups.length; i++)
     {
       emit(groups[i], doc);
