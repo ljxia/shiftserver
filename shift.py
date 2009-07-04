@@ -74,6 +74,7 @@ def byUserName(userName):
   options = {"key": userName}
   result = []
   
+  # TODO: find a better way to handle this - David 7/3/09
   for row in db.view("_design/users/_view/byname", None, **options):
     options = {"key": row.value["_id"]}
     result = []
