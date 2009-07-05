@@ -1,3 +1,4 @@
+import os
 import time
 import cherrypy
 
@@ -9,8 +10,6 @@ import simplejson as json
 
 
 class User:
-    exposed = True
-
     def POST(self, data):
         return "Trying to create a user"
 
@@ -25,50 +24,59 @@ class User:
 
 
 class Shift:
-    exposed = True
-
-    def POST(self):
+    def create(self):
         return shift.create(json.loads(cherrypy.request.body.read()))
 
-    def GET(self, id):
+    def read(self, id):
         return json.dumps(shift.get(id))
 
-    def PUT(self, data):
+    def update(self, data):
         return "Updating a shift"
 
-    def DELETE(self, id):
+    def delete(self, id):
         return "Trying to delete a shift"
 
 
 class Shifts:
-    exposed = True
-
-    def GET(self, userName):
+    def read(self, userName):
         return json.dumps(shift.byUserName(userName))
 
 
 class Groups:
-    exposed = True
-
-    def GET(self, id):
+    def read(self, id):
         return json.dumps(groups.inGroup(int(id)))
 
 
-class ShiftSpaceServer:
-    exposed = True
+def initRoutes():
     shift = Shift()
     shifts = Shifts()
     group = Groups()
     user = User()
 
-    def GET(self):
-        return "ShiftSpace Server 1.0"
+    d = cherrypy.dispatch.RoutesDispatcher()
+
+    # Shift Routes
+    d.connect(name="shiftCreate", route="shift", controller=shift, action="create",
+              condition=dict(method="POST"))
+    d.connect(name="shiftRead", route="shift/:id", controller=shift, action="read",
+              condition=dict(method="GET"))
+    # User Routes
+    # Group Routes
+    # Stream Routes
+    # Event Routes
 
 
 appconf = {'/': {'tools.proxy.on':True,
-                 'request.dispatch': cherrypy.dispatch.MethodDispatcher()}}
+                 'request.dispatch': initRoutes()}}
 
-cherrypy.config.update({'server.socket_port':8080})
 
-# TODO: The following value should be read from an environment file - David 7/4/09
-cherrypy.quickstart(ShiftSpaceServer(), '/~davidnolen/shiftspace/shiftserver', appconf)
+def startServer(config=None):
+    cherrypy.config.update({'server.socket_port':8080})
+    if config:
+        cherrypy.config.update(config)
+    app = cherrypy.tree.mount(root=None, config=appconf)
+    cherrypy.quickstart(app, '/~davidnolen/shiftspace/shiftserver', appconf)
+ 
+ 
+if __name__ == '__main__':
+    startServer(os.path.join(os.path.dirname(__file__), 'server.conf'))
