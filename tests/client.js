@@ -49,3 +49,16 @@ new Request.JSON({
     console.log(json);
   }
 }).send();
+
+
+// Query for a User
+// =============================================================================
+
+new Request.JSON({
+  method:"get",
+  url:"/~davidnolen/shiftspace/shiftserver/user/query",
+  onComplete:function(json)
+  {
+    console.log(json);
+  }
+}).send();

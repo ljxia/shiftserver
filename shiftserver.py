@@ -14,6 +14,7 @@ class User:
         return "Trying to create a user"
 
     def read(self, userName):
+        # TODO: don't return private fields - David 7/5/09
         return json.dumps(user.get(userName))
 
     def update(self, data):
@@ -23,11 +24,18 @@ class User:
         return "Trying to delete %s" % userName
 
     def query(self):
-        return "Query user"
+        loggedInUser = cherrypy.session.get('loggedInUser')
+        if loggedInUser:
+            return json.dumps(loggedInUser)
+        else:
+            return json.dumps({"message":"No logged in user"})
 
     def login(self, userName, password):
-        user = self.read(userName)
-        return "Login user %s" % user
+        theUser = user.get(userName)
+        if theUser and theUser['password'] == password:
+            cherrypy.session['loggedInUser'] = theUser
+            return json.dumps(theUser)
+        return "Error"
 
     def logout(self):
         return "Logout user"
@@ -77,8 +85,11 @@ def initRoutes():
     # User Routes
     d.connect(name="userLogin", route="user/login", controller=user, action="login",
               conditions=dict(method="POST"))
-    d.connect(name="userRead", route="user/:userName", controller=user, action="read",
-              conditions=dict(method="GET")) 
+    d.connect(name="userQuery", route="user/query", controller=user, action="query",
+              conditions=dict(method="GET"))
+    # We need to use /view here becaues we have other actions - David
+    d.connect(name="userRead", route="user/view/:userName", controller=user, action="read",
+              conditions=dict(method="GET"))
 
     # Shift Routes
     d.connect(name="shiftCreate", route="shift", controller=shift, action="create",
@@ -107,7 +118,7 @@ appconf = {'/': {'tools.proxy.on':True,
                  'request.dispatch': initRoutes(),
                  'tools.sessions.on': True,
                  'tools.sessions.storage_type': "file",
-                 'tools.sessions.storage_path':"/Users/davidnolen/Sites/shiftserver/session",
+                 'tools.sessions.storage_path':"/Users/davidnolen/Sites/shiftserver/sessions",
                  'tools.sessions.timeout': 60}}
 
 cherrypy.config.update({'server.socket_port':8080})
