@@ -55,6 +55,8 @@ def initRoutes():
 
     d = cherrypy.dispatch.RoutesDispatcher()
 
+    # Root
+
     # Shift Routes
     d.connect(name="shiftCreate", route="shift", controller=shift, action="create",
               conditions=dict(method="POST"))
@@ -76,13 +78,14 @@ appconf = {'/': {'tools.proxy.on':True,
                  'request.dispatch': initRoutes()}}
 
 
+
 def startServer(config=None):
     cherrypy.config.update({'server.socket_port':8080})
     if config:
         cherrypy.config.update(config)
     app = cherrypy.tree.mount(root=None, config=appconf)
-    cherrypy.quickstart(None, '/~davidnolen/shiftspace/shiftserver', appconf)
+    cherrypy.quickstart(None, '/~davidnolen/shiftspace/shiftserver')
  
  
 if __name__ == '__main__':
-    startServer(os.path.join(os.path.dirname(__file__), 'server.conf'))
+    startServer(os.path.join(os.path.dirname(__file__)))
