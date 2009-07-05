@@ -10,16 +10,16 @@ import simplejson as json
 
 
 class User:
-    def POST(self, data):
+    def create(self, data):
         return "Trying to create a user"
 
-    def GET(self, userName):
+    def read(self, userName):
         return json.dumps(user.get(userName))
 
-    def PUT(self, data):
+    def update(self, data):
         return "Updating a user"
 
-    def DELETE(self, userName):
+    def delete(self, userName):
         return "Trying to delete %s" % userName
 
 
@@ -66,9 +66,15 @@ def initRoutes():
               conditions=dict(method="PUT"))
     d.connect(name="shiftDelete", route="shift/:id", controller=shift, action="delete",
               conditions=dict(method="DELETE"))
+    d.connect(name="shiftsRead", route="shifts/:username", controller=shifts, action="read",
+              conditions=dict(method="GET"))
 
     # User Routes
+    d.connect(name="userRead", route="user/:username", controller=user, action="read",
+              conditions=dict(method="GET"))
     # Group Routes
+    d.connect(name="groupRead", route="group/:id", controller=group, action="read",
+              conditions=dict(method="GET"))
     # Stream Routes
     # Event Routes
     return d
@@ -77,15 +83,7 @@ def initRoutes():
 appconf = {'/': {'tools.proxy.on':True,
                  'request.dispatch': initRoutes()}}
 
-
-
-def startServer(config=None):
-    cherrypy.config.update({'server.socket_port':8080})
-    if config:
-        cherrypy.config.update(config)
-    app = cherrypy.tree.mount(root=None, config=appconf)
-    cherrypy.quickstart(None, '/~davidnolen/shiftspace/shiftserver')
- 
- 
-if __name__ == '__main__':
-    startServer(os.path.join(os.path.dirname(__file__)))
+cherrypy.config.update({'server.socket_port':8080})
+app = cherrypy.tree.mount(root=None, script_name='/~davidnolen/shiftspace/shiftserver', config=appconf)
+# TODO: The following value should be read from an environment file - David 7/4/09
+cherrypy.quickstart(app)
