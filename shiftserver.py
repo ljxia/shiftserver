@@ -66,17 +66,21 @@ def initRoutes():
               conditions=dict(method="PUT"))
     d.connect(name="shiftDelete", route="shift/:id", controller=shift, action="delete",
               conditions=dict(method="DELETE"))
-    d.connect(name="shiftsRead", route="shifts/:username", controller=shifts, action="read",
+    d.connect(name="shiftsRead", route="shifts/:userName", controller=shifts, action="read",
               conditions=dict(method="GET"))
 
     # User Routes
-    d.connect(name="userRead", route="user/:username", controller=user, action="read",
-              conditions=dict(method="GET"))
+    d.connect(name="userRead", route="user/:useroName", controller=user, action="read",
+              conditions=dict(method="GET")) 
+
     # Group Routes
     d.connect(name="groupRead", route="group/:id", controller=group, action="read",
               conditions=dict(method="GET"))
+
     # Stream Routes
+
     # Event Routes
+
     return d
 
 
