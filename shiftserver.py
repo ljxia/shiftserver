@@ -57,13 +57,19 @@ def initRoutes():
 
     # Shift Routes
     d.connect(name="shiftCreate", route="shift", controller=shift, action="create",
-              condition=dict(method="POST"))
+              conditions=dict(method="POST"))
     d.connect(name="shiftRead", route="shift/:id", controller=shift, action="read",
-              condition=dict(method="GET"))
+              conditions=dict(method="GET"))
+    d.connect(name="shiftUpdate", route="shift/:id", controller=shift, action="update",
+              conditions=dict(method="PUT"))
+    d.connect(name="shiftDelete", route="shift/:id", controller=shift, action="delete",
+              conditions=dict(method="DELETE"))
+
     # User Routes
     # Group Routes
     # Stream Routes
     # Event Routes
+    return d
 
 
 appconf = {'/': {'tools.proxy.on':True,
@@ -75,7 +81,7 @@ def startServer(config=None):
     if config:
         cherrypy.config.update(config)
     app = cherrypy.tree.mount(root=None, config=appconf)
-    cherrypy.quickstart(app, '/~davidnolen/shiftspace/shiftserver', appconf)
+    cherrypy.quickstart(None, '/~davidnolen/shiftspace/shiftserver', appconf)
  
  
 if __name__ == '__main__':

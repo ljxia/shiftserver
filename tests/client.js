@@ -29,3 +29,27 @@ new Request.JSON({
     console.log(json);
   }
 }).send(data)
+
+var data = JSON.encode({
+  space:"Notes",
+  summary: "Some really cool note",
+  content:
+  {
+    position: {x: 150, w:150},
+    size: {x:200, y:200},
+    text: "Some really cool note"
+  }
+});
+
+new Request.JSON({
+  method:"post",
+  url:"/~davidnolen/shiftspace/shiftserver/shift",
+  headers:
+  {
+    "Content-type":"application/json"
+  },
+  onComplete:function(json)
+  {
+    console.log(json);
+  }
+}).send(data)
