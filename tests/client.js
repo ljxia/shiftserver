@@ -1,3 +1,6 @@
+// Grab a shift
+// =============================================================================
+
 new Request.JSON({
   method:"get",
   url:"/~davidnolen/shiftspace/shiftserver/shift/e7e31f18346f8d9818f2cc4fecf3ed9e",
@@ -7,6 +10,9 @@ new Request.JSON({
   }
 }).send();
 
+
+// Create a Highlight
+// =============================================================================
 
 var data = JSON.encode({
   space:"Highlights",
@@ -28,28 +34,18 @@ new Request.JSON({
   {
     console.log(json);
   }
-}).send(data)
+}).send(data);
 
-var data = JSON.encode({
-  space:"Notes",
-  summary: "Some really cool note",
-  content:
-  {
-    position: {x: 150, w:150},
-    size: {x:200, y:200},
-    text: "Some really cool note"
-  }
-});
+
+// Login a User
+// =============================================================================
 
 new Request.JSON({
   method:"post",
-  url:"/~davidnolen/shiftspace/shiftserver/shift",
-  headers:
-  {
-    "Content-type":"application/json"
-  },
+  url:"/~davidnolen/shiftspace/shiftserver/user/login",
+  data:{userName:"dnolen", password:"foobar"},
   onComplete:function(json)
   {
     console.log(json);
   }
-}).send(data)
+}).send();

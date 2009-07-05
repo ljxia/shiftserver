@@ -22,6 +22,16 @@ class User:
     def delete(self, userName):
         return "Trying to delete %s" % userName
 
+    def query(self):
+        return "Query user"
+
+    def login(self, userName, password):
+        user = self.read(userName)
+        return "Login user %s" % user
+
+    def logout(self):
+        return "Logout user"
+
 
 class Shift:
     def create(self):
@@ -47,15 +57,28 @@ class Groups:
         return json.dumps(groups.inGroup(int(id)))
 
 
+class Root:
+    def read(self):
+        return "ShiftSpace Server 1.0"
+
+
 def initRoutes():
+    root = Root()
+    user = User()
     shift = Shift()
     shifts = Shifts()
     group = Groups()
-    user = User()
 
     d = cherrypy.dispatch.RoutesDispatcher()
 
     # Root
+    d.connect(name="root", route="", controller=root, action="read")
+
+    # User Routes
+    d.connect(name="userLogin", route="user/login", controller=user, action="login",
+              conditions=dict(method="POST"))
+    d.connect(name="userRead", route="user/:userName", controller=user, action="read",
+              conditions=dict(method="GET")) 
 
     # Shift Routes
     d.connect(name="shiftCreate", route="shift", controller=shift, action="create",
@@ -69,10 +92,6 @@ def initRoutes():
     d.connect(name="shiftsRead", route="shifts/:userName", controller=shifts, action="read",
               conditions=dict(method="GET"))
 
-    # User Routes
-    d.connect(name="userRead", route="user/:useroName", controller=user, action="read",
-              conditions=dict(method="GET")) 
-
     # Group Routes
     d.connect(name="groupRead", route="group/:id", controller=group, action="read",
               conditions=dict(method="GET"))
@@ -85,9 +104,13 @@ def initRoutes():
 
 
 appconf = {'/': {'tools.proxy.on':True,
-                 'request.dispatch': initRoutes()}}
+                 'request.dispatch': initRoutes(),
+                 'tools.sessions.on': True,
+                 'tools.sessions.storage_type': "file",
+                 'tools.sessions.storage_path':"/Users/davidnolen/Sites/shiftserver/session",
+                 'tools.sessions.timeout': 60}}
 
 cherrypy.config.update({'server.socket_port':8080})
-app = cherrypy.tree.mount(root=None, script_name='/~davidnolen/shiftspace/shiftserver', config=appconf)
 # TODO: The following value should be read from an environment file - David 7/4/09
+app = cherrypy.tree.mount(root=None, script_name='/~davidnolen/shiftspace/shiftserver', config=appconf)
 cherrypy.quickstart(app)
