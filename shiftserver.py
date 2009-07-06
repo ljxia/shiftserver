@@ -87,9 +87,9 @@ class User:
         valid, msg = self.isValid(theData)
         result = None
         if valid:
-            # TODO: log the user in - David 7/6/09
             id = user.create(theData)
             theUser = user.getById(id)
+            helper.setLoggedInUser(theUser)
             return data(theUser)
         else:
             return error(msg)
