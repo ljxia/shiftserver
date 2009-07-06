@@ -15,8 +15,9 @@ ack = {"data":"ok"}
 # TODO: json.dumps decorator
 
 class User:
-    def create(self, data):
-        return "Trying to create a user"
+    def join(self, data):
+        user.create(data)
+        return json.dumps(ack)
 
     def read(self, userName):
         theUser = user.get(userName).copy()
@@ -24,13 +25,13 @@ class User:
             del theUser['password']
         return json.dumps(theUser)
 
-    def update(self, userName, data):
+    def update(self, userName):
         loggedInUser = cherrypy.session['loggedInUser']
         if loggedInUser['userName'] == userName:
-            shift.update(data)
+            shift.update(cherrypy.request.body.read())
             return json.dumps(ack)
         else:
-            return json.dumps({"error": "Operation not permitted."})
+            return json.dumps({"error": "Operation not permitted. You don't have permission to update this account."})
 
     def delete(self, userName):
         loggedInUser = cherrypy.session['loggedInUser']
@@ -38,7 +39,7 @@ class User:
             user.delete(userName)
             return json.dumps(ack)
         else:
-            return json.dumps({"error": "Operation not permitted."})
+            return json.dumps({"error": "Operation not permitted. You don't have permission to delete this account."})
 
     def query(self):
         loggedInUser = cherrypy.session.get('loggedInUser')
@@ -59,26 +60,76 @@ class User:
         if loggedInUser:
             cherrpy.session['loggedInUser'] = None
             return json.dumps({"data":"ok"})
-        return json.dumps({"message":"No logged in user."})
+        return json.dumps({"error":"No user logged in."})
 
 
 class Shift:
     def create(self):
-        return shift.create(json.loads(cherrypy.request.body.read()))
+        loggedInUser = cherrpy.session['loggedInUser']
+        if loggedInUser:
+            data = json.loads(cherrypy.request.body.read())
+            data['createdBy'] = loggedInUser.get("_id")
+            return shift.create(data)
+        else:
+            return json.dumps({"error":"Operation not permitted. You are not logged in"})
 
     def read(self, id):
         loggedInUser = cherrpy.session['loggedInUser']
-        theShift = shift.get(id)
-        if shift.userCanReadShift(loggedInUser.get("_id"), theShift):
-            json.dumps(theShift)
+        if loggedInUser and shift.userCanReadShift(loggedInUser.get("_id"), id):
+            return json.dumps(shift.get(id))
         else:
-            json.dumps({"error":"Operation not permitted."})
+            return json.dumps({"error":"Operation not permitted. You don't have permission to view this shift."})
 
     def update(self, id):
-        return shift.update(json.loads(cherrypy.request.body.read()))
+        loggedInUser = cherrpy.session['loggedInUser']
+        theShift = shift.get(id)
+        if loggedInUser and loggedInUser['_id'] == theShift['userId']:
+            shift.update(cherrpy.request.body.read())
+            return json.dumps(ack)
+        else:
+            return json.dumps({"error":"Operation not permitted. You don't have permission to update this shift."})
 
     def delete(self, id):
-        return shift.delete(id)
+        loggedInUser = cherrpy.session['loggedInUser']
+        theShift = shift.get(id)
+        if loggedInUser and loggedInUser['_id'] == theShift['userId']:
+            shift.delete(id)
+            return json.dumps(ack)
+        else:
+            return json.dumps({"error":"Operation not permitted. You don't have permission to delete this shift."})
+
+
+class Event:
+    def create(self):
+        pass
+    def read(self, id):
+        pass
+    def update(self, id):
+        pass
+    def delete(self, id):
+        pass
+
+
+class Stream:
+    def create(self):
+        pass
+    def read(self, id):
+        pass
+    def update(self, id):
+        pass
+    def delete(self, id):
+        pass
+
+
+class Permission:
+    def create(self):
+        pass
+    def read(self, id):
+        pass
+    def update(self, id):
+        pass
+    def delete(self, id):
+        pass
 
 
 class Shifts:
@@ -109,11 +160,14 @@ def initRoutes():
     d.connect(name="root", route="", controller=root, action="read")
 
     # User Routes
+    d.connect(name="userJoin", route="user/join", controller="user", actino="join",
+              conditions=dict(method="POST"))
     d.connect(name="userLogin", route="user/login", controller=user, action="login",
+              conditions=dict(method="POST"))
+    d.connect(name="userLogout", route="user/logout", controller=user, action="logout",
               conditions=dict(method="POST"))
     d.connect(name="userQuery", route="user/query", controller=user, action="query",
               conditions=dict(method="GET"))
-    # We need to use /view here becaues we have other actions - David
     d.connect(name="userRead", route="user/view/:userName", controller=user, action="read",
               conditions=dict(method="GET"))
 

@@ -1,5 +1,6 @@
 import core
 import utils
+import stream
 import schema
 
 """Some Examples.
@@ -81,3 +82,7 @@ def byUserName(userName):
       row.value.update({"id":row.id})
       result.append(row.value)
     return result
+
+
+def userCanReadShift(userId, shift):
+  pass
