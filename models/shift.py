@@ -2,6 +2,7 @@ import utils
 import core
 import stream
 import schema
+import permission
 
 """Some Examples.
 
@@ -110,13 +111,22 @@ def userCanReadShift(userId, shiftId):
   db = core.connect()
 
   theShift = db[shiftId]
+
+  if theShift["createdBy"] == userId:
+    return True
+
   theUser = db[userId]
 
   if not theShift["publishData"]["private"]:
     return True
 
   streams = stream.streamsForObjectRef(ref(shiftId))
-  allowed = set(streams).intersection(set(theUser["streams"]))
+  streamIds = [astream["_id"] for astream in streams]
+
+  perms = permission.permissionsForUser(userId)
+  permStreamIds = [aperm["streamId"] for aperm in perms if aperm["level"] >= 1]
+
+  allowed = set(streamIds).intersection(set(permStreamIds))
 
   if len(allowed) > 0:
     return True

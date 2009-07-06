@@ -9,7 +9,8 @@ def user():
     "password": None,
     "joined": None,
     "lastSeen": None,
-    "streams": [],
+    "groups": [],
+    "following": [],
     "preferences": {}
   }
 
@@ -56,6 +57,7 @@ def event():
     "createdBy": None,
     "streamId": None,
     "displayString": None,
+    "uniqueName": None,
     "created": None,
     "modified": None,
     "objectRef": None,
@@ -65,6 +67,7 @@ def event():
 def permission():
   return {
     "type": "permission",
+    "streamId": None,
     "userId": None,
     "level": 0
   }

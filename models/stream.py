@@ -49,3 +49,15 @@ def find(uniqueName, filters):
   Find a public stream with the specified unique name."
   """
   pass
+
+
+def streamsForObjectRef(objectRef):
+  """
+  All streams for a objectRef, where objectRef is "type:id".
+  """
+  db = core.connect()
+  options = {"key": objectRef}
+  result = []
+  for row in db.view("_design/streams/_view/byobjectref", None, **options):
+    result.append(row.value)
+  return result
