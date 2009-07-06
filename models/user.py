@@ -72,6 +72,7 @@ def delete(id):
   Delete a user.
   """
   db = core.connect()
+  # TODO: delete all events, shifts as well - not streams
   del db[i]
 
 

@@ -13,7 +13,7 @@ import models.shift as shift
 import models.stream as stream
 import models.event as event
 import models.permission as permission
-import models.groups as groups 
+import models.groups as groups
 
 # Return types
 # ==============================================================================
@@ -124,7 +124,7 @@ class User:
     @jsonencode
     def delete(self, userName):
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser['userName'] == 'userName':
+        if loggedInUser['userName'] == userName:
             user.delete(userName)
             return ack
         else:
