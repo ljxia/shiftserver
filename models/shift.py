@@ -33,7 +33,7 @@ def create(data):
   """
   db = core.connect()
 
-  theTime = utils.isotime()
+  theTime = utils.utctime()
   data["created"] = theTime
 
   newShift = schema.shift()
@@ -83,7 +83,7 @@ def update(data):
   id = data["id"]
   doc = db[id]
   doc.update(data)
-  doc["modified"] = utils.isotime()
+  doc["modified"] = utils.utctime()
   
   db[id] = doc
 

@@ -9,7 +9,7 @@ def create(data):
   """
   db = core.connect()
 
-  data["joined"] = utils.isotime()
+  data["joined"] = utils.utctime()
   newUser = schema.user()
   newUser.update(data)
 
@@ -63,7 +63,7 @@ def update(data):
   """
   Update a user document.
   """
-  data["modified"] = utils.isotime()
+  data["modified"] = utils.utctime()
   return core.update(data)
 
 

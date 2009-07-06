@@ -1,4 +1,6 @@
 import time
+import datetime
 
-def isotime():
-  return time.strftime("%Y-%m-%d %H:%M:%S")
+# TODO: adjust for user's actual time - David 7/6/09
+def utctime():
+  return datetime.datetime.strftime(datetime.datetime.utcnow(), "%a, %d %b %Y %H:%M:%S")

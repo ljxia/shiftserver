@@ -91,12 +91,17 @@ class User:
 
     @jsonencode
     def join(self):
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser:
+            return error("You are logged in. You cannot create an account")
+
         theData = json.loads(helper.getRequestBody())
 
         valid, msg = self.isValid(theData)
         result = None
         if valid:
             theData["password"] = hash(theData["password"])
+            del theData["passwordVerify"]
             id = user.create(theData)
             theUser = user.getById(id)
             helper.setLoggedInUser(theUser)
@@ -126,6 +131,7 @@ class User:
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser['userName'] == userName:
             user.delete(userName)
+            helper.setLoggedInUser(None)
             return ack
         else:
             return error("Operation not permitted. You don't have permission to delete this account.")
