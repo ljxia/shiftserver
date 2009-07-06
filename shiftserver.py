@@ -111,16 +111,16 @@ class User:
 
     @jsonencode
     def update(self, userName):
-        loggedInUser = cherrypy.session['loggedInUser']
+        loggedInUser = helper.getLoggedInUser()
         if loggedInUser['userName'] == userName:
-            shift.update(cherrypy.request.body.read())
+            shift.update(helper.getRequestBody())
             return ack
         else:
             return error("Operation not permitted. You don't have permission to update this account.")
 
     @jsonencode
     def delete(self, userName):
-        loggedInUser = cherrypy.session['loggedInUser']
+        loggedInUser = helper.getLoggedInUser()
         if loggedInUser['userName'] == 'userName':
             user.delete(userName)
             return ack
@@ -129,7 +129,7 @@ class User:
 
     @jsonencode
     def query(self):
-        loggedInUser = cherrypy.session.get('loggedInUser')
+        loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
             return loggedInUser
         else:
@@ -139,7 +139,7 @@ class User:
     def login(self, userName, password):
         theUser = user.get(userName)
         if theUser and theUser['password'] == password:
-            cherrypy.session['loggedInUser'] = theUser
+            helper.setLoggedInUser(theUser)
             return data(theUser)
         return error("Incorrect password.")
 
@@ -160,7 +160,7 @@ class Shift:
     def create(self):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
-            data = json.loads(cherrypy.request.body.read())
+            data = json.loads(helper.getRequestBody())
             data['createdBy'] = loggedInUser.get("_id")
             return data(shift.create(data))
         else:
