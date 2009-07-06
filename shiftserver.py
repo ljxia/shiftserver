@@ -107,17 +107,10 @@ class User:
     @jsonencode
     def read(self, userName):
         loggedInUser = helper.getLoggedInUser()
-        theUser = user.get(userName)
-        copy = None
-
-        if theUser:
-            copy = theUser.copy()
-
-        if (not loggedInUser) or (loggedInUser.get("userName") != userName):
-            if copy.get('password'):
-                del copy['password']
-
-        return data(copy)
+        if loggedInUser and (loggedInUser.get("userName") == userName):
+            return data(user.get(userName).copy())
+        else:
+            return data(user.getFull(userName).copy())
 
     @jsonencode
     def update(self, userName):
