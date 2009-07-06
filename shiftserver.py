@@ -14,6 +14,16 @@ ack = {"data":"ok"}
 # TODO: verify logged in decorator
 # TODO: json.dumps decorator
 
+def setLoggedInUser(data):
+    cherrypy.session['loggedInUser'] = data
+
+def getLoggedInUser():
+    return cherrypy.session['loggedInUser']
+
+def getRequestBody():
+    return cherrypy.request.body.read()
+
+
 class Resource:
     def create(self):
         pass
@@ -183,16 +193,21 @@ def initRoutes():
     d.connect(name="root", route="", controller=root, action="read")
 
     # User Routes
-    d.connect(name="userJoin", route="user/join", controller="user", actino="join",
+    d.connect(name="userLogin", route="login", controller=user, action="login",
               conditions=dict(method="POST"))
-    d.connect(name="userLogin", route="user/login", controller=user, action="login",
+    d.connect(name="userLogout", route="logout", controller=user, action="logout",
               conditions=dict(method="POST"))
-    d.connect(name="userLogout", route="user/logout", controller=user, action="logout",
-              conditions=dict(method="POST"))
-    d.connect(name="userQuery", route="user/query", controller=user, action="query",
+    d.connect(name="userQuery", route="query", controller=user, action="query",
               conditions=dict(method="GET"))
-    d.connect(name="userRead", route="user/view/:userName", controller=user, action="read",
+    d.connect(name="userJoin", route="join", controller="user", action="join",
+              conditions=dict(method="POST"))
+
+    d.connect(name="userRead", route="user/:userName", controller=user, action="read",
               conditions=dict(method="GET"))
+    d.connect(name="userUpdate", route="user/:userName", controller=user, action="update",
+              conditions=dict(method="PUT"))
+    d.connect(name="userDelete", route="user/:userName", controller=user, action="delete",
+              conditions=dict(method="DELETE"))
 
     # Shift Routes
     d.connect(name="shiftCreate", route="shift", controller=shift, action="create",
