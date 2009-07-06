@@ -1,5 +1,6 @@
 import utils
 import core
+import user
 import stream
 import schema
 import permission
@@ -93,18 +94,8 @@ def byUserName(userName):
   """
   Return the list of shifts a user has created.
   """
-  db = core.connect()
-
-  options = {"key": userName}
-  
-  # TODO: find a better way to handle this - David 7/3/09
-  for row in db.view("_design/users/_view/byname", None, **options):
-    options = {"key": row.value["_id"]}
-    result = []
-    for row in db.view("_design/shifts/_view/byuser", **options):
-      row.value.update({"id":row.id})
-      result.append(row.value)
-    return result
+  userId = user.idForName(userName)
+  return core.query("_design/shifts/_view/byuser", userId)
 
 
 def userCanReadShift(userId, shiftId):

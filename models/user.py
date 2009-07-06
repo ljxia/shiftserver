@@ -18,33 +18,37 @@ def create(data):
 
 def get(userName):
   """
-  Returns a user.
+  Returns public data for a user.
   """
-  db = core.connect()
-
-  options = {"key": userName}
-
-  for row in db.view("_design/users/_view/byname", None, **options):
-    return row.value
+  return core.single("_design/users/_view/byname", userName)
 
 
 def getFull(userName):
+  """
+  Return the full data for a user.
+  """
   pass
 
 
 def getById(id):
+  """
+  Get a user by document id.
+  """
   db = core.connect()
   return db[id]
 
 
 def idForName(userName):
+  """
+  Get the id for a user from the userName.
+  """
   theUser = get(userName)
   return theUser["_id"]
 
 
 def update(data):
   """
-  Update a user.
+  Update a user document.
   """
   db = core.connect()
 
@@ -63,12 +67,24 @@ def delete(id):
 
 
 def nameIsUnique(userName):
+  """
+  Returns True or False depending on if the name is taken.
+  """
   return get(userName) == None
 
 
-def feeds(id):
+def feeds(id, page=0, perPage=25):
+  """
+  Return all events for all streams that a user is subscribed to.
+  """
+  db = core.connect()
+  theUser = db[id]
+  streams = theUser["streams"]
   pass
 
 
 def feed(id, streamId):
+  """
+  Return all events for a single feed.
+  """
   pass
