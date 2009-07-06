@@ -10,10 +10,19 @@ import md5
 import simplejson as json
 from utils import jsonencode
 
-ack = {"data":"ok"}
+# Return types
+# ==============================================================================
 
-# TODO: verify logged in decorator
-# TODO: json.dumps decorator
+ack = {"message":"ok"}
+
+def error(msg):
+    return {"error":msg}
+
+def data(d):
+    return {"data":d}
+
+def message(msg):
+    return {"message":msg}
 
 # Helper
 # ==============================================================================
@@ -51,20 +60,20 @@ class Resource:
 class User:
     def isValid(self, data):
         if not data.get("email"):
-            return (False, {"error":"Please specify your email address."})
+            return (False, "Please specify your email address.")
         userName = data.get("userName")
         if not userName:
-            return (False, {"error":"Please enter a user name."})
+            return (False, "Please enter a user name.")
         if len(userName) < 6:
-            return (False, {"error":"Your user name should be at least 6 characters long."})
+            return (False, "Your user name should be at least 6 characters long.")
         if not user.nameIsUnique(userName):
-            return (False, {"error":"That user name is taken, please choose another."})
+            return (False, "That user name is taken, please choose another.")
         if not data.get("password"):
-            return (False, {"error":"Please supply a password."})
+            return (False, "Please supply a password.")
         if not data.get("passwordVerify"):
-            return (False, {"error":"Please enter your password twice."})
+            return (False, "Please enter your password twice.")
         if data.get("password") != data.get("passwordVerify"):
-            return (False, {"error":"Password do not match."})
+            return (False, "Password do not match.")
         return (True, data)
 
     @jsonencode
@@ -72,11 +81,14 @@ class User:
         data = json.loads(helper.getRequestBody)
 
         valid, msg = self.isValid(data)
+        result = None
         if valid:
             id = user.create(data)
-            msg = {"data": user.getById(id)}
+            result = data(user.getById(id))
+        else:
+            result = error(msg)
 
-        return msg
+        return result
 
     @jsonencode
     def read(self, userName):
@@ -91,7 +103,7 @@ class User:
             if theUser.get('password'):
                 del theUser['password']
 
-        return copy
+        return data(copy)
 
     @jsonencode
     def update(self, userName):
@@ -100,7 +112,7 @@ class User:
             shift.update(cherrypy.request.body.read())
             return ack
         else:
-            return {"error": "Operation not permitted. You don't have permission to update this account."}
+            return error("Operation not permitted. You don't have permission to update this account.")
 
     @jsonencode
     def delete(self, userName):
@@ -109,7 +121,7 @@ class User:
             user.delete(userName)
             return ack
         else:
-            return {"error": "Operation not permitted. You don't have permission to delete this account."}
+            return error("Operation not permitted. You don't have permission to delete this account.")
 
     @jsonencode
     def query(self):
@@ -117,15 +129,15 @@ class User:
         if loggedInUser:
             return loggedInUser
         else:
-            return {"message":"No logged in user"}
+            return message("No logged in user")
 
     @jsonencode
     def login(self, userName, password):
         theUser = user.get(userName)
         if theUser and theUser['password'] == password:
             cherrypy.session['loggedInUser'] = theUser
-            return theUser
-        return "Error"
+            return data(theUser)
+        return error("Incorrect password.")
 
     @jsonencode
     def logout(self):
@@ -133,7 +145,7 @@ class User:
         if loggedInUser:
             helper.setLoggedInUser(None)
             return ack
-        return {"error":"No user logged in."}
+        return error("No user logged in.")
 
 
 # Shift
@@ -146,17 +158,17 @@ class Shift:
         if loggedInUser:
             data = json.loads(cherrypy.request.body.read())
             data['createdBy'] = loggedInUser.get("_id")
-            return shift.create(data)
+            return data(shift.create(data))
         else:
-            return {"error":"Operation not permitted. You are not logged in"}
+            return error("Operation not permitted. You are not logged in")
 
     @jsonencode
     def read(self, id):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser and shift.userCanReadShift(loggedInUser.get("_id"), id):
-            return shift.get(id)
+            return data(shift.get(id))
         else:
-            return {"error":"Operation not permitted. You don't have permission to view this shift."}
+            return error("Operation not permitted. You don't have permission to view this shift.")
 
     @jsonencode
     def update(self, id):
@@ -166,7 +178,7 @@ class Shift:
             shift.update(helper.getRequestBody())
             return ack
         else:
-            return {"error":"Operation not permitted. You don't have permission to update this shift."}
+            return error("Operation not permitted. You don't have permission to update this shift.")
 
     @jsonencode
     def delete(self, id):
@@ -176,7 +188,7 @@ class Shift:
             shift.delete(id)
             return ack
         else:
-            return {"error":"Operation not permitted. You don't have permission to delete this shift."}
+            return error("Operation not permitted. You don't have permission to delete this shift.")
 
 # Event
 # ==============================================================================
@@ -223,13 +235,14 @@ class Permission:
 class Shifts:
     @jsonencode
     def read(self, userName):
-        return shift.byUserName(userName)
+        return data(shift.byUserName(userName))
 
 
 class Groups:
     @jsonencode
     def read(self, id):
-        return groups.inGroup(int(id))
+        # return only public groups
+        return data(groups.inGroup(int(id)))
 
 
 # Main
