@@ -1,14 +1,18 @@
 import os
 import time
 import cherrypy
-
-import user
 import routes
-import shift
-import groups
 import md5
 import simplejson as json
+
 from utils import jsonencode
+
+import models.user as user
+import models.shift as shift
+import models.stream as stream
+import models.event as event
+import models.permission as permission
+import models.groups as groups 
 
 # Return types
 # ==============================================================================
