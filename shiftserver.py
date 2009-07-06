@@ -9,19 +9,36 @@ import groups
 import simplejson as json
 
 
+ack = {"data":"ok"}
+
+# TODO: verify logged in decorator
+# TODO: json.dumps decorator
+
 class User:
     def create(self, data):
         return "Trying to create a user"
 
     def read(self, userName):
-        # TODO: don't return private fields - David 7/5/09
-        return json.dumps(user.get(userName))
+        theUser = user.get(userName).copy()
+        if theUser.get('password'):
+            del theUser['password']
+        return json.dumps(theUser)
 
-    def update(self, data):
-        return "Updating a user"
+    def update(self, userName, data):
+        loggedInUser = cherrypy.session['loggedInUser']
+        if loggedInUser['userName'] == userName:
+            shift.update(data)
+            return json.dumps(ack)
+        else:
+            return json.dumps({"error": "Operation not permitted."})
 
     def delete(self, userName):
-        return "Trying to delete %s" % userName
+        loggedInUser = cherrypy.session['loggedInUser']
+        if loggedInUser['userName'] == 'userName':
+            user.delete(userName)
+            return json.dumps(ack)
+        else:
+            return json.dumps({"error": "Operation not permitted."})
 
     def query(self):
         loggedInUser = cherrypy.session.get('loggedInUser')
@@ -38,7 +55,11 @@ class User:
         return "Error"
 
     def logout(self):
-        return "Logout user"
+        loggedInUser = cherrpy.session['loggedInUser']
+        if loggedInUser:
+            cherrpy.session['loggedInUser'] = None
+            return json.dumps({"data":"ok"})
+        return json.dumps({"message":"No logged in user."})
 
 
 class Shift:
@@ -46,13 +67,18 @@ class Shift:
         return shift.create(json.loads(cherrypy.request.body.read()))
 
     def read(self, id):
-        return json.dumps(shift.get(id))
+        loggedInUser = cherrpy.session['loggedInUser']
+        theShift = shift.get(id)
+        if shift.userCanReadShift(loggedInUser.get("_id"), theShift):
+            json.dumps(theShift)
+        else:
+            json.dumps({"error":"Operation not permitted."})
 
-    def update(self, data):
-        return "Updating a shift"
+    def update(self, id):
+        return shift.update(json.loads(cherrypy.request.body.read()))
 
     def delete(self, id):
-        return "Trying to delete a shift"
+        return shift.delete(id)
 
 
 class Shifts:
