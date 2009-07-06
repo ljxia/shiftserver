@@ -14,8 +14,31 @@ ack = {"data":"ok"}
 # TODO: verify logged in decorator
 # TODO: json.dumps decorator
 
+class Resource:
+    def create(self):
+        pass
+    def read(self, id):
+        pass
+    def update(self, id):
+        pass
+    def updateField(self, id, key, value):
+        pass
+    def delete(self, id):
+        pass
+
+
 class User:
-    def join(self, data):
+    def join(self):
+        data = json.loads(cherrypy.request.body.read())
+        if not data.get("email"):
+            return json.dumps({"error":"Please specify your email address."})
+        userName = data.get("userName")
+        if userName == None:
+            return json.dumps({"error":"Please enter a user name."})
+        if len(userName) < 6:
+            return json.dumps({"error":"Your user name should be at least 6 characters long."})
+        if not user.nameIsUnique(userName):
+            return json.dumps({"error":"That user name is taken, please choose another."})
         user.create(data)
         return json.dumps(ack)
 
