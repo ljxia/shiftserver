@@ -178,7 +178,7 @@ class Shift:
     def update(self, id):
         loggedInUser = helper.getLoggedInUser()
         theShift = shift.get(id)
-        if loggedInUser and loggedInUser['_id'] == theShift['userId']:
+        if loggedInUser and loggedInUser['_id'] == theShift['createdBy']:
             shift.update(helper.getRequestBody())
             return ack
         else:
@@ -188,7 +188,7 @@ class Shift:
     def delete(self, id):
         loggedInUser = helper.getLoggedInUser()
         theShift = shift.get(id)
-        if loggedInUser and loggedInUser['_id'] == theShift['userId']:
+        if loggedInUser and loggedInUser['_id'] == theShift['createdBy']:
             shift.delete(id)
             return ack
         else:

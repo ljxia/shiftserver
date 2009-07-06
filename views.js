@@ -64,3 +64,16 @@ function (doc) {
     emit("http://"+parts[0], doc);
   }
 }
+
+// byuser_and_domain
+// -----------------------------------------------------------------------------
+function (doc) {
+  if(doc.type == "shift")
+  {
+    var href = doc.href;
+    var url = href.substr(7, href.length);
+    var parts = url.split("/");
+    emit([doc.createdBy, "http://"+parts[0]], doc);
+  }
+}
+
