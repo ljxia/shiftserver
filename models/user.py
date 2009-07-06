@@ -21,11 +21,12 @@ def get(userName):
   Returns public data for a user.
   """
   theUser = getFull(userName)
-
-  del theUser["email"]
-  del theUser["groups"]
-  del theUser["following"]
-  del theUser["password"]
+  
+  if theUser:
+    del theUser["email"]
+    del theUser["groups"]
+    del theUser["following"]
+    del theUser["password"]
   
   return theUser
 
@@ -35,7 +36,10 @@ def getFull(userName):
   Return the full data for a user.
   """
   theUser = core.single("_design/users/_view/byname", userName)
-  del theUser["type"]
+
+  if theUser:
+    del theUser["type"]
+
   return theUser
 
 
