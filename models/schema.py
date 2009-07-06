@@ -9,7 +9,6 @@ def user():
     "password": None,
     "joined": None,
     "lastSeen": None,
-    "subscriptions": [],
     "streams": [],
     "preferences": {}
   }
@@ -41,6 +40,7 @@ def shift():
 def stream():
   return {
     "type": "stream",
+    "meta": None,
     "createdBy": None,
     "displayName": None,
     "uniqueName": None,

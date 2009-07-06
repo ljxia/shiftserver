@@ -5,7 +5,7 @@ import routes
 import md5
 import simplejson as json
 
-from utils import jsonencode
+from decorators import jsonencode
 
 import models.user as user
 import models.shift as shift

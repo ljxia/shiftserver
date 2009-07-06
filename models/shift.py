@@ -1,5 +1,5 @@
-import core
 import utils
+import core
 import stream
 import schema
 
@@ -21,17 +21,39 @@ shift.create({
 })
 """
 
+def ref(id):
+  return "shift:"+id
+
+
 def create(data):
   """
   Create a shift in the database.
   """
   db = core.connect()
 
-  data["created"] = utils.isotime()
+  theTime = utils.isotime()
+  data["created"] = theTime
+
   newShift = schema.shift()
   newShift.update(data)
+  
+  shiftId = db.create(newShift)
+  newShift = db[shiftId]
 
-  return db.create(newShift)
+  # update shift with stream data
+  streamId = stream.create({
+      "objectRef":ref(shiftId),
+      "createdBy":newShift["createdBy"],
+      "created":theTime,
+      "private":newShift["publishData"]["private"]
+  })
+  
+  shiftStream = db[streamId]
+  newShift['streams'] = [streamId]
+
+  db[shiftId] = newShift
+
+  return shiftId
 
 
 def get(id):
@@ -84,5 +106,17 @@ def byUserName(userName):
     return result
 
 
-def userCanReadShift(userId, shift):
-  pass
+def userCanReadShift(userId, shiftId):
+  db = core.connect()
+
+  theShift = db[shiftId]
+  theUser = db[userId]
+
+  if not theShift["publishData"]["private"]:
+    return True
+
+  streams = stream.streamsForObjectRef(ref(shiftId))
+  allowed = set(streams).intersection(set(theUser["streams"]))
+
+  if len(allowed) > 0:
+    return True

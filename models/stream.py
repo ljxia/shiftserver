@@ -31,7 +31,7 @@ def subscribe(id, userId):
   db = core.connect()
   
   user = db[userId]
-  db[userId] = user["subscriptions"].append(id)
+  db[userId] = user["streams"].append(id)
 
 
 def unsubscribe(id, userId):

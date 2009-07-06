@@ -1,8 +1,4 @@
-import time
 import simplejson as json
-
-def isotime():
-  return time.strftime("%Y-%m-%d %H:%M:%S")
 
 def simple_decorator(decorator):
     def new_decorator(f):
