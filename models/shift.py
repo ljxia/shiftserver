@@ -108,12 +108,24 @@ def byUserName(userName):
 
 
 def userCanReadShift(userId, shiftId):
+  """
+  Check if a user can read a shift. The user must have
+  either:
+  
+  1. Created the shift
+  2. The shift must be published and public
+  3. The shift is private and the user has read permissions
+     for a stream containing the shift.
+  """
   db = core.connect()
 
   theShift = db[shiftId]
 
   if theShift["createdBy"] == userId:
     return True
+
+  if theShift["publishData"]["draft"]:
+    return False
 
   theUser = db[userId]
 

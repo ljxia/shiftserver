@@ -37,6 +37,11 @@ def getById(id):
   return db[id]
 
 
+def idForName(userName):
+  theUser = get(userName)
+  return theUser["_id"]
+
+
 def update(data):
   """
   Update a user.
