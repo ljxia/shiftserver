@@ -77,22 +77,22 @@ class User:
         if not data.get("passwordVerify"):
             return (False, "Please enter your password twice.")
         if data.get("password") != data.get("passwordVerify"):
-            return (False, "Password do not match.")
+            return (False, "Passwords do not match.")
         return (True, data)
 
     @jsonencode
     def join(self):
-        data = json.loads(helper.getRequestBody)
+        theData = json.loads(helper.getRequestBody())
 
-        valid, msg = self.isValid(data)
+        valid, msg = self.isValid(theData)
         result = None
         if valid:
-            id = user.create(data)
-            result = data(user.getById(id))
+            # TODO: log the user in - David 7/6/09
+            id = user.create(theData)
+            theUser = user.getById(id)
+            return data(theUser)
         else:
-            result = error(msg)
-
-        return result
+            return error(msg)
 
     @jsonencode
     def read(self, userName):
@@ -104,8 +104,8 @@ class User:
             copy = theUser.copy()
 
         if (not loggedInUser) or (loggedInUser.get("userName") != userName):
-            if theUser.get('password'):
-                del theUser['password']
+            if copy.get('password'):
+                del copy['password']
 
         return data(copy)
 
@@ -276,7 +276,7 @@ def initRoutes():
               conditions=dict(method="POST"))
     d.connect(name="userQuery", route="query", controller=user, action="query",
               conditions=dict(method="GET"))
-    d.connect(name="userJoin", route="join", controller="user", action="join",
+    d.connect(name="userJoin", route="join", controller=user, action="join",
               conditions=dict(method="POST"))
 
     d.connect(name="userRead", route="user/:userName", controller=user, action="read",

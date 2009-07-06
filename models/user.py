@@ -7,6 +7,8 @@ def create(data):
   """
   Create a new user.
   """
+  db = core.connect()
+
   data["joined"] = utils.isotime()
   newUser = schema.user()
   newUser.update(data)
@@ -39,7 +41,12 @@ def update(data):
   """
   Update a user.
   """
-  pass
+  db = core.connect()
+
+  data["modified"] = utils.isotime()
+  db[data.get("_id")] = data
+  
+  return data
 
 
 def delete(id):
@@ -48,6 +55,10 @@ def delete(id):
   """
   db = core.connect()
   del db[i]
+
+
+def nameIsUnique(userName):
+  return get(userName) == None
 
 
 def feeds(id):
