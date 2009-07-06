@@ -20,14 +20,23 @@ def get(userName):
   """
   Returns public data for a user.
   """
-  return core.single("_design/users/_view/byname", userName)
+  theUser = getFull(userName)
+
+  del theUser["email"]
+  del theUser["groups"]
+  del theUser["following"]
+  del theUser["password"]
+  
+  return theUser
 
 
 def getFull(userName):
   """
   Return the full data for a user.
   """
-  pass
+  theUser = core.single("_design/users/_view/byname", userName)
+  del theUser["type"]
+  return theUser
 
 
 def getById(id):
@@ -50,12 +59,8 @@ def update(data):
   """
   Update a user document.
   """
-  db = core.connect()
-
   data["modified"] = utils.isotime()
-  db[data.get("_id")] = data
-  
-  return data
+  return core.update(data)
 
 
 def delete(id):

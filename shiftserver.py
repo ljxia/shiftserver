@@ -3,6 +3,7 @@ import time
 import cherrypy
 import routes
 import md5
+import email
 import simplejson as json
 
 from decorators import jsonencode
@@ -27,6 +28,14 @@ def data(d):
 
 def message(msg):
     return {"message":msg}
+
+# Utils
+# =============================================================================
+
+def hash(str):
+    m = md5.new()
+    m.update(str)
+    return m.hexdigest()
 
 # Helper
 # ==============================================================================
@@ -87,6 +96,7 @@ class User:
         valid, msg = self.isValid(theData)
         result = None
         if valid:
+            theData["password"] = hash(theData["password"])
             id = user.create(theData)
             theUser = user.getById(id)
             helper.setLoggedInUser(theUser)
@@ -138,10 +148,12 @@ class User:
     @jsonencode
     def login(self, userName, password):
         theUser = user.get(userName)
-        if theUser and theUser['password'] == password:
+
+        if theUser and theUser['password'] == hash(password):
             helper.setLoggedInUser(theUser)
             return data(theUser)
-        return error("Incorrect password.")
+        else:
+            return error("Incorrect password.")
 
     @jsonencode
     def logout(self):
@@ -149,7 +161,17 @@ class User:
         if loggedInUser:
             helper.setLoggedInUser(None)
             return ack
-        return error("No user logged in.")
+        else:
+            return error("No user logged in.")
+
+    @jsonencode
+    def resetPassword(self):
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser:
+            # TODO: generate random 8 character password update user and email
+            return ack
+        else:
+            return error("No user logged in.")
 
 
 # Shift

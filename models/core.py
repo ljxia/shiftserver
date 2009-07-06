@@ -22,6 +22,15 @@ def single(view, key):
     return row.value
 
 
+def update(doc):
+  db.connect()
+  id = doc.get("_id")
+  old = db[id]
+  new = old.update(doc)
+  db[id] = new
+  return new
+
+
 
 
 
