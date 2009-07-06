@@ -6,23 +6,32 @@ import user
 import routes
 import shift
 import groups
+import md5
 import simplejson as json
-
+from utils import jsonencode
 
 ack = {"data":"ok"}
 
 # TODO: verify logged in decorator
 # TODO: json.dumps decorator
 
-def setLoggedInUser(data):
-    cherrypy.session['loggedInUser'] = data
+# Helper
+# ==============================================================================
 
-def getLoggedInUser():
-    return cherrypy.session['loggedInUser']
+class Helper:
+    def setLoggedInUser(self, data):
+        cherrypy.session['loggedInUser'] = data
 
-def getRequestBody():
-    return cherrypy.request.body.read()
+    def getLoggedInUser(self):
+        return cherrypy.session.get('loggedInUser')
 
+    def getRequestBody(self):
+        return cherrypy.request.body.read()
+helper = Helper()
+
+
+# Resource
+# ==============================================================================
 
 class Resource:
     def create(self):
@@ -36,101 +45,141 @@ class Resource:
     def delete(self, id):
         pass
 
+# User
+# ==============================================================================
 
 class User:
-    def join(self):
-        data = json.loads(cherrypy.request.body.read())
+    def isValid(self, data):
         if not data.get("email"):
-            return json.dumps({"error":"Please specify your email address."})
+            return (False, {"error":"Please specify your email address."})
         userName = data.get("userName")
-        if userName == None:
-            return json.dumps({"error":"Please enter a user name."})
+        if not userName:
+            return (False, {"error":"Please enter a user name."})
         if len(userName) < 6:
-            return json.dumps({"error":"Your user name should be at least 6 characters long."})
+            return (False, {"error":"Your user name should be at least 6 characters long."})
         if not user.nameIsUnique(userName):
-            return json.dumps({"error":"That user name is taken, please choose another."})
-        user.create(data)
-        return json.dumps(ack)
+            return (False, {"error":"That user name is taken, please choose another."})
+        if not data.get("password"):
+            return (False, {"error":"Please supply a password."})
+        if not data.get("passwordVerify"):
+            return (False, {"error":"Please enter your password twice."})
+        if data.get("password") != data.get("passwordVerify"):
+            return (False, {"error":"Password do not match."})
+        return (True, data)
 
+    @jsonencode
+    def join(self):
+        data = json.loads(helper.getRequestBody)
+
+        valid, msg = self.isValid(data)
+        if valid:
+            id = user.create(data)
+            msg = {"data": user.getById(id)}
+
+        return msg
+
+    @jsonencode
     def read(self, userName):
-        theUser = user.get(userName).copy()
-        if theUser.get('password'):
-            del theUser['password']
-        return json.dumps(theUser)
+        loggedInUser = helper.getLoggedInUser()
+        theUser = user.get(userName)
+        copy = None
 
+        if theUser:
+            copy = theUser.copy()
+
+        if (not loggedInUser) or (loggedInUser.get("userName") != userName):
+            if theUser.get('password'):
+                del theUser['password']
+
+        return copy
+
+    @jsonencode
     def update(self, userName):
         loggedInUser = cherrypy.session['loggedInUser']
         if loggedInUser['userName'] == userName:
             shift.update(cherrypy.request.body.read())
-            return json.dumps(ack)
+            return ack
         else:
-            return json.dumps({"error": "Operation not permitted. You don't have permission to update this account."})
+            return {"error": "Operation not permitted. You don't have permission to update this account."}
 
+    @jsonencode
     def delete(self, userName):
         loggedInUser = cherrypy.session['loggedInUser']
         if loggedInUser['userName'] == 'userName':
             user.delete(userName)
-            return json.dumps(ack)
+            return ack
         else:
-            return json.dumps({"error": "Operation not permitted. You don't have permission to delete this account."})
+            return {"error": "Operation not permitted. You don't have permission to delete this account."}
 
+    @jsonencode
     def query(self):
         loggedInUser = cherrypy.session.get('loggedInUser')
         if loggedInUser:
-            return json.dumps(loggedInUser)
+            return loggedInUser
         else:
-            return json.dumps({"message":"No logged in user"})
+            return {"message":"No logged in user"}
 
+    @jsonencode
     def login(self, userName, password):
         theUser = user.get(userName)
         if theUser and theUser['password'] == password:
             cherrypy.session['loggedInUser'] = theUser
-            return json.dumps(theUser)
+            return theUser
         return "Error"
 
+    @jsonencode
     def logout(self):
-        loggedInUser = cherrpy.session['loggedInUser']
+        loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
-            cherrpy.session['loggedInUser'] = None
-            return json.dumps({"data":"ok"})
-        return json.dumps({"error":"No user logged in."})
+            helper.setLoggedInUser(None)
+            return ack
+        return {"error":"No user logged in."}
 
+
+# Shift
+# ==============================================================================
 
 class Shift:
+    @jsonencode
     def create(self):
-        loggedInUser = cherrpy.session['loggedInUser']
+        loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
             data = json.loads(cherrypy.request.body.read())
             data['createdBy'] = loggedInUser.get("_id")
             return shift.create(data)
         else:
-            return json.dumps({"error":"Operation not permitted. You are not logged in"})
+            return {"error":"Operation not permitted. You are not logged in"}
 
+    @jsonencode
     def read(self, id):
-        loggedInUser = cherrpy.session['loggedInUser']
+        loggedInUser = helper.getLoggedInUser()
         if loggedInUser and shift.userCanReadShift(loggedInUser.get("_id"), id):
-            return json.dumps(shift.get(id))
+            return shift.get(id)
         else:
-            return json.dumps({"error":"Operation not permitted. You don't have permission to view this shift."})
+            return {"error":"Operation not permitted. You don't have permission to view this shift."}
 
+    @jsonencode
     def update(self, id):
-        loggedInUser = cherrpy.session['loggedInUser']
+        loggedInUser = helper.getLoggedInUser()
         theShift = shift.get(id)
         if loggedInUser and loggedInUser['_id'] == theShift['userId']:
-            shift.update(cherrpy.request.body.read())
-            return json.dumps(ack)
+            shift.update(helper.getRequestBody())
+            return ack
         else:
-            return json.dumps({"error":"Operation not permitted. You don't have permission to update this shift."})
+            return {"error":"Operation not permitted. You don't have permission to update this shift."}
 
+    @jsonencode
     def delete(self, id):
-        loggedInUser = cherrpy.session['loggedInUser']
+        loggedInUser = helper.getLoggedInUser()
         theShift = shift.get(id)
         if loggedInUser and loggedInUser['_id'] == theShift['userId']:
             shift.delete(id)
-            return json.dumps(ack)
+            return ack
         else:
-            return json.dumps({"error":"Operation not permitted. You don't have permission to delete this shift."})
+            return {"error":"Operation not permitted. You don't have permission to delete this shift."}
 
+# Event
+# ==============================================================================
 
 class Event:
     def create(self):
@@ -142,6 +191,8 @@ class Event:
     def delete(self, id):
         pass
 
+# Stream
+# ==============================================================================
 
 class Stream:
     def create(self):
@@ -153,6 +204,8 @@ class Stream:
     def delete(self, id):
         pass
 
+# Permission
+# ==============================================================================
 
 class Permission:
     def create(self):
@@ -164,16 +217,23 @@ class Permission:
     def delete(self, id):
         pass
 
+# Aggregates
+# ==============================================================================
 
 class Shifts:
+    @jsonencode
     def read(self, userName):
-        return json.dumps(shift.byUserName(userName))
+        return shift.byUserName(userName)
 
 
 class Groups:
+    @jsonencode
     def read(self, id):
-        return json.dumps(groups.inGroup(int(id)))
+        return groups.inGroup(int(id))
 
+
+# Main
+# ==============================================================================
 
 class Root:
     def read(self):

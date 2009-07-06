@@ -26,6 +26,15 @@ def get(userName):
     return row.value
 
 
+def getFull(userName):
+  pass
+
+
+def getById(id):
+  db = core.connect()
+  return db[id]
+
+
 def update(data):
   """
   Update a user.
