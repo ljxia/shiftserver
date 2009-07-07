@@ -185,9 +185,9 @@ class Shift:
     def create(self):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
-            data = json.loads(helper.getRequestBody())
-            data['createdBy'] = loggedInUser.get("_id")
-            return data(shift.create(data))
+            theData = json.loads(helper.getRequestBody())
+            theData['createdBy'] = loggedInUser.get("_id")
+            return data(shift.create(theData))
         else:
             return error("Operation not permitted. You are not logged in")
 
@@ -366,7 +366,9 @@ appconf = {'/': {'tools.proxy.on':True,
                  'tools.sessions.storage_path':"/Users/davidnolen/Sites/shiftserver/sessions",
                  'tools.sessions.timeout': 60}}
 
-cherrypy.config.update({'server.socket_port':8080})
-# TODO: The following value should be read from an environment file - David 7/4/09
-app = cherrypy.tree.mount(root=None, script_name='/~davidnolen/shiftspace/shiftserver', config=appconf)
-cherrypy.quickstart(app)
+
+if __name__ == "__main__":
+    cherrypy.config.update({'server.socket_port':8080})
+    # TODO: The following value should be read from an environment file - David 7/4/09
+    app = cherrypy.tree.mount(root=None, script_name='/~davidnolen/shiftspace/shiftserver', config=appconf)
+    cherrypy.quickstart(app)

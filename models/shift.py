@@ -27,8 +27,6 @@ def create(data):
   shiftId = db.create(newShift)
   newShift = db[shiftId]
 
-  db[shiftId] = newShift
-
   return shiftId
 
 
