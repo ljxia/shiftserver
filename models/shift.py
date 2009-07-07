@@ -102,13 +102,16 @@ def userCanReadShift(userId, shiftId):
 
   allowed = set(shiftStreams).intersection(set(readableStreams))
 
-  if len(allowed) > 0:
-    return True
+  return len(allowed) > 0
 
 
 def publish(id, publishData):
   """
   Set draft status of a shift to false. Sync publishData field.
+  If the shift is private only publish to the streams that
+  the user has access. If the shift is publich publish it to
+  any of the public non-user streams. Creates the comment stream
+  if it doesn't already exist.
   """
   db = core.connect()
 
@@ -123,13 +126,16 @@ def publish(id, publishData):
   if publishData["private"]:
     allowedStreams = permission.writeableStreams(userId)
     allowed = list(set(allowedStreams).intersection(set(publishStreams)))
-  else:
+  else:n
     # publish to the users public stream - used when following
     allowed = allowed.append(user.publicStream(userId)["_id"])
-
-  # also include any public streams if specified
-  publicStreams = [astream for astream in publishStreams if stream.isPublic(astream)]
-  allowed.extend(publicStreams)
+    # also include any public streams if specified, excluding
+    # the public streams of other users
+    publicStreams = [astream for astream in publishStreams
+                     if stream.isPublic(astream) and (not stream.isUserPublicStream(astream))]
+    allowed.extend(publicStreams)
+    if not commentStream(id):
+      createCommentStream(id)
     
   publishData["streams"] = allowed
   theShift["publishData"] = publishData
@@ -148,3 +154,34 @@ def unpublish(id):
   theShift["publishData"]["draft"] = True
 
   db[id] = theShift
+
+
+def commentStream(id):
+  return core.single("_design/streams/_view/byobjectref", ref(id)+":comment")
+
+
+def createCommentStream(id):
+  db = core.connect()
+
+  theShift = db[id]
+  stream.create({
+      "objectRef": ref(id)+":comment",
+      "createdBy": theShift["createdBy"]
+      })
+
+
+def canComment(id, userId):
+  db = core.connect()
+  theShift = db[id]
+
+  if not theShift["publishData"]["private"]:
+    return True
+  else:
+    shiftStreams = theShift["publishData"]["streams"]
+    userStreams = permission.writeableStreams(userId)
+    
+    allowed = set(shiftStreams).intersection(userStreams)
+    
+    return len(allowed) > 0
+
+  

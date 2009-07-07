@@ -80,3 +80,7 @@ def isPublic(id):
   return not db[id]["private"]
 
 
+def isPublicUserStream(id):
+  db = core.connect()
+  return (not db[id]["meta"] == "userPublicStream")
+

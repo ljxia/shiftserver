@@ -31,7 +31,8 @@ def create(data):
   publicStream = stream.create({
       "objectRef": userRef, 
       "uniqueName": userRef+":public", 
-      "private": False, 
+      "private": False,
+      "meta": "userPublicStream",
       "createdBy": userId
       })
 
@@ -40,6 +41,7 @@ def create(data):
       "objectRef": userRef, 
       "uniqueName": userRef+":messages", 
       "private": False, 
+      "meta": "userPrivateStream",
       "createdBy": userId
       })
 

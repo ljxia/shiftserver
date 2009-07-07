@@ -9,6 +9,11 @@ def permissionsForUser(userId):
   return core.query("_design/permissions/_view/byuser", userId)
 
 
+def joinableStreams(userId):
+  return [aperm["streamId"] for aperm in permissionsForUser[userId]
+          if aperm["level"] == 0]
+
+
 def readableStreams(userId):
   return [aperm["streamId"] for aperm in permissionsForUser[userId]
           if aperm["level"] >= 1]
