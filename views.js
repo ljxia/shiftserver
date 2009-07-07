@@ -20,7 +20,7 @@ function(doc)
 // users
 // =============================================================================
 
-// byname
+// by_name
 // -----------------------------------------------------------------------------
 function(doc)
 {
@@ -43,7 +43,7 @@ function (doc) {
   }
 }
 
-// byuser
+// by_user
 // -----------------------------------------------------------------------------
 function(doc)
 {
@@ -53,18 +53,20 @@ function(doc)
   }
 }
 
-// byhref
+// by_href
 // -----------------------------------------------------------------------------
-function(doc) {
+function(doc)
+{
   if(doc.type == "shift")
   {
     emit(doc.href, doc);
   }
 }
 
-// bydomain
+// by_domain
 // -----------------------------------------------------------------------------
-function (doc) {
+function (doc)
+{
   if(doc.type == "shift")
   {
     var href = doc.href;
@@ -74,9 +76,10 @@ function (doc) {
   }
 }
 
-// byuser_and_domain
+// by_user_and_domain
 // -----------------------------------------------------------------------------
-function (doc) {
+function (doc)
+{
   if(doc.type == "shift")
   {
     var href = doc.href;
@@ -92,29 +95,70 @@ function (doc) {
 
 // all
 // -----------------------------------------------------------------------------
-function (doc) {
+function (doc)
+{
   if(doc.type == "stream")
   {
     emit(doc._id, doc);
   }
 }
 
-// byobjectref
+// by_object_ref
 // -----------------------------------------------------------------------------
-function (doc) {
+function (doc)
+{
   if(doc.type == "stream")
   {
     emit(doc.objectRef, doc);
   }
 }
 
+// stream_with_events
+// -----------------------------------------------------------------------------
+function (doc)
+{
+  if(doc.type == "user")
+  {
+    streams = doc.streams;
+    for(var i = 0; i < streams.length; i++)
+    {
+      emit([stream[i], 0]);
+    }
+  }
+  else if(doc.type == "event")
+  {
+    emit([doc.streamId, 1]);
+  }
+}
+
+// event_with_shift
+// -----------------------------------------------------------------------------
+function (doc)
+{
+  var objectRef = doc.objectRef;
+  if(doc.type == "event" && objectRef)
+  {
+    var parts = objectRef.split(":");
+    if(parts[0] == "shift")
+    {
+      emit([parts[1], 0], doc);
+    }
+  }
+  else if(doc.type == "shift")
+  {
+    emit([doc._id, 1], doc);
+  }
+}
+
+
 // =============================================================================
 // events
 // =============================================================================
 
-// bystream
+// by_stream
 // -----------------------------------------------------------------------------
-function (doc) {
+function (doc)
+{
   if(doc.type == "event")
   {
     emit(doc.streamId, doc);
@@ -125,9 +169,10 @@ function (doc) {
 // permissions
 // =============================================================================
 
-// byuser
+// by_user
 // -----------------------------------------------------------------------------
-function (doc) {
+function (doc)
+{
   if(doc.type == "permission")
   {
     emit(doc.userId, doc);
