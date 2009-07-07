@@ -26,15 +26,6 @@ def create(data):
 
   userRef = ref(userId)
 
-  # create personal stream for user
-  # for when people publish to the user's subscribed streams
-  privateStream = stream.create({
-      "objectRef": userRef, 
-      "uniqueName": userRef+":private", 
-      "private": True, 
-      "createdBy": userId
-      })
-
   # create public stream for user
   # for when the user publishes her/his own content
   publicStream = stream.create({
@@ -53,7 +44,7 @@ def create(data):
       })
 
   theUser = db[userId]
-  theUser.update({"streams":[privateStream, messageStream]})
+  theUser.update({"streams":[messageStream]})
   db[userId] = theUser
 
   return userId
@@ -160,6 +151,7 @@ def nameIsUnique(userName):
   """
   Returns True or False depending on if the name is taken.
   """
+  # FIXME: cannot protect unless it's the document id - David Nolen 7/6/09
   return get(userName) == None
 
 

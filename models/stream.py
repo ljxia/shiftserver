@@ -37,8 +37,12 @@ def subscribe(id, userId):
   """
   db = core.connect()
   theUser = db[userId]
-  theUser["streams"].append(id)
-  db[userId] = theUser
+  
+  perms = permission.readableStreams(userId);
+  
+  if id in perms:
+    theUser["streams"].append(id)
+    db[userId] = theUser
 
 
 def unsubscribe(id, userId):
@@ -47,8 +51,10 @@ def unsubscribe(id, userId):
   """
   db = core.connect()
   theUser = db[userId]
-  theUser["streams"].remove(id)
-  db[userId] = theUser
+  
+  if id in theUser["streams"]:
+    theUser["streams"].remove(id)
+    db[userId] = theUser
 
 
 def subscribers(streamId):
@@ -67,5 +73,10 @@ def byUniqueName(uniqueName):
   Return the stream with a unique name.
   """
   return core.single("_design/streams/_view/byuniquename", uniqueName)
+
+
+def isPublic(id):
+  db = core.connect()
+  return not db[id]["private"]
 
 

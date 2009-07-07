@@ -76,6 +76,20 @@ function (doc)
   }
 }
 
+// by_stream
+// -----------------------------------------------------------------------------
+function (doc)
+{
+  if(doc.type == "shift")
+  {
+    var streams = doc.publishData.streams;
+    for(var i = 0; i < streams.length; i++)
+    {
+      emit(streams[i], doc);
+    }
+  }
+}
+
 // by_user_and_domain
 // -----------------------------------------------------------------------------
 function (doc)
@@ -155,24 +169,6 @@ function (doc)
   }
 }
 
-// event_with_shift
-// -----------------------------------------------------------------------------
-function (doc)
-{
-  var objectRef = doc.objectRef;
-  if(doc.type == "event" && objectRef)
-  {
-    var parts = objectRef.split(":");
-    if(parts[0] == "shift")
-    {
-      emit([parts[1], 0], doc);
-    }
-  }
-  else if(doc.type == "shift")
-  {
-    emit([doc._id, 1], doc);
-  }
-}
 
 // We should reduce the two things into one value
 
@@ -197,16 +193,6 @@ function (doc)
   if(doc.type == "event")
   {
     emit(doc.createdBy, doc);
-  }
-}
-
-// for_user
-// -----------------------------------------------------------------------------
-function (doc)
-{
-  if(doc.type == "user")
-  {
-    
   }
 }
 

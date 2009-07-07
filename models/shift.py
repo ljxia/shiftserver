@@ -91,8 +91,7 @@ def userCanReadShift(userId, shiftId):
   
   1. Created the shift
   2. The shift must be published and public
-  3. The shift is private and the user has read permissions
-     for a stream containing the shift.
+  3. If the user is subscribed to a stream the shift is on.
   """
   db = core.connect()
 
@@ -109,47 +108,48 @@ def userCanReadShift(userId, shiftId):
   if not theShift["publishData"]["private"]:
     return True
 
-  streams = stream.streamsForObjectRef(ref(shiftId))
-  streamIds = [astream["_id"] for astream in streams]
+  shiftStreams = theShift["publishData"]["streams"]
+  readableStreams = permissions.readableStreams(userId)
 
-  perms = permission.permissionsForUser(userId)
-  permStreamIds = [aperm["streamId"] for aperm in perms if aperm["level"] >= 1]
-
-  allowed = set(streamIds).intersection(set(permStreamIds))
+  allowed = set(shiftStreams).intersection(set(readableStreams))
 
   if len(allowed) > 0:
     return True
 
 
 def publish(data):
+  """
+  Set draft status of shift to false. Sync publishData field.
+  """
   db = core.connect()
 
-  if not data.get("publishData").get("private"):
-    # public, publish to followers
-    streamId = user.publicStream(data.get("createdBy")).get("_id")
-    publishToSubscribers(data, stream.subscribers(streamId))
-  else:
-    # publish to specified streams
-    streamIds = date.get("publishData").get("streams")
-    streams = [db[streamId] for streamId in streamIds]
-    
-    for stream in streams:
-      publishToSubscribers(data, stream.get("subscribers"))
+  theShift = db[data["_id"]]
+  theUser = db[data["createdBy"]]
+  userId = theUser["_id"]
 
+  # limit the streams only to the ones that the user has permissions for
+  publishStreams = data["publishData"]["streams"]
+  publicStreams = [astream for astream in publicStreams if stream.isPublic(astream)]
+  allowedStreams = permission.writeableStreams(userId)
 
-def publishToSubscribers(data, subscribers):
-  for subscriber in subscribers:
-    userStream = stream.forUniqueName(user.ref(subscriber)+":public")
+  allowed = list(set(allowedStreams).intersection(set(publishStreams)))
+  allowed.extend(publicStreams)
 
-    event.create({
-        "streamId": userStream["_id"],
-        "createdBy": data["createdBy"],
-        "subscriber": subscriber,
-        "objectRef": ref(data["_id"]),
-        "created": data["created"],
-        "displayString": data["summary"]
-        })
+  data["publishData"]["streams"] = allowed
+
+  theShift["publishData"] = data["publishData"]
+  theShift["publishData"]["draft"] = False
+
+  db[shiftId] = theShift
 
 
 def unpublish(id):
-  pass
+  """
+  Set the draft status of a shift back to True"
+  """
+  db = core.connect()
+
+  theShift = db[id]
+  theShift["publishData"]["draft"] = True
+
+  db[id] = theShift
