@@ -59,7 +59,6 @@ def event():
     "objectRef": None,
     "uniqueName": None,
     "displayString": None,
-    "subscriber": None,
     "created": None,
     "modified": None,
     "content": {}

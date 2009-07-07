@@ -115,6 +115,11 @@ def idForName(userName):
     return theUser["_id"]
 
 
+def nameForId(id):
+  db = core.connect()
+  return db[id].get("userName")
+
+
 def update(data):
   """
   Update a user document.
@@ -153,6 +158,14 @@ def nameIsUnique(userName):
   Returns True or False depending on if the name is taken.
   """
   return get(userName) == None
+
+
+def follow(follower, followed):
+  stream.subscribe(publicStream(followed), idForName(follower))
+
+
+def unfollow(follower, followed):
+  stream.unsubscribe(publicStream(followed), idForName(follower))
 
 
 def feeds(id, page=0, perPage=25):

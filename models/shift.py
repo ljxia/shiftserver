@@ -1,8 +1,10 @@
 import utils
 import core
+import schema
+
 import user
 import stream
-import schema
+import event
 import permission
 
 
@@ -123,24 +125,30 @@ def publish(data):
   db = core.connect()
 
   if not data.get("publishData").get("private"):
-    # publish to public streams
-    pass
+    # public, publish to followers
+    streamId = user.publicStream(data.get("createdBy")).get("_id")
+    publishToSubscribers(data, stream.subscribers(streamId))
   else:
     # publish to specified streams
     streamIds = date.get("publishData").get("streams")
     streams = [db[streamId] for streamId in streamIds]
     
     for stream in streams:
-      subscribers = stream.get("subscribers")
-      if len(subcribers) > 0:
-        for subscriber in subscribers:
-          userStream = stream.forUniqueName(user.ref(subscriber)+":public")
-          event.create({
-              "streamId": userStream["_id"]
-            
-              })
-      else:
-        pass
+      publishToSubscribers(data, stream.get("subscribers"))
+
+
+def publishToSubscribers(data, subscribers):
+  for subscriber in subscribers:
+    userStream = stream.forUniqueName(user.ref(subscriber)+":public")
+
+    event.create({
+        "streamId": userStream["_id"],
+        "createdBy": data["createdBy"],
+        "uniqueName": ref(data["_id"]),
+        "objectRef": ref(data["_id"]),
+        "created": data["created"],
+        "displayString": data["summary"]
+        })
 
 
 def unpublish(id):
