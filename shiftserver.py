@@ -215,6 +215,27 @@ class Shift:
         else:
             return error("Operation not permitted. You don't have permission to delete this shift.")
 
+    @jsonencode
+    def publish(self, id):
+        loggedInUser = helper.getLoggedInUser()
+        publishData = json.loads(helper.getRequestBody())
+        theShift = shift.get(id)
+        if loggedInUser and loggedInUser['_id'] == theShift['createdBy']:
+            shift.publish(id, publishData)
+            return ack
+        else:
+            return error("Operation not permitted. You don't have permission to publish this shift.")
+
+    @jsonencode
+    def unpublish(self, id):
+        loggedInUser = helper.getLoggedInUser()
+        theShift = shift.get(id)
+        if loggedInUser and loggedInUser['_id'] == theShift['createdBy']:
+            shift.unpublish(id)
+            return ack
+        else:
+            return error("Operation not permitted. You don't have permission to publish this shift.")
+
 # Event
 # ==============================================================================
 
