@@ -146,13 +146,17 @@ class User:
 
     @jsonencode
     def login(self, userName, password):
-        theUser = user.get(userName)
+        loggedInUser = helper.getLoggedInUser()
+        if not loggedInUser:
+            theUser = user.getFull(userName)
 
-        if theUser and theUser['password'] == hash(password):
-            helper.setLoggedInUser(theUser)
-            return data(theUser)
+            if theUser and (theUser['password'] == hash(password)):
+                helper.setLoggedInUser(theUser)
+                return data(theUser)
+            else:
+                return error("Incorrect password.")
         else:
-            return error("Incorrect password.")
+            return error("Already logged in.")
 
     @jsonencode
     def logout(self):
