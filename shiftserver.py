@@ -337,6 +337,10 @@ def initRoutes():
               conditions=dict(method="PUT"))
     d.connect(name="shiftDelete", route="shift/:id", controller=shift, action="delete",
               conditions=dict(method="DELETE"))
+    d.connect(name="shiftsPublish", route="publish/:id", controller=shifts, action="publish",
+              conditions=dict(method="POST"))
+    d.connect(name="shiftsUnpublish", route="unpublish/:id", controller=shifts, action="unpublish",
+              conditions=dict(method="POST"))
     d.connect(name="shiftsRead", route="shifts/:userName", controller=shifts, action="read",
               conditions=dict(method="GET"))
 
