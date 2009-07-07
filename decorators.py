@@ -15,6 +15,5 @@ def simple_decorator(decorator):
 @simple_decorator
 def jsonencode(func):
     def afn(*args, **kwargs):
-        print 'calling %s' % func.__name__
         return json.dumps(func(*args, **kwargs))
     return afn
