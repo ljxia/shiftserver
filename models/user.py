@@ -52,8 +52,9 @@ def create(data):
       "createdBy": userId
       })
 
-  newUser["streams"] = [privateStream, publicStream, messageStream];
-  db[userId] = newUser["streams"]
+  theUser = db[userId]
+  theUser.update({"streams":[privateStream, publicStream, messageStream]})
+  db[userId] = theUser
 
   return userId
 
