@@ -32,7 +32,7 @@ def message(msg):
 # Utils
 # =============================================================================
 
-def hash(str):
+def md5hash(str):
     m = md5.new()
     m.update(str)
     return m.hexdigest()
@@ -100,7 +100,7 @@ class User:
         valid, msg = self.isValid(theData)
         result = None
         if valid:
-            theData["password"] = hash(theData["password"])
+            theData["password"] = md5hash(theData["password"])
             del theData["passwordVerify"]
             id = user.create(theData)
             theUser = user.getById(id)
@@ -150,7 +150,7 @@ class User:
         if not loggedInUser:
             theUser = user.getFull(userName)
 
-            if theUser and (theUser['password'] == hash(password)):
+            if theUser and (theUser['password'] == md5hash(password)):
                 helper.setLoggedInUser(theUser)
                 return data(theUser)
             else:
