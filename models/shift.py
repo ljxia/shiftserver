@@ -144,7 +144,7 @@ def publishToSubscribers(data, subscribers):
     event.create({
         "streamId": userStream["_id"],
         "createdBy": data["createdBy"],
-        "uniqueName": ref(data["_id"]),
+        "subscriber": subscriber,
         "objectRef": ref(data["_id"]),
         "created": data["created"],
         "displayString": data["summary"]
