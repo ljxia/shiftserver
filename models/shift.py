@@ -134,6 +134,8 @@ def publish(id, publishData):
     allowed.extend(publicStreams)
     if not commentStream(id):
       createCommentStream(id)
+
+  # TODO: publish to user's private stream
     
   publishData["streams"] = allowed
   theShift["publishData"] = publishData

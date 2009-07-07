@@ -56,7 +56,6 @@ def event():
     "type": "event",
     "createdBy": None,
     "streamId": None,
-    "subscriber": None,
     "objectRef": None,
     "uniqueName": None,
     "displayString": None,
