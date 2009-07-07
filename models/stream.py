@@ -52,7 +52,7 @@ def unsubscribe(id, userId):
 
 
 def subscribers(streamId):
-  pass
+  return core.query("_design/streams/_view/subscribers", streamId)
 
 
 def streamsForObjectRef(objectRef):

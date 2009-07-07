@@ -53,7 +53,7 @@ def create(data):
       })
 
   theUser = db[userId]
-  theUser.update({"streams":[privateStream, publicStream, messageStream]})
+  theUser.update({"streams":[privateStream, messageStream]})
   db[userId] = theUser
 
   return userId
