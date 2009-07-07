@@ -27,17 +27,6 @@ def create(data):
   shiftId = db.create(newShift)
   newShift = db[shiftId]
 
-  # update shift with stream data
-  streamId = stream.create({
-      "objectRef":ref(shiftId),
-      "createdBy":newShift["createdBy"],
-      "created":theTime,
-      "private":newShift["publishData"]["private"]
-  })
-  
-  shiftStream = db[streamId]
-  newShift['streams'] = [streamId]
-
   db[shiftId] = newShift
 
   return shiftId
@@ -127,16 +116,22 @@ def publish(data):
   theUser = db[data["createdBy"]]
   userId = theUser["_id"]
 
-  # limit the streams only to the ones that the user has permissions for
+  allowed = None
   publishStreams = data["publishData"]["streams"]
-  publicStreams = [astream for astream in publicStreams if stream.isPublic(astream)]
-  allowedStreams = permission.writeableStreams(userId)
 
-  allowed = list(set(allowedStreams).intersection(set(publishStreams)))
+  if data["publishData"]["private"]:
+    allowedStreams = permission.writeableStreams(userId)
+
+    allowed = list(set(allowedStreams).intersection(set(publishStreams)))
+    allowed.extend(publicStreams)
+  else:
+    allowed = [user.publicStream(userId)["_id"]]
+
+  # limit the streams only to the ones that the user has permissions for
+  publicStreams = [astream for astream in publishStreams if stream.isPublic(astream)]
   allowed.extend(publicStreams)
-
+    
   data["publishData"]["streams"] = allowed
-
   theShift["publishData"] = data["publishData"]
   theShift["publishData"]["draft"] = False
 
