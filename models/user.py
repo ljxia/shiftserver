@@ -59,6 +59,18 @@ def create(data):
   return userId
 
 
+def publicStream(userName):
+  return core.single("_design/streams/_view/byuniquename", ref(idForName(userName))+":public")
+
+
+def privateStream(userName):
+  return core.single("_design/streams/_view/byuniquename", ref(idForName(userName))+":private")
+
+
+def messageStream(userName):
+  return core.single("_design/streams/_view/byuniquename", ref(idForName(userName))+":messages")
+
+
 def get(userName):
   """
   Returns public data for a user.

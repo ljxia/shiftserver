@@ -119,15 +119,15 @@ def userCanReadShift(userId, shiftId):
     return True
 
 
-def publish(publishData):
+def publish(data):
   db = core.connect()
 
-  if not publishData.get("private"):
+  if not data.get("publishData").get("private"):
     # publish to public streams
     pass
   else:
     # publish to specified streams
-    streamIds = publishData["streams"]
+    streamIds = date.get("publishData").get("streams")
     streams = [db[streamId] for streamId in streamIds]
     
     for stream in streams:
