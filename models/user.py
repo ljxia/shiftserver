@@ -1,7 +1,10 @@
 import core
 import utils
 import schema
+
+import shift
 import stream
+import event
 
 
 def ref(id):
@@ -90,7 +93,8 @@ def idForName(userName):
   Get the id for a user from the userName.
   """
   theUser = get(userName)
-  return theUser["_id"]
+  if theUser:
+    return theUser["_id"]
 
 
 def update(data):
@@ -116,12 +120,12 @@ def delete(userName):
     del db[streamId]
 
   # delete the user's shifts
-  userShifts = [ashift["_id"] for ashift in shifts.byUserName(userName)]
+  userShifts = [ashift["_id"] for ashift in shift.byUserName(userName)]
   for shiftId in userShifts:
     del db[shiftId]
 
   # delete the user's events
-  userEvents = [anevent["_id"] for anevent in event.byUser(id)]
+  userEvents = [anevent["_id"] for anevent in event.eventsForUser(id)]
   for eventId in userEvents:
     del db[eventId]
 
