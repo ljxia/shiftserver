@@ -82,13 +82,13 @@ def get(userName):
   return theUser
 
 
-def getFull(userName):
+def getFull(userName, deleteType=True):
   """
   Return the full data for a user.
   """
   theUser = core.single("_design/users/_view/byname", userName)
 
-  if theUser:
+  if theUser and deleteType:
     del theUser["type"]
 
   return theUser
@@ -172,6 +172,13 @@ def unfollow(follower, followed):
   should be userNames.
   """
   stream.unsubscribe(publicStream(followed).get("_id"), idForName(follower))
+
+
+def updateLastSeen(userName):
+  db = core.connect()
+  theUser = getFull(userName, False)
+  theUser["lastSeen"] = utils.utctime()
+  db[theUser["_id"]] = theUser
 
 
 def feeds(id, page=0, perPage=25):

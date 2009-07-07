@@ -150,8 +150,12 @@ class User:
         if not loggedInUser:
             theUser = user.getFull(userName)
 
+            if not theUser:
+                return error("User does not exist.")
+
             if theUser and (theUser['password'] == md5hash(password)):
                 helper.setLoggedInUser(theUser)
+                user.updateLastSeen(userName)
                 return data(theUser)
             else:
                 return error("Incorrect password.")
@@ -162,6 +166,7 @@ class User:
     def logout(self):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
+            user.updateLastSeen(loggedInUser["userName"])
             helper.setLoggedInUser(None)
             return ack
         else:
@@ -180,7 +185,10 @@ class User:
     def follow(self, userName):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
-            user.follow(loggedInUser["userName"], userName)
+            lname = loggedInUser["userName"]
+            if lname == userName:
+                return error("You cannot follow yourself.")
+            user.follow(lname, userName)
             return ack
         else:
             return error("No user logged in.")
@@ -189,7 +197,10 @@ class User:
     def unfollow(self, userName):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
-            user.unfollow(loggedInUser["userName"], userName)
+            lname = loggedInUser["userName"]
+            if lname == userName:
+                return error("You cannot unfollow yourself.")
+            user.unfollow(lname, userName)
             return ack
         else:
             return error("No user logged in.")
