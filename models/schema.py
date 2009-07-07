@@ -56,11 +56,12 @@ def event():
     "type": "event",
     "createdBy": None,
     "streamId": None,
-    "displayString": None,
+    "objectRef": None,
     "uniqueName": None,
+    "displayString": None,
+    "subscriber": None,
     "created": None,
     "modified": None,
-    "objectRef": None,
     "content": {}
   }
 

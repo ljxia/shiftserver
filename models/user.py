@@ -1,6 +1,11 @@
 import core
 import utils
 import schema
+import stream
+
+
+def ref(id):
+  return "user:"+id
 
 
 def create(data):
@@ -10,10 +15,39 @@ def create(data):
   db = core.connect()
 
   data["joined"] = utils.utctime()
+
   newUser = schema.user()
   newUser.update(data)
 
-  return db.create(newUser)
+  userId = db.create(newUser)
+
+  # create personal stream for user
+  # for when people publish to the user's subscribed streams
+  privateStream = stream.create({
+      "objectRef": ref(userId), 
+      "meta": "private", 
+      "private": True, 
+      "createdBy": userId
+      })
+
+  # create public stream for user
+  # for when the user publishes her/his own content
+  publicStream = stream.create({
+      "objectRef": ref(userId), 
+      "meta": "public", 
+      "private": False, 
+      "createdBy": userId
+      })
+
+  # create the message stream for the user
+  messageStream = stream.create({
+      "objectRef": ref(userId), 
+      "meta": "messages", 
+      "private": False, 
+      "createdBy": userId
+      })
+
+  return userId
 
 
 def get(userName):
@@ -67,13 +101,29 @@ def update(data):
   return core.update(data)
 
 
-def delete(id):
+def delete(userName):
   """
   Delete a user.
   """
   db = core.connect()
-  # TODO: delete all events, shifts as well - not streams
-  del db[i]
+  id = idForName(userName)
+
+  del db[id]
+
+  # delete the user's private, public, and message streams
+  userStreams = [astream["_id"] for astream in stream.streamsForObjectRef(ref(id))]
+  for streamId in userStreams:
+    del db[streamId]
+
+  # delete the user's shifts
+  userShifts = [ashift["_id"] for ashift in shifts.byUserName(userName)]
+  for shiftId in userShifts:
+    del db[shiftId]
+
+  # delete the user's events
+  userEvents = [anevent["_id"] for anevent in event.byUser(id)]
+  for eventId in userEvents:
+    del db[eventId]
 
 
 def nameIsUnique(userName):

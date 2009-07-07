@@ -150,6 +150,7 @@ function (doc)
   }
 }
 
+// We should reduce the two things into one value
 
 // =============================================================================
 // events
@@ -162,6 +163,16 @@ function (doc)
   if(doc.type == "event")
   {
     emit(doc.streamId, doc);
+  }
+}
+
+// by_user
+// -----------------------------------------------------------------------------
+function (doc)
+{
+  if(doc.type == "event")
+  {
+    emit(doc.createdBy, doc);
   }
 }
 

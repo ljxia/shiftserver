@@ -7,7 +7,14 @@ def create(data):
   """
   Create a stream.
   """
-  pass
+  db = core.connect()
+
+  data["created"] = utils.utctime()
+
+  newStream = schema.stream()
+  newStream.update(data)
+
+  return db.create(newStream)
 
 
 def update(data):
