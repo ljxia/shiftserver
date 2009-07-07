@@ -108,7 +108,7 @@ def userCanReadShift(userId, shiftId):
 
 def publish(id, publishData):
   """
-  Set draft status of shift to false. Sync publishData field.
+  Set draft status of a shift to false. Sync publishData field.
   """
   db = core.connect()
 
@@ -116,17 +116,18 @@ def publish(id, publishData):
   theUser = db[theShift["createdBy"]]
   userId = theUser["_id"]
 
-  allowed = None
+  allowed = []
   publishStreams = publishData["streams"]
 
+  # if private shift check against the streams the user can write to
   if publishData["private"]:
     allowedStreams = permission.writeableStreams(userId)
     allowed = list(set(allowedStreams).intersection(set(publishStreams)))
-    allowed.extend(publicStreams)
   else:
-    allowed = [user.publicStream(userId)["_id"]]
+    # publish to the users public stream - used when following
+    allowed = allowed.append(user.publicStream(userId)["_id"])
 
-  # limit the streams only to the ones that the user has permissions for
+  # also include any public streams if specified
   publicStreams = [astream for astream in publishStreams if stream.isPublic(astream)]
   allowed.extend(publicStreams)
     
