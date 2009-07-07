@@ -60,15 +60,18 @@ def create(data):
 
 
 def publicStream(userName):
-  return core.single("_design/streams/_view/byuniquename", ref(idForName(userName))+":public")
+  return core.single("_design/streams/_view/byuniquename", 
+                     ref(idForName(userName))+":public")
 
 
 def privateStream(userName):
-  return core.single("_design/streams/_view/byuniquename", ref(idForName(userName))+":private")
+  return core.single("_design/streams/_view/byuniquename", 
+                     ref(idForName(userName))+":private")
 
 
 def messageStream(userName):
-  return core.single("_design/streams/_view/byuniquename", ref(idForName(userName))+":messages")
+  return core.single("_design/streams/_view/byuniquename", 
+                     ref(idForName(userName))+":messages")
 
 
 def get(userName):
@@ -110,7 +113,7 @@ def idForName(userName):
   """
   Get the id for a user from the userName.
   """
-  theUser = get(userName)
+  theUser = getFull(userName)
   if theUser:
     return theUser["_id"]
 
@@ -161,11 +164,11 @@ def nameIsUnique(userName):
 
 
 def follow(follower, followed):
-  stream.subscribe(publicStream(followed), idForName(follower))
+  stream.subscribe(publicStream(followed).get("_id"), idForName(follower))
 
 
 def unfollow(follower, followed):
-  stream.unsubscribe(publicStream(followed), idForName(follower))
+  stream.unsubscribe(publicStream(followed).get("_id"), idForName(follower))
 
 
 def feeds(id, page=0, perPage=25):
