@@ -126,7 +126,7 @@ def publish(id, publishData):
   if publishData["private"]:
     allowedStreams = permission.writeableStreams(userId)
     allowed = list(set(allowedStreams).intersection(set(publishStreams)))
-  else:n
+  else:
     # publish to the users public stream - used when following
     allowed = allowed.append(user.publicStream(userId)["_id"])
     # also include any public streams if specified, excluding
