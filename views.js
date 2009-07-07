@@ -103,6 +103,21 @@ function (doc)
   }
 }
 
+// subscribers
+// -----------------------------------------------------------------------------
+function (doc)
+{
+  if(doc.type == "user")
+  {
+    var streams = doc.streams;
+    for(var i = 0; i < streams.len; i++)
+    {
+      emit(streams[i], doc);
+    }
+  }
+}
+
+
 // by_object_ref
 // -----------------------------------------------------------------------------
 function (doc)
@@ -110,6 +125,16 @@ function (doc)
   if(doc.type == "stream")
   {
     emit(doc.objectRef, doc);
+  }
+}
+
+// by_unique_name
+// -----------------------------------------------------------------------------
+function (doc)
+{
+  if(doc.type == "stream")
+  {
+    emit(doc.uniqueName, doc);
   }
 }
 

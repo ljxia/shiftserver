@@ -5,23 +5,6 @@ import stream
 import schema
 import permission
 
-"""Some Examples.
-
-shift.create({"content":{"foo":"bar"}})
-
-shift.create({
-  "createdBy": "1",
-  "space": {"name": "Notes", "version": 0.1},
-  "summary": "My note.",
-  "content": {
-    "position": {"x": 100, "y": 150},
-    "size": {"x": 200, "y": 200},
-    "pinRef": None,
-    "filters": {"text":"html", "summary":"html"},
-    "text": "A note that I think is very cool!"
-  }
-})
-"""
 
 def ref(id):
   return "shift:"+id
@@ -71,6 +54,7 @@ def delete(id):
   Delete a shift from the database.
   """
   db = core.connect()
+  # FIXME: What happens to orphaned comments? - David 7/6/09
   del db[id]
 
 
@@ -84,7 +68,7 @@ def update(data):
   doc = db[id]
   doc.update(data)
   doc["modified"] = utils.utctime()
-  
+
   db[id] = doc
 
   return doc
@@ -133,3 +117,31 @@ def userCanReadShift(userId, shiftId):
 
   if len(allowed) > 0:
     return True
+
+
+def publish(publishData):
+  db = core.connect()
+
+  if not publishData.get("private"):
+    # publish to public streams
+    pass
+  else:
+    # publish to specified streams
+    streamIds = publishData["streams"]
+    streams = [db[streamId] for streamId in streamIds]
+    
+    for stream in streams:
+      subscribers = stream.get("subscribers")
+      if len(subcribers) > 0:
+        for subscriber in subscribers:
+          userStream = stream.forUniqueName(user.ref(subscriber)+":public")
+          event.create({
+              "streamId": userStream["_id"]
+            
+              })
+      else:
+        pass
+
+
+def unpublish(id):
+  pass

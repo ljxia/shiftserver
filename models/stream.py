@@ -51,10 +51,7 @@ def unsubscribe(id, userId):
   db[userId] = user.remove(id)
 
 
-def find(uniqueName, filters):
-  """
-  Find a public stream with the specified unique name."
-  """
+def subscribers(streamId):
   pass
 
 
@@ -62,5 +59,13 @@ def streamsForObjectRef(objectRef):
   """
   All streams for a objectRef, where objectRef is "type:id".
   """
-  db = core.connect()
   return core.query("_design/streams/_view/byobjectref", objectRef)
+
+
+def byUniqueName(uniqueName):
+  """
+  Return the stream with a unique name.
+  """
+  return core.single("_design/streams/_view/byuniquename", uniqueName)
+
+

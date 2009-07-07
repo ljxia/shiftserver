@@ -31,9 +31,9 @@ def shift():
     "publishData": {
       "draft": True,
       "publishTime": None,
-      "private": True
+      "private": True,
+      "streams": []
      },
-    "streams": [],
     "preferences": {},
     "content": {}
   }

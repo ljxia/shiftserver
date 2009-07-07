@@ -24,11 +24,13 @@ def create(data):
 
   userId = db.create(newUser)
 
+  userRef = ref(userId)
+
   # create personal stream for user
   # for when people publish to the user's subscribed streams
   privateStream = stream.create({
-      "objectRef": ref(userId), 
-      "meta": "private", 
+      "objectRef": userRef, 
+      "uniqueName": userRef+":private", 
       "private": True, 
       "createdBy": userId
       })
@@ -36,19 +38,22 @@ def create(data):
   # create public stream for user
   # for when the user publishes her/his own content
   publicStream = stream.create({
-      "objectRef": ref(userId), 
-      "meta": "public", 
+      "objectRef": userRef, 
+      "uniqueName": userRef+":public", 
       "private": False, 
       "createdBy": userId
       })
 
   # create the message stream for the user
   messageStream = stream.create({
-      "objectRef": ref(userId), 
-      "meta": "messages", 
+      "objectRef": userRef, 
+      "uniqueName": userRef+":messages", 
       "private": False, 
       "createdBy": userId
       })
+
+  newUser["streams"] = [privateStream, publicStream, messageStream];
+  db[userId] = newUser["streams"]
 
   return userId
 
