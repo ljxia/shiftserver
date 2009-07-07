@@ -102,6 +102,9 @@ def userCanReadShift(userId, shiftId):
 
   return len(allowed) > 0
 
+"""
+shift.publish("", {"private":False, "streams":[]})
+"""
 
 def publish(id, publishData):
   """
@@ -126,7 +129,7 @@ def publish(id, publishData):
     allowed = list(set(allowedStreams).intersection(set(publishStreams)))
   else:
     # publish to the users public stream - used when following
-    allowed = allowed.append(user.publicStream(userId)["_id"])
+    allowed.append(user.publicStream(theUser["userName"])["_id"])
     # also include any public streams if specified, excluding
     # the public streams of other users
     publicStreams = [astream for astream in publishStreams
@@ -135,13 +138,13 @@ def publish(id, publishData):
     if not commentStream(id):
       createCommentStream(id)
 
-  # TODO: publish to user's private stream
+  # TODO: publish to user's private stream for @user - David
     
   publishData["streams"] = allowed
   theShift["publishData"] = publishData
   theShift["publishData"]["draft"] = False
 
-  db[shiftId] = theShift
+  db[id] = theShift
 
 
 def unpublish(id):

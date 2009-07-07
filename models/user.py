@@ -158,10 +158,19 @@ def nameIsUnique(userName):
 
 
 def follow(follower, followed):
+  """
+  Subscribe a user to another user's public stream. A user's public
+  stream is only for shifts at the moment. Both arguments should
+  be the userNames.
+  """
   stream.subscribe(publicStream(followed).get("_id"), idForName(follower))
 
 
 def unfollow(follower, followed):
+  """
+  Unsubscribe a user from another user's public stream. Both arguments
+  should be userNames.
+  """
   stream.unsubscribe(publicStream(followed).get("_id"), idForName(follower))
 
 

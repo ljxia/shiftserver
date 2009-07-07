@@ -176,6 +176,24 @@ class User:
         else:
             return error("No user logged in.")
 
+    @jsonencode
+    def follow(self, userName):
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser:
+            user.follow(loggedInUser["userName"], userName)
+            return ack
+        else:
+            return error("No user logged in.")
+
+    @jsonencode
+    def unfollow(self, userName):
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser:
+            user.unfollow(loggedInUser["userName"], userName)
+            return ack
+        else:
+            return error("No user logged in.")
+
 
 # Shift
 # ==============================================================================
@@ -331,6 +349,11 @@ def initRoutes():
               conditions=dict(method="PUT"))
     d.connect(name="userDelete", route="user/:userName", controller=user, action="delete",
               conditions=dict(method="DELETE"))
+
+    d.connect(name="userFollow", route="follow/:userName", controller=user, action="follow",
+              conditions=dict(method="POST"))
+    d.connect(name="userUnfollow", route="unfollow/:userName", controller=user, action="unfollow",
+              conditions=dict(method="POST"))
 
     # Shift Routes
     d.connect(name="shiftCreate", route="shift", controller=shift, action="create",
