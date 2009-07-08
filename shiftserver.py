@@ -20,14 +20,34 @@ import models.groups as groups
 
 ack = {"message":"ok"}
 
-def error(msg):
-    return {"error":msg}
+def error(msg, type=None):
+    err = {"error":msg}
+    if type:
+        err["type"] = type
+    return err
 
 def data(d):
     return {"data":d}
 
 def message(msg):
     return {"message":msg}
+
+# Error types
+# =============================================================================
+
+AlreadyLoggedInError = "AlreadyLoggedInError"
+AlreadyLoggedOutError = "AlreadyLoggedOutError"
+InvalidUserNameError = "InvalidUserNameError"
+IncorrectPasswordError = "IncorrectPasswordError"
+UserNotLoggedInError = "UserNotLoggedInError"
+
+NoEmailError = "NoEmailError"
+MissingUserNameError = "MissingUserNameError"
+ShortUserNameError = "ShortUserNameError"
+UserNameAlreadyExistsError = "UserNameAlreadyExistsError"
+MissingPasswordError = "MissingPasswordError"
+MissingPasswordVerifyError = "MissingPasswordVerifyError"
+PasswordMatchError = "PasswordMatchError"
 
 # Utils
 # =============================================================================
@@ -66,38 +86,38 @@ class Resource:
         pass
     def delete(self, id):
         pass
-
+ 
 # User
 # ==============================================================================
 
 class User:
     def isValid(self, data):
         if not data.get("email"):
-            return (False, "Please specify your email address.")
+            return (False, "Please specify your email address.", NoEmailError)
         userName = data.get("userName")
         if not userName:
-            return (False, "Please enter a user name.")
+            return (False, "Please enter a user name.", MissingUserNameError)
         if len(userName) < 6:
-            return (False, "Your user name should be at least 6 characters long.")
+            return (False, "Your user name should be at least 6 characters long.", ShortUserNameError)
         if not user.nameIsUnique(userName):
-            return (False, "That user name is taken, please choose another.")
+            return (False, "That user name is taken, please choose another.", UserNameAlreadyExistsError)
         if not data.get("password"):
-            return (False, "Please supply a password.")
+            return (False, "Please supply a password.", MissingPasswordError)
         if not data.get("passwordVerify"):
-            return (False, "Please enter your password twice.")
+            return (False, "Please enter your password twice.", MissingPasswordVerifyError)
         if data.get("password") != data.get("passwordVerify"):
-            return (False, "Passwords do not match.")
-        return (True, data)
+            return (False, "Passwords do not match.", PasswordMatchError)
+        return (True, data, None)
 
     @jsonencode
     def join(self):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
-            return error("You are logged in. You cannot create an account")
+            return error("You are logged in. You cannot create an account.", AlreadyLoggedInError)
 
         theData = json.loads(helper.getRequestBody())
 
-        valid, msg = self.isValid(theData)
+        valid, msg, errType = self.isValid(theData)
         result = None
         if valid:
             theData["password"] = md5hash(theData["password"])
@@ -107,7 +127,7 @@ class User:
             helper.setLoggedInUser(theUser)
             return data(theUser)
         else:
-            return error(msg)
+            return error(msg, errType)
 
     @jsonencode
     def read(self, userName):
@@ -151,16 +171,16 @@ class User:
             theUser = user.getFull(userName)
 
             if not theUser:
-                return error("User does not exist.")
+                return error("Invalid user name.", InvalidUserNameError)
 
             if theUser and (theUser['password'] == md5hash(password)):
                 helper.setLoggedInUser(theUser)
                 user.updateLastSeen(userName)
                 return data(theUser)
             else:
-                return error("Incorrect password.")
+                return error("Incorrect password.", IncorrectPasswordError)
         else:
-            return error("Already logged in.")
+            return error("Already logged in.", AlreadyLoggedInError)
 
     @jsonencode
     def logout(self):
@@ -170,7 +190,7 @@ class User:
             helper.setLoggedInUser(None)
             return ack
         else:
-            return error("No user logged in.")
+            return error("No user logged in.", AlreadyLoggedOutError)
 
     @jsonencode
     def resetPassword(self):
