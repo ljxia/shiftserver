@@ -6,10 +6,7 @@ import shift
 import stream
 import event
 
-
-def ref(id):
-  return "user:"+id
-
+ref = utils.genrefn("user")
 
 def create(data):
   """
@@ -30,7 +27,7 @@ def create(data):
   # for when the user publishes her/his own content
   publicStream = stream.create({
       "objectRef": userRef, 
-      "uniqueName": userRef+":public", 
+      "uniqueName": ref(userId,"public"),
       "private": False,
       "meta": "userPublicStream",
       "createdBy": userId
@@ -39,7 +36,7 @@ def create(data):
   # create the message stream for the user
   messageStream = stream.create({
       "objectRef": userRef, 
-      "uniqueName": userRef+":messages", 
+      "uniqueName": ref(userId, "messages"), 
       "private": False, 
       "meta": "userPrivateStream",
       "createdBy": userId
@@ -54,17 +51,17 @@ def create(data):
 
 def publicStream(userName):
   return core.single("_design/streams/_view/byuniquename", 
-                     ref(idForName(userName))+":public")
+                     ref(idForName(userName), "public"))
 
 
 def privateStream(userName):
   return core.single("_design/streams/_view/byuniquename", 
-                     ref(idForName(userName))+":private")
+                     ref(idForName(userName), "private"))
 
 
 def messageStream(userName):
   return core.single("_design/streams/_view/byuniquename", 
-                     ref(idForName(userName))+":messages")
+                     ref(idForName(userName), "messages"))
 
 
 def get(userName):
