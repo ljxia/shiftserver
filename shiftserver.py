@@ -48,6 +48,10 @@ UserNameAlreadyExistsError = "UserNameAlreadyExistsError"
 MissingPasswordError = "MissingPasswordError"
 MissingPasswordVerifyError = "MissingPasswordVerifyError"
 PasswordMatchError = "PasswordMatchError"
+FollowError = "FollowError"
+
+UserDoesNotExistError = "UserDoesNotExistError"
+PermissionError = "PermissionError"
 
 # Utils
 # =============================================================================
@@ -131,16 +135,20 @@ class User:
 
     @jsonencode
     def read(self, userName):
+        if not user.get(userName):
+            return error("User %s does not exist" % userName, UserDoesNotExistError)
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser and (loggedInUser.get("userName") == userName):
+        if (not loggedInUser) or (loggedInUser["userName"] != userName):
             return data(user.get(userName).copy())
         else:
             return data(user.getFull(userName).copy())
 
     @jsonencode
     def update(self, userName):
+        if not user.get(userName):
+            return error("User %s does not exist" % userName, UserDoesNotExistError)
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser['userName'] == userName:
+        if loggedInUser and (loggedInUser['userName'] == userName):
             shift.update(helper.getRequestBody())
             return ack
         else:
@@ -148,8 +156,10 @@ class User:
 
     @jsonencode
     def delete(self, userName):
+        if not user.get(userName):
+            return error("User %s does not exist" % userName, UserDoesNotExistError)
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser['userName'] == userName:
+        if loggedInUser and (loggedInUser['userName'] == userName):
             user.delete(userName)
             helper.setLoggedInUser(None)
             return ack
@@ -199,7 +209,7 @@ class User:
             # TODO: generate random 8 character password update user and email
             return ack
         else:
-            return error("No user logged in.")
+            return error("No user logged in.", UserNotLoggedInError)
 
     @jsonencode
     def follow(self, userName):
@@ -207,11 +217,13 @@ class User:
         if loggedInUser:
             lname = loggedInUser["userName"]
             if lname == userName:
-                return error("You cannot follow yourself.")
+                return error("You cannot follow yourself.", FollowError)
+            if not user.get(userName):
+                return error("User % does not exist" % userName, UserDoesNotExistError)
             user.follow(lname, userName)
             return ack
         else:
-            return error("No user logged in.")
+            return error("No user logged in.", UserNotLoggedInError)
 
     @jsonencode
     def unfollow(self, userName):
@@ -219,11 +231,13 @@ class User:
         if loggedInUser:
             lname = loggedInUser["userName"]
             if lname == userName:
-                return error("You cannot unfollow yourself.")
+                return error("You cannot unfollow yourself.", FollowError)
+            if not user.get(userName):
+                return error("User % does not exist" % userName, UserDoesNotExistError)
             user.unfollow(lname, userName)
             return ack
         else:
-            return error("No user logged in.")
+            return error("No user logged in.", UserNotLoggedInError)
 
 
 # Shift
@@ -314,6 +328,10 @@ class Stream:
         pass
     def delete(self, id):
         pass
+    def comments(self, shiftId):
+        pass
+    def private(self, userId):
+        pass
 
 # Permission
 # ==============================================================================
@@ -335,6 +353,8 @@ class Shifts:
     @jsonencode
     def read(self, userName):
         return data(shift.byUserName(userName))
+    def feed(self, userName):
+        pass
 
 
 class Groups:
