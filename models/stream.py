@@ -54,23 +54,46 @@ def canCreate(id, userId):
 
 
 def canRead(id, userId):
+  """
+  Returns true if:
+  1. user is admin
+  2. if the stream is public
+  3. if the user created the stream
+  4. if the user has read permission for the stream
+  """
   if user.isAdmin(userId):
     return True
-
-  theStream = read(id)
-  if theStream["public"]:
+  if theStream["createdBy"] == userId:
     return True
-
+  theStream = read(id)
+  if not theStream["private"]:
+    return True
   readableStreams = permissions.readableStreams(userId)
   return (id in readableStreams)
 
 
 def canUpdate(id, userId):
-  pass
+  """
+  Returns true if:
+  1. user is admin
+  2. user created teh stream
+  """
+  if user.isAdmin(userId):
+    return True
+  if theStream["createdBy"] == userId:
+    return True
+  return False
 
 
 def canDelete(id, userId):
-  pass
+  """
+  Returns true 
+  """
+  if user.isAdmin(userId):
+    return True
+  if theStream["createdBy"] == userId:
+    return True
+  return False
 
 
 def isPublic(id):
