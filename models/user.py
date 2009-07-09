@@ -56,11 +56,11 @@ def create(data):
   return userId
 
 
-def get(userName):
+def read(userName):
   """
   Returns public data for a user.
   """
-  theUser = getFull(userName)
+  theUser = readFull(userName)
   
   if theUser:
     del theUser["email"]
@@ -70,7 +70,7 @@ def get(userName):
   return theUser
 
 
-def getFull(userName, deleteType=True):
+def readFull(userName, deleteType=True):
   """
   Return the full data for a user.
   """
@@ -144,7 +144,7 @@ def nameIsUnique(userName):
   Returns True or False depending on if the name is taken.
   """
   # FIXME: cannot protect unless it's the document id - David Nolen 7/6/09
-  return get(userName) == None
+  return read(userName) == None
 
 
 # ==============================================================================
@@ -209,7 +209,7 @@ def idForName(userName):
   """
   Get the id for a user from the userName.
   """
-  theUser = getFull(userName)
+  theUser = readFull(userName)
   if theUser:
     return theUser["_id"]
 
@@ -221,6 +221,6 @@ def nameForId(id):
 
 def updateLastSeen(userName):
   db = core.connect()
-  theUser = getFull(userName, False)
+  theUser = readFull(userName, False)
   theUser["lastSeen"] = utils.utctime()
   db[theUser["_id"]] = theUser

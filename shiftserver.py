@@ -118,14 +118,14 @@ permissionType = verifyDecoratorGenerator("permission")
 def exists(func):
     def afn(*args, **kwargs):
         db = core.connect()
-        self = args[0]
+        instance = args[0]
         id = kwargs["id"]
         if not db[id]:
-            fn = getattr(self, "resourceDoesNotExistsString")
+            fn = getattr(instance, "resourceDoesNotExistsString")
             errorStr = (fn and fn()) or ("Resource %s does not exist" % id)
             return error(errorStr, ResourceDoesNotExistsError)
         else:
-           return func(*args, **kwargs)
+            return func(*args, **kwargs)
     return afn
 
 # Resource
@@ -183,20 +183,20 @@ class UserController(ResourceController):
 
     @jsonencode
     def read(self, userName):
-        if not user.get(userName):
+        if not user.read(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser and user.canReadFull(user.idForName(userName),
                                              loggedInUser["_id"]):
-            return data(user.getFull(userName).copy())
+            return data(user.readFull(userName).copy())
         else:
-            return data(user.get(userName).copy())
+            return data(user.read(userName).copy())
 
 
     @jsonencode
     @loggedin
     def update(self, userName):
-        if not user.get(userName):
+        if not user.read(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser and user.canUpdate(user.idForName(userName),
@@ -209,7 +209,7 @@ class UserController(ResourceController):
     @jsonencode
     @loggedin
     def delete(self, userName):
-        if not user.get(userName):
+        if not user.read(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser and user.canDelete(user.idForName(userName),
@@ -232,7 +232,7 @@ class UserController(ResourceController):
     def login(self, userName, password):
         loggedInUser = helper.getLoggedInUser()
         if not loggedInUser:
-            theUser = user.getFull(userName)
+            theUser = user.readFull(userName)
 
             if not theUser:
                 return error("Invalid user name.", InvalidUserNameError)
@@ -272,7 +272,7 @@ class UserController(ResourceController):
         lname = loggedInUser["userName"]
         if lname == userName:
             return error("You cannot follow yourself.", FollowError)
-        if not user.get(userName):
+        if not user.read(userName):
             return error("User % does not exist" % userName, UserDoesNotExistError)
         user.follow(lname, userName)
         return ack
@@ -284,7 +284,7 @@ class UserController(ResourceController):
         lname = loggedInUser["userName"]
         if lname == userName:
             return error("You cannot unfollow yourself.", FollowError)
-        if not user.get(userName):
+        if not user.read(userName):
             return error("User % does not exist" % userName, UserDoesNotExistError)
         user.unfollow(lname, userName)
         return ack
