@@ -72,8 +72,7 @@ def get(userName):
   
   if theUser:
     del theUser["email"]
-    del theUser["groups"]
-    del theUser["following"]
+    del theUser["streams"]
     del theUser["password"]
   
   return theUser

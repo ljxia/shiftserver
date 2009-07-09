@@ -168,8 +168,8 @@ class User:
         else:
             return data(user.getFull(userName).copy())
 
-    @loggedin
     @jsonencode
+    @loggedin
     def update(self, userName):
         if not user.get(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
@@ -180,8 +180,8 @@ class User:
         else:
             return error("Operation not permitted. You don't have permission to update this account.")
 
-    @loggedin
     @jsonencode
+    @loggedin
     def delete(self, userName):
         if not user.get(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
@@ -238,8 +238,8 @@ class User:
         else:
             return error("No user logged in.", UserNotLoggedInError)
 
-    @loggedin
     @jsonencode
+    @loggedin
     def follow(self, userName):
         loggedInUser = helper.getLoggedInUser()
         lname = loggedInUser["userName"]
@@ -250,8 +250,8 @@ class User:
         user.follow(lname, userName)
         return ack
 
-    @loggedin
     @jsonencode
+    @loggedin
     def unfollow(self, userName):
         loggedInUser = helper.getLoggedInUser()
         lname = loggedInUser["userName"]
