@@ -230,11 +230,13 @@ function (doc)
 
 function(newDoc, oldDoc, userCtx)
 {
-  if(newDoc && oldDoc)
+  if(newDoc &&
+     newDoc.type &&
+     oldDoc)
   {
     if(newDoc.type != oldDoc.type)
     {
-      throw {changing_type: 'Document cannot change type.'};
+      throw {changing_type: 'Document cannot change type. ' + newDoc.type + ' -> ' + oldDoc.type};
     }
     if(newDoc.createdBy && (newDoc.createdBy != oldDoc.createdBy))
     {
