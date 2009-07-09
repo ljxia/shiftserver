@@ -1,3 +1,21 @@
+# ==============================================================================
+# Views
+# ==============================================================================
+
+permissionByUser = "_design/permissions/_view/byuser"
+streamByObjectRef = "_design/streams/_view/byobjectref"
+streamByUniqueName = "_design/streams/_view/byuniquename"
+streamBySubscribers = "_design/streams/_view/subscribers"
+userByName = "_design/users/_view/byname"
+eventByStream = "_design/events/_view/bystream"
+eventByUser= "_design/events/_view/byuser"
+allGroups = "_design/groups/_view/all"
+shiftByUser = "_design/shifts/_view/byuser"
+
+# ==============================================================================
+# Schemas
+# ==============================================================================
+
 def user():
   return {
     "type": "user",

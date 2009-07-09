@@ -3,6 +3,10 @@ import utils
 import schema
 
 
+# ==============================================================================
+# CRUD
+# ==============================================================================
+
 def create(data):
   """
   Create a stream.
@@ -15,6 +19,14 @@ def create(data):
   newStream.update(data)
 
   return db.create(newStream)
+
+
+def read(id):
+  """
+  Read a stream
+  """
+  db = core.connect()
+  return db[id]
 
 
 def update(data):
@@ -30,6 +42,50 @@ def delete(id):
   """
   pass
 
+
+# ==============================================================================
+# Validation
+# ==============================================================================
+
+def canCreate(id, userId):
+  if user.isAdmin(userId):
+    return True
+  return True
+
+
+def canRead(id, userId):
+  if user.isAdmin(userId):
+    return True
+
+  theStream = read(id)
+  if theStream["public"]:
+    return True
+
+  readableStreams = permissions.readableStreams(userId)
+  return (id in readableStreams)
+
+
+def canUpdate(id, userId):
+  pass
+
+
+def canDelete(id, userId):
+  pass
+
+
+def isPublic(id):
+  db = core.connect()
+  return not db[id]["private"]
+
+
+def isPublicUserStream(id):
+  db = core.connect()
+  return (not db[id]["meta"] == "userPublicStream")
+
+
+# ==============================================================================
+# Subscribe/Unsubscribe
+# ==============================================================================
 
 def subscribe(id, userId, tag=None):
   """
@@ -63,30 +119,23 @@ def unsubscribe(id, userId):
     db[userId] = theUser
 
 
+# ==============================================================================
+# Utilities
+# ==============================================================================
+
 def subscribers(streamId):
-  return core.query("_design/streams/_view/subscribers", streamId)
+  return core.query(schema.streamBySubscribers, streamId)
 
 
 def streamsForObjectRef(objectRef):
   """
   All streams for a objectRef, where objectRef is "type:id".
   """
-  return core.query("_design/streams/_view/byobjectref", objectRef)
+  return core.query(schema.streamByObjectRef, objectRef)
 
 
 def byUniqueName(uniqueName):
   """
   Return the stream with a unique name.
   """
-  return core.single("_design/streams/_view/byuniquename", uniqueName)
-
-
-def isPublic(id):
-  db = core.connect()
-  return not db[id]["private"]
-
-
-def isPublicUserStream(id):
-  db = core.connect()
-  return (not db[id]["meta"] == "userPublicStream")
-
+  return core.single(schema.streamByUniqueName, uniqueName)

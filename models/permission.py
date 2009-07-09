@@ -1,12 +1,13 @@
 import core
 import utils
+import schema
 
 def permissionsForUser(userId):
   """
   Returns all permission documents for a particular user.
   """
   db = core.connect()
-  return core.query("_design/permissions/_view/byuser", userId)
+  return core.query(schema.permissionByUser, userId)
 
 
 def joinableStreams(userId):

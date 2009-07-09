@@ -71,7 +71,7 @@ def getFull(userName, deleteType=True):
   """
   Return the full data for a user.
   """
-  theUser = core.single("_design/users/_view/byname", userName)
+  theUser = core.single(schema.userByName, userName)
 
   if theUser and deleteType:
     del theUser["type"]
@@ -137,17 +137,17 @@ def nameIsUnique(userName):
 # ==============================================================================
 
 def publicStream(userName):
-  return core.single("_design/streams/_view/byuniquename", 
+  return core.single(schema.streamByUniqueName,
                      ref(idForName(userName), "public"))
 
 
 def privateStream(userName):
-  return core.single("_design/streams/_view/byuniquename", 
+  return core.single(schema.streamByUniqueName,
                      ref(idForName(userName), "private"))
 
 
 def messageStream(userName):
-  return core.single("_design/streams/_view/byuniquename", 
+  return core.single(schema.streamByUniqueName,
                      ref(idForName(userName), "messages"))
 
 

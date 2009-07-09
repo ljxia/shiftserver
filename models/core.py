@@ -15,6 +15,15 @@ def query(view, key):
   return result
 
 
+def queryRange(view, startKey, endKey):
+  db = connect()
+  options = {"startKey": startKey, "endKey": endKey}
+  result = []
+  for row in db.view(view, None, **options):
+    result.append(row.value)
+  return result
+
+
 def single(view, key):
   db = connect()
   options = {"key": key}

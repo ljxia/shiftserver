@@ -7,5 +7,5 @@ def inGroup(id):
   Returns all users in a particular group.
   """
   db = core.connect()
-  return core.query("_design/groups/_view/all", id)
+  return core.query(schema.allGroups, id)
 
