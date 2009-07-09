@@ -193,3 +193,10 @@ def feed(id, streamId):
   Return all events for a single feed.
   """
   pass
+
+
+def isAdmin(id):
+  """
+  Return true if the user is in the admin list.
+  """
+  pass

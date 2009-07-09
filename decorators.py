@@ -17,3 +17,12 @@ def jsonencode(func):
     def afn(*args, **kwargs):
         return json.dumps(func(*args, **kwargs))
     return afn
+
+@simple_decorator
+def loggedin(func):
+    def afn(*args, **kwargs):
+        loggedInUser = helper.getLoggedInUser()
+        if not loggedInUser:
+            return error("User not logged in", UserNotLoggedInError)
+        return func(*args, **kwargs)
+    return afn

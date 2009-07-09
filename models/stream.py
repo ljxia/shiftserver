@@ -31,16 +31,22 @@ def delete(id):
   pass
 
 
-def subscribe(id, userId):
+def subscribe(id, userId, tag=None):
   """
   Subscribe a user to a stream.
   """
   db = core.connect()
   theUser = db[userId]
   
-  perms = permission.readableStreams(userId);
-  
-  if id in perms:
+  theStream = db[id]
+
+  allowed = not theStream["private"]
+
+  if not allowed:
+    perms = permission.readableStreams(userId);
+    allowed = id in perms
+      
+  if allowed:
     theUser["streams"].append(id)
     db[userId] = theUser
 

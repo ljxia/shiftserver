@@ -7,6 +7,7 @@ import email
 import simplejson as json
 
 from decorators import jsonencode
+from decorators import simple_decorator
 
 import models.user as user
 import models.shift as shift
@@ -75,6 +76,30 @@ class Helper:
         return cherrypy.request.body.read()
 helper = Helper()
 
+@simple_decorator
+def loggedin(func):
+    def afn(*args, **kwargs):
+        loggedInUser = helper.getLoggedInUser()
+        if not loggedInUser:
+            return error("User not logged in", UserNotLoggedInError)
+        return func(*args, **kwargs)
+    return afn
+
+def verifyDecoratorGenerator(type):
+    def verifyDecorator(func):
+        def afn(*args, **kwargs):
+            db = core.connect
+            resource = args[i]
+            if db[id]["type"] != type:
+                return error("Resource %s is not of the resource type %s" % (id, type))
+            return func(*args, **kwargs)
+        return afn
+
+shiftType = verifyDecoratorGenerator("shift")
+userType = verifyDecoratorGenerator("user")
+streamType = verifyDecoratorGenerator("stream")
+eventType = verifyDecoratorGenerator("event")
+permissionType = verifyDecoratorGenerator("permission")
 
 # Resource
 # ==============================================================================
@@ -143,6 +168,7 @@ class User:
         else:
             return data(user.getFull(userName).copy())
 
+    @loggedin
     @jsonencode
     def update(self, userName):
         if not user.get(userName):
@@ -154,6 +180,7 @@ class User:
         else:
             return error("Operation not permitted. You don't have permission to update this account.")
 
+    @loggedin
     @jsonencode
     def delete(self, userName):
         if not user.get(userName):
@@ -211,33 +238,29 @@ class User:
         else:
             return error("No user logged in.", UserNotLoggedInError)
 
+    @loggedin
     @jsonencode
     def follow(self, userName):
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser:
-            lname = loggedInUser["userName"]
-            if lname == userName:
-                return error("You cannot follow yourself.", FollowError)
-            if not user.get(userName):
-                return error("User % does not exist" % userName, UserDoesNotExistError)
-            user.follow(lname, userName)
-            return ack
-        else:
-            return error("No user logged in.", UserNotLoggedInError)
+        lname = loggedInUser["userName"]
+        if lname == userName:
+            return error("You cannot follow yourself.", FollowError)
+        if not user.get(userName):
+            return error("User % does not exist" % userName, UserDoesNotExistError)
+        user.follow(lname, userName)
+        return ack
 
+    @loggedin
     @jsonencode
     def unfollow(self, userName):
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser:
-            lname = loggedInUser["userName"]
-            if lname == userName:
-                return error("You cannot unfollow yourself.", FollowError)
-            if not user.get(userName):
-                return error("User % does not exist" % userName, UserDoesNotExistError)
-            user.unfollow(lname, userName)
-            return ack
-        else:
-            return error("No user logged in.", UserNotLoggedInError)
+        lname = loggedInUser["userName"]
+        if lname == userName:
+            return error("You cannot unfollow yourself.", FollowError)
+        if not user.get(userName):
+            return error("User % does not exist" % userName, UserDoesNotExistError)
+        user.unfollow(lname, userName)
+        return ack
 
 
 # Shift
@@ -252,7 +275,7 @@ class Shift:
             theData['createdBy'] = loggedInUser.get("_id")
             return data(shift.create(theData))
         else:
-            return error("Operation not permitted. You are not logged in")
+            return error("Operation not permitted. You are not logged in", PermissionError)
 
     @jsonencode
     def read(self, id):
@@ -260,7 +283,7 @@ class Shift:
         if loggedInUser and shift.userCanReadShift(loggedInUser.get("_id"), id):
             return data(shift.get(id))
         else:
-            return error("Operation not permitted. You don't have permission to view this shift.")
+            return error("Operation not permitted. You don't have permission to view this shift.", PermissionError)
 
     @jsonencode
     def update(self, id):
@@ -270,7 +293,7 @@ class Shift:
             shift.update(helper.getRequestBody())
             return ack
         else:
-            return error("Operation not permitted. You don't have permission to update this shift.")
+            return error("Operation not permitted. You don't have permission to update this shift.", PermissionError)
 
     @jsonencode
     def delete(self, id):
@@ -280,7 +303,7 @@ class Shift:
             shift.delete(id)
             return ack
         else:
-            return error("Operation not permitted. You don't have permission to delete this shift.")
+            return error("Operation not permitted. You don't have permission to delete this shift.", PermissionError)
 
     @jsonencode
     def publish(self, id):
@@ -291,7 +314,7 @@ class Shift:
             shift.publish(id, publishData)
             return ack
         else:
-            return error("Operation not permitted. You don't have permission to publish this shift.")
+            return error("Operation not permitted. You don't have permission to publish this shift.", PermissionError)
 
     @jsonencode
     def unpublish(self, id):
@@ -301,7 +324,7 @@ class Shift:
             shift.unpublish(id)
             return ack
         else:
-            return error("Operation not permitted. You don't have permission to publish this shift.")
+            return error("Operation not permitted. You don't have permission to publish this shift.", PermissionError)
 
 # Event
 # ==============================================================================

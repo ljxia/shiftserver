@@ -9,8 +9,12 @@ def user():
     "password": None,
     "joined": None,
     "lastSeen": None,
-    "groups": [],
-    "following": [],
+    "messageStream": None,
+    "streams": {
+      "groups": [],
+      "following": [],
+      "all": []
+    },
     "preferences": {}
   }
 
