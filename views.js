@@ -223,3 +223,38 @@ function (doc)
     emit(doc.userId, doc);
   }
 }
+
+// =============================================================================
+// validation
+// =============================================================================
+
+function(newDoc, oldDoc, userCtx)
+{
+  if(newDoc.type != oldDoc.type)
+  {
+    throw {changing_type: "Document cannot change type."};
+  }
+  if(newDoc.createdBy && (newDoc.createdBy != oldDoc.createdBy))
+  {
+    throw {changing_owner: "You cannot change the owner of the document."};
+  }
+  if(newDoc.created && (newDoc.created != oldDoc.created))
+  {
+    throw {changing_created: "You cannot change the created field of the document."};
+  }
+  if(newDoc.uniqueName && (newDoc.uniqueName != oldDoc.uniqueName))
+  {
+    throw {changing_unique_name: "You cannot change the uniqueName field of a document."};
+  }
+  if(newDoc.type == "event")
+  {
+    if(newDoc.objectRef != oldDoc.objectRef)
+    {
+      throw {changing_objectref: "You cannot change the objectRef of an event."};
+    }
+    if(newDoc.streamId != oldDoc.streamId)
+    {
+      throw {rehost_event: "You cannot rehost an event to another stream."};
+    }
+  }
+}
