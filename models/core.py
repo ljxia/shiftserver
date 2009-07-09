@@ -1,5 +1,5 @@
 import couchdb.client
-
+import schema
 
 def connect():
   server = couchdb.client.Server("http://localhost:5984/")
@@ -31,7 +31,8 @@ def update(doc):
   return new
 
 
-
-
-
-
+def validate(doc):
+  schema = getattr(schema, doc.type)()
+  schemaKeys = schema.keys()
+  docKeys = doc.keys()
+  return set(docKeys).issubset(set(schemaKeys))

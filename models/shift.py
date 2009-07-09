@@ -58,9 +58,12 @@ def update(data):
   doc.update(data)
   doc["modified"] = utils.utctime()
 
-  db[id] = doc
-
-  return doc
+  if core.validate(doc):
+    db[id] = doc
+    return doc
+  else:
+    # TODO: throw an exception - David 7/9/09
+    return None
 
 
 def byUserName(userName):

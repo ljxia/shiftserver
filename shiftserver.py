@@ -63,7 +63,7 @@ def md5hash(str):
     m.update(str)
     return m.hexdigest()
 
-# Helper(s)
+# Helper
 # ==============================================================================
 
 class Helper:
@@ -77,8 +77,14 @@ class Helper:
         return cherrypy.request.body.read()
 helper = Helper()
 
+# Decorators
+# ==============================================================================
+
 @simple_decorator
 def loggedin(func):
+    """
+    Verify a user is logged in before running a controller action.
+    """
     def afn(*args, **kwargs):
         loggedInUser = helper.getLoggedInUser()
         if not loggedInUser:
@@ -87,6 +93,11 @@ def loggedin(func):
     return afn
 
 def verifyDecoratorGenerator(type):
+    """
+    Generates a type verifier. This is because some resources take
+    generic db ids. Should only be applied to methods of a controller
+    where the first parameter is the resource (document) id.
+    """
     def verifyDecorator(func):
         def afn(*args, **kwargs):
             db = core.connect()
