@@ -119,11 +119,18 @@ def exists(func):
     def afn(*args, **kwargs):
         db = core.connect()
         instance = args[0]
-        id = kwargs["id"]
-        if not db[id]:
-            fn = getattr(instance, "resourceDoesNotExistsString")
-            errorStr = (fn and fn()) or ("Resource %s does not exist" % id)
-            return error(errorStr, ResourceDoesNotExistsError)
+        id = kwargs.values()[0]
+        
+        resolver = getattr(instance, "resolveResource")
+        if resolver:
+            id = resolver(id)
+
+        if (not id) or (not db[id]):
+            fnA = getattr(instance, "resourceDoesNotExistString")
+            errorStr = (fnA and fnA(id)) or ("Resource %s does not exist" % id)
+            fnB = getattr(instance, "resourceDoesNotExistType")
+            errorType = (fnB and fnB()) or ResourceDoesNotExistsError
+            return error(errorStr, errorType)
         else:
             return func(*args, **kwargs)
     return afn
@@ -143,6 +150,17 @@ class ResourceController:
 # ==============================================================================
 
 class UserController(ResourceController):
+
+    def resolveResource(self, userName):
+        theUser = user.read(userName)
+        return (theUser and theUser["_id"])
+
+    def resourceDoesNotExistString(self, userName):
+        return "User %s does not exist" % userName
+    
+    def resourceDoesNotExistType(self):
+        return UserDoesNotExistError
+
     def isValid(self, data):
         if not data.get("email"):
             return (False, "Please specify your email address.", NoEmailError)
@@ -182,6 +200,7 @@ class UserController(ResourceController):
             return error(msg, errType)
 
     @jsonencode
+    @exists
     def read(self, userName):
         if not user.read(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
@@ -195,6 +214,7 @@ class UserController(ResourceController):
 
     @jsonencode
     @loggedin
+    @exists
     def update(self, userName):
         if not user.read(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
@@ -208,6 +228,7 @@ class UserController(ResourceController):
 
     @jsonencode
     @loggedin
+    @exists
     def delete(self, userName):
         if not user.read(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
@@ -257,7 +278,8 @@ class UserController(ResourceController):
             return error("No user logged in.", AlreadyLoggedOutError)
 
     @jsonencode
-    def resetPassword(self):
+    @exists
+    def resetPassword(self, userName):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
             # TODO: generate random 8 character password update user and email
@@ -267,25 +289,23 @@ class UserController(ResourceController):
 
     @jsonencode
     @loggedin
+    @exists
     def follow(self, userName):
         loggedInUser = helper.getLoggedInUser()
         lname = loggedInUser["userName"]
         if lname == userName:
             return error("You cannot follow yourself.", FollowError)
-        if not user.read(userName):
-            return error("User % does not exist" % userName, UserDoesNotExistError)
         user.follow(lname, userName)
         return ack
 
     @jsonencode
     @loggedin
+    @exists
     def unfollow(self, userName):
         loggedInUser = helper.getLoggedInUser()
         lname = loggedInUser["userName"]
         if lname == userName:
             return error("You cannot unfollow yourself.", FollowError)
-        if not user.read(userName):
-            return error("User % does not exist" % userName, UserDoesNotExistError)
         user.unfollow(lname, userName)
         return ack
 
