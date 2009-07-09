@@ -9,6 +9,7 @@ import simplejson as json
 from decorators import jsonencode
 from decorators import simple_decorator
 
+import core
 import models.user as user
 import models.shift as shift
 import models.stream as stream
@@ -62,7 +63,7 @@ def md5hash(str):
     m.update(str)
     return m.hexdigest()
 
-# Helper
+# Helper(s)
 # ==============================================================================
 
 class Helper:
@@ -88,12 +89,13 @@ def loggedin(func):
 def verifyDecoratorGenerator(type):
     def verifyDecorator(func):
         def afn(*args, **kwargs):
-            db = core.connect
-            resource = args[i]
-            if db[id]["type"] != type:
-                return error("Resource %s is not of the resource type %s" % (id, type))
+            db = core.connect()
+            rid = kwargs["id"]
+            if db[rid]["type"] != type:
+                return error("Resource %s is not of type %s" % (rid, type))
             return func(*args, **kwargs)
         return afn
+    return verifyDecorator
 
 shiftType = verifyDecoratorGenerator("shift")
 userType = verifyDecoratorGenerator("user")
@@ -278,14 +280,20 @@ class Shift:
             return error("Operation not permitted. You are not logged in", PermissionError)
 
     @jsonencode
+    @shiftType
     def read(self, id):
-        loggedInUser = helper.getLoggedInUser()
-        if loggedInUser and shift.userCanReadShift(loggedInUser.get("_id"), id):
-            return data(shift.get(id))
+        allowed = shift.isPublic(id)
+        if not allowed:
+            loggedInUser = helper.getLoggedInUser()
+            if loggedInUser and shift.userCanReadShift(loggedInUser.get("_id"), id):
+                return data(shift.get(id))
+            else:
+                return error("Operation not permitted. You don't have permission to view this shift.", PermissionError)
         else:
-            return error("Operation not permitted. You don't have permission to view this shift.", PermissionError)
+            return data(shift.get(id))
 
     @jsonencode
+    @shiftType
     def update(self, id):
         loggedInUser = helper.getLoggedInUser()
         theShift = shift.get(id)
@@ -296,6 +304,7 @@ class Shift:
             return error("Operation not permitted. You don't have permission to update this shift.", PermissionError)
 
     @jsonencode
+    @shiftType
     def delete(self, id):
         loggedInUser = helper.getLoggedInUser()
         theShift = shift.get(id)
@@ -306,6 +315,7 @@ class Shift:
             return error("Operation not permitted. You don't have permission to delete this shift.", PermissionError)
 
     @jsonencode
+    @shiftType
     def publish(self, id):
         loggedInUser = helper.getLoggedInUser()
         publishData = json.loads(helper.getRequestBody())
@@ -317,6 +327,7 @@ class Shift:
             return error("Operation not permitted. You don't have permission to publish this shift.", PermissionError)
 
     @jsonencode
+    @shiftType
     def unpublish(self, id):
         loggedInUser = helper.getLoggedInUser()
         theShift = shift.get(id)

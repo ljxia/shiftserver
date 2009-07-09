@@ -187,4 +187,11 @@ def canComment(id, userId):
     
     return len(allowed) > 0
 
+
+def isPublic(id):
+  db = core.connect()
+  theShift = db[id]
+  publishData = theShift["publishData"]
+  return (not publishData["draft"]) and (not publishData["private"])
+
   
