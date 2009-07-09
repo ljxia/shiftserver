@@ -198,4 +198,6 @@ def isAdmin(id):
   """
   Return true if the user is in the admin list.
   """
-  pass
+  db = core.connect()
+  admins = db["admins"]
+  return id in admins["ids"]

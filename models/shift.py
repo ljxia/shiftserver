@@ -66,6 +66,18 @@ def update(data):
     return None
 
 
+def canUpdate(shiftId, userId):
+  db = core.connect()
+  theShift = db[shiftId]
+  return user.isAdmin(userId) or (userId == theShift['createdBy'])
+
+
+def canDelete(shiftId, userId):
+  db = core.connect()
+  theShift = db[shiftId]
+  return user.isAdmin(userId) or (userId == theShift['createdBy'])
+
+
 def byUserName(userName):
   """
   Return the list of shifts a user has created.
@@ -74,7 +86,7 @@ def byUserName(userName):
   return core.query("_design/shifts/_view/byuser", userId)
 
 
-def userCanReadShift(userId, shiftId):
+def canRead(shiftId, userId):
   """
   Check if a user can read a shift. The user must have
   either:
@@ -86,6 +98,9 @@ def userCanReadShift(userId, shiftId):
   db = core.connect()
 
   theShift = db[shiftId]
+
+  if user.isAdmin(userId):
+    return True
 
   if theShift["createdBy"] == userId:
     return True

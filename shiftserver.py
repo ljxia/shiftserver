@@ -279,7 +279,8 @@ class User:
 # Shift
 # ==============================================================================
 
-class Shift:
+class Shift
+:
     @jsonencode
     def create(self):
         loggedInUser = helper.getLoggedInUser()
@@ -296,7 +297,7 @@ class Shift:
         allowed = shift.isPublic(id)
         if not allowed:
             loggedInUser = helper.getLoggedInUser()
-            if loggedInUser and shift.userCanReadShift(loggedInUser.get("_id"), id):
+            if loggedInUser and shift.canRead(id, loggedInUser.get("_id")):
                 return data(shift.get(id))
             else:
                 return error("Operation not permitted. You don't have permission to view this shift.", PermissionError)
@@ -308,7 +309,7 @@ class Shift:
     def update(self, id):
         loggedInUser = helper.getLoggedInUser()
         theShift = shift.get(id)
-        if loggedInUser and loggedInUser['_id'] == theShift['createdBy']:
+        if loggedInUser and shift.canUpdate(id, loggedInUser['_id']):
             shift.update(helper.getRequestBody())
             return ack
         else:
@@ -319,7 +320,7 @@ class Shift:
     def delete(self, id):
         loggedInUser = helper.getLoggedInUser()
         theShift = shift.get(id)
-        if loggedInUser and loggedInUser['_id'] == theShift['createdBy']:
+        if loggedInUser and shift.canDelete(id, loggedInUser['_id']):
             shift.delete(id)
             return ack
         else:
@@ -367,8 +368,16 @@ class Event:
 class Stream:
     def create(self):
         pass
+
+    @jsonencode
+    @loggedin
     def read(self, id):
-        pass
+        loggedInUser = helper.loggedInUser()
+        if loggedInUser and stream.canRead(id, loggedInUser["_id"]):
+            return data(stream.get(id))
+        else:
+            return error("Operation not permitted. You don't have permission to view this stream.", PermissionError)
+
     def update(self, id):
         pass
     def delete(self, id):
