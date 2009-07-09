@@ -11,6 +11,9 @@ import permission
 def ref(id):
   return "shift:"+id
 
+# ==============================================================================
+# CRUD
+# ==============================================================================
 
 def create(data):
   """
@@ -66,25 +69,9 @@ def update(data):
     return None
 
 
-def canUpdate(shiftId, userId):
-  db = core.connect()
-  theShift = db[shiftId]
-  return user.isAdmin(userId) or (userId == theShift['createdBy'])
-
-
-def canDelete(shiftId, userId):
-  db = core.connect()
-  theShift = db[shiftId]
-  return user.isAdmin(userId) or (userId == theShift['createdBy'])
-
-
-def byUserName(userName):
-  """
-  Return the list of shifts a user has created.
-  """
-  userId = user.idForName(userName)
-  return core.query("_design/shifts/_view/byuser", userId)
-
+# ==============================================================================
+# Validation
+# ==============================================================================
 
 def canRead(shiftId, userId):
   """
@@ -120,9 +107,44 @@ def canRead(shiftId, userId):
 
   return len(allowed) > 0
 
-"""
-shift.publish("", {"private":False, "streams":[]})
-"""
+
+def canUpdate(shiftId, userId):
+  db = core.connect()
+  theShift = db[shiftId]
+  return user.isAdmin(userId) or (userId == theShift['createdBy'])
+
+
+def canDelete(shiftId, userId):
+  db = core.connect()
+  theShift = db[shiftId]
+  return user.isAdmin(userId) or (userId == theShift['createdBy'])
+
+
+def canComment(id, userId):
+  db = core.connect()
+  theShift = db[id]
+
+  if not theShift["publishData"]["private"]:
+    return True
+  else:
+    shiftStreams = theShift["publishData"]["streams"]
+    userStreams = permission.writeableStreams(userId)
+    
+    allowed = set(shiftStreams).intersection(userStreams)
+    
+    return len(allowed) > 0
+
+
+def isPublic(id):
+  db = core.connect()
+  theShift = db[id]
+  publishData = theShift["publishData"]
+  return (not publishData["draft"]) and (not publishData["private"])
+
+
+# ==============================================================================
+# Publishing
+# ==============================================================================
 
 def publish(id, publishData):
   """
@@ -177,6 +199,10 @@ def unpublish(id):
   db[id] = theShift
 
 
+# ==============================================================================
+# Comments
+# ==============================================================================
+
 def commentStream(id):
   return core.single("_design/streams/_view/byobjectref", ref(id)+":comment")
 
@@ -191,25 +217,14 @@ def createCommentStream(id):
       })
 
 
-def canComment(id, userId):
-  db = core.connect()
-  theShift = db[id]
+# ==============================================================================
+# Utilities
+# ==============================================================================
 
-  if not theShift["publishData"]["private"]:
-    return True
-  else:
-    shiftStreams = theShift["publishData"]["streams"]
-    userStreams = permission.writeableStreams(userId)
-    
-    allowed = set(shiftStreams).intersection(userStreams)
-    
-    return len(allowed) > 0
-
-
-def isPublic(id):
-  db = core.connect()
-  theShift = db[id]
-  publishData = theShift["publishData"]
-  return (not publishData["draft"]) and (not publishData["private"])
-
+def byUserName(userName):
+  """
+  Return the list of shifts a user has created.
+  """
+  userId = user.idForName(userName)
+  return core.query("_design/shifts/_view/byuser", userId)
   
