@@ -132,7 +132,7 @@ class Resource:
 # User
 # ==============================================================================
 
-class User:
+class UserController:
     def isValid(self, data):
         if not data.get("email"):
             return (False, "Please specify your email address.", NoEmailError)
@@ -279,8 +279,7 @@ class User:
 # Shift
 # ==============================================================================
 
-class Shift
-:
+class ShiftController:
     @jsonencode
     def create(self):
         loggedInUser = helper.getLoggedInUser()
@@ -352,7 +351,7 @@ class Shift
 # Event
 # ==============================================================================
 
-class Event:
+class EventController:
     def create(self):
         pass
     def read(self, id):
@@ -365,7 +364,7 @@ class Event:
 # Stream
 # ==============================================================================
 
-class Stream:
+class StreamController:
     def create(self):
         pass
 
@@ -390,7 +389,7 @@ class Stream:
 # Permission
 # ==============================================================================
 
-class Permission:
+class PermissionController:
     def create(self):
         pass
     def read(self, id):
@@ -403,7 +402,7 @@ class Permission:
 # Aggregates
 # ==============================================================================
 
-class Shifts:
+class ShiftsController:
     @jsonencode
     def read(self, userName):
         return data(shift.byUserName(userName))
@@ -411,7 +410,7 @@ class Shifts:
         pass
 
 
-class Groups:
+class GroupsController:
     @jsonencode
     def read(self, id):
         # return only public groups
@@ -421,17 +420,19 @@ class Groups:
 # Main
 # ==============================================================================
 
-class Root:
+class RootController:
     def read(self):
         return "ShiftSpace Server 1.0"
 
 
 def initRoutes():
-    root = Root()
-    user = User()
-    shift = Shift()
-    shifts = Shifts()
-    group = Groups()
+    root = RootController()
+    user = UserController()
+    shift = ShiftController()
+    stream = StreamController()
+    event = EventController()
+    shifts = ShiftsController()
+    group = GroupsController()
 
     d = cherrypy.dispatch.RoutesDispatcher()
 

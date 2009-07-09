@@ -8,6 +8,10 @@ import event
 
 ref = utils.genrefn("user")
 
+# ==============================================================================
+# CRUD
+# ==============================================================================
+
 def create(data):
   """
   Create a new user.
@@ -49,21 +53,6 @@ def create(data):
   return userId
 
 
-def publicStream(userName):
-  return core.single("_design/streams/_view/byuniquename", 
-                     ref(idForName(userName), "public"))
-
-
-def privateStream(userName):
-  return core.single("_design/streams/_view/byuniquename", 
-                     ref(idForName(userName), "private"))
-
-
-def messageStream(userName):
-  return core.single("_design/streams/_view/byuniquename", 
-                     ref(idForName(userName), "messages"))
-
-
 def get(userName):
   """
   Returns public data for a user.
@@ -88,28 +77,6 @@ def getFull(userName, deleteType=True):
     del theUser["type"]
 
   return theUser
-
-
-def getById(id):
-  """
-  Get a user by document id.
-  """
-  db = core.connect()
-  return db[id]
-
-
-def idForName(userName):
-  """
-  Get the id for a user from the userName.
-  """
-  theUser = getFull(userName)
-  if theUser:
-    return theUser["_id"]
-
-
-def nameForId(id):
-  db = core.connect()
-  return db[id].get("userName")
 
 
 def update(data):
@@ -144,6 +111,18 @@ def delete(userName):
   for eventId in userEvents:
     del db[eventId]
 
+# ==============================================================================
+# Validation
+# ==============================================================================
+
+def isAdmin(id):
+  """
+  Return true if the user is in the admin list.
+  """
+  db = core.connect()
+  admins = db["admins"]
+  return id in admins["ids"]
+
 
 def nameIsUnique(userName):
   """
@@ -151,6 +130,25 @@ def nameIsUnique(userName):
   """
   # FIXME: cannot protect unless it's the document id - David Nolen 7/6/09
   return get(userName) == None
+
+
+# ==============================================================================
+# Streams
+# ==============================================================================
+
+def publicStream(userName):
+  return core.single("_design/streams/_view/byuniquename", 
+                     ref(idForName(userName), "public"))
+
+
+def privateStream(userName):
+  return core.single("_design/streams/_view/byuniquename", 
+                     ref(idForName(userName), "private"))
+
+
+def messageStream(userName):
+  return core.single("_design/streams/_view/byuniquename", 
+                     ref(idForName(userName), "messages"))
 
 
 def follow(follower, followed):
@@ -169,14 +167,6 @@ def unfollow(follower, followed):
   """
   stream.unsubscribe(publicStream(followed).get("_id"), idForName(follower))
 
-
-def updateLastSeen(userName):
-  db = core.connect()
-  theUser = getFull(userName, False)
-  theUser["lastSeen"] = utils.utctime()
-  db[theUser["_id"]] = theUser
-
-
 def feeds(id, page=0, perPage=25):
   """
   Return all events for all streams that a user is subscribed to.
@@ -193,11 +183,34 @@ def feed(id, streamId):
   """
   pass
 
+# ==============================================================================
+# Utilties
+# ==============================================================================
 
-def isAdmin(id):
+def getById(id):
   """
-  Return true if the user is in the admin list.
+  Get a user by document id.
   """
   db = core.connect()
-  admins = db["admins"]
-  return id in admins["ids"]
+  return db[id]
+
+
+def idForName(userName):
+  """
+  Get the id for a user from the userName.
+  """
+  theUser = getFull(userName)
+  if theUser:
+    return theUser["_id"]
+
+
+def nameForId(id):
+  db = core.connect()
+  return db[id].get("userName")
+
+
+def updateLastSeen(userName):
+  db = core.connect()
+  theUser = getFull(userName, False)
+  theUser["lastSeen"] = utils.utctime()
+  db[theUser["_id"]] = theUser
