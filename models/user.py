@@ -115,6 +115,18 @@ def delete(userName):
 # Validation
 # ==============================================================================
 
+def canReadFull(id, userId):
+  return (id == userId) or isAdmin(userId)
+
+
+def canUpdate(id, userId):
+  return (id == userId) or isAdmin(userId)
+
+
+def canDelete(id, userId):
+  return (id == userId) or isAdmin(userId)
+
+
 def isAdmin(id):
   """
   Return true if the user is in the admin list.

@@ -176,10 +176,12 @@ class UserController:
         if not user.get(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
         loggedInUser = helper.getLoggedInUser()
-        if (not loggedInUser) or (loggedInUser["userName"] != userName):
-            return data(user.get(userName).copy())
-        else:
+        if loggedInUser and user.canReadFull(user.idForName(userName),
+                                             loggedInUser["_id"]):
             return data(user.getFull(userName).copy())
+        else:
+            return data(user.get(userName).copy())
+
 
     @jsonencode
     @loggedin
@@ -187,7 +189,8 @@ class UserController:
         if not user.get(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser and (loggedInUser['userName'] == userName):
+        if loggedInUser and user.canUpdate(user.idForName(userName),
+                                           loggedInUser["_id"]):
             shift.update(helper.getRequestBody())
             return ack
         else:
@@ -199,7 +202,8 @@ class UserController:
         if not user.get(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser and (loggedInUser['userName'] == userName):
+        if loggedInUser and user.canDelete(user.idForName(userName),
+                                           loggedInUser["_id"]):
             user.delete(userName)
             helper.setLoggedInUser(None)
             return ack
