@@ -27,6 +27,7 @@ def user():
     "password": None,
     "joined": None,
     "lastSeen": None,
+    "publicStream": None,
     "messageStream": None,
     "streams": {
       "groups": [],

@@ -2,6 +2,7 @@ import core
 import utils
 import schema
 
+import user
 
 # ==============================================================================
 # CRUD
@@ -63,9 +64,9 @@ def canRead(id, userId):
   """
   if user.isAdmin(userId):
     return True
+  theStream = read(id)
   if theStream["createdBy"] == userId:
     return True
-  theStream = read(id)
   if not theStream["private"]:
     return True
   readableStreams = permissions.readableStreams(userId)
@@ -80,6 +81,7 @@ def canUpdate(id, userId):
   """
   if user.isAdmin(userId):
     return True
+  theStream = read(id)
   if theStream["createdBy"] == userId:
     return True
   return False
@@ -91,6 +93,7 @@ def canDelete(id, userId):
   """
   if user.isAdmin(userId):
     return True
+  theStream = read(id)
   if theStream["createdBy"] == userId:
     return True
   return False

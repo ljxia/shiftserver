@@ -54,6 +54,7 @@ FollowError = "FollowError"
 
 UserDoesNotExistError = "UserDoesNotExistError"
 PermissionError = "PermissionError"
+ResourceDoesNotExistsError = "ResourceDoesNotExistsError"
 
 # Utils
 # =============================================================================
@@ -114,25 +115,34 @@ streamType = verifyDecoratorGenerator("stream")
 eventType = verifyDecoratorGenerator("event")
 permissionType = verifyDecoratorGenerator("permission")
 
+def exists(func):
+    def afn(*args, **kwargs):
+        db = core.connect()
+        self = args[0]
+        id = kwargs["id"]
+        if not db[id]:
+            fn = getattr(self, "resourceDoesNotExistsString")
+            errorStr = (fn and fn()) or ("Resource %s does not exist" % id)
+            return error(errorStr, ResourceDoesNotExistsError)
+        else:
+           return func(*args, **kwargs)
+    return afn
+
 # Resource
 # ==============================================================================
 
-class Resource:
-    def create(self):
-        pass
-    def read(self, id):
-        pass
-    def update(self, id):
-        pass
-    def updateField(self, id, key, value):
-        pass
-    def delete(self, id):
-        pass
+class ResourceController:
+    def resourceExists(self, id):
+        db = core.connect()
+        if db[id]:
+            return True
+        else:
+            return False
  
 # User
 # ==============================================================================
 
-class UserController:
+class UserController(ResourceController):
     def isValid(self, data):
         if not data.get("email"):
             return (False, "Please specify your email address.", NoEmailError)
@@ -283,8 +293,9 @@ class UserController:
 # Shift
 # ==============================================================================
 
-class ShiftController:
+class ShiftController(ResourceController):
     @jsonencode
+    @loggedin
     def create(self):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
@@ -295,6 +306,7 @@ class ShiftController:
             return error("Operation not permitted. You are not logged in", PermissionError)
 
     @jsonencode
+    @exists
     @shiftType
     def read(self, id):
         allowed = shift.isPublic(id)
@@ -309,6 +321,8 @@ class ShiftController:
 
     @jsonencode
     @shiftType
+    @exists
+    @loggedin
     def update(self, id):
         loggedInUser = helper.getLoggedInUser()
         theShift = shift.get(id)
@@ -320,6 +334,8 @@ class ShiftController:
 
     @jsonencode
     @shiftType
+    @exists
+    @loggedin
     def delete(self, id):
         loggedInUser = helper.getLoggedInUser()
         theShift = shift.get(id)
@@ -331,11 +347,13 @@ class ShiftController:
 
     @jsonencode
     @shiftType
+    @exists
+    @loggedin
     def publish(self, id):
         loggedInUser = helper.getLoggedInUser()
         publishData = json.loads(helper.getRequestBody())
         theShift = shift.get(id)
-        if loggedInUser and loggedInUser['_id'] == theShift['createdBy']:
+        if loggedInUser and shift.canPublish(id, loggedInUser['_id']):
             shift.publish(id, publishData)
             return ack
         else:
@@ -343,10 +361,12 @@ class ShiftController:
 
     @jsonencode
     @shiftType
+    @exists
+    @loggedin
     def unpublish(self, id):
         loggedInUser = helper.getLoggedInUser()
         theShift = shift.get(id)
-        if loggedInUser and loggedInUser['_id'] == theShift['createdBy']:
+        if loggedInUser and shift.canUnpublish(id, loggedInUser['_id']):
             shift.unpublish(id)
             return ack
         else:
@@ -355,66 +375,113 @@ class ShiftController:
 # Event
 # ==============================================================================
 
-class EventController:
+class EventController(ResourceController):
+    @jsonencode
+    @loggedin
     def create(self):
         pass
+
+    @jsonencode
+    @eventType
+    @exists
     def read(self, id):
         pass
+
+    @jsonencode
+    @eventType
+    @exists
+    @loggedin
     def update(self, id):
         pass
+
+    @jsonencode
+    @eventType
+    @exists
+    @loggedin
     def delete(self, id):
         pass
 
 # Stream
 # ==============================================================================
 
-class StreamController:
+class StreamController(ResourceController):
+    @jsonencode
+    @loggedin
     def create(self):
         pass
 
     @jsonencode
-    @loggedin
+    @streamType
     def read(self, id):
-        loggedInUser = helper.loggedInUser()
+        loggedInUser = helper.getLoggedInUser()
         if loggedInUser and stream.canRead(id, loggedInUser["_id"]):
-            return data(stream.get(id))
+            return data(stream.read(id))
         else:
             return error("Operation not permitted. You don't have permission to view this stream.", PermissionError)
 
+    @jsonencode
+    @streamType
+    @exists
+    @loggedin
     def update(self, id):
         pass
+
+    @jsonencode
+    @streamType
+    @exists
+    @loggedin
     def delete(self, id):
         pass
+
     def comments(self, shiftId):
         pass
-    def private(self, userId):
+
+    def privateStram(self, userId):
         pass
 
 # Permission
 # ==============================================================================
 
-class PermissionController:
+class PermissionController(ResourceController):
+    @jsonencode
+    @loggedin
     def create(self):
         pass
+
+    @jsonencode
+    @permissionType
+    @exists
+    @loggedin    
     def read(self, id):
         pass
+
+    @jsonencode
+    @permissionType
+    @exists
+    @loggedin
     def update(self, id):
         pass
+
+    @jsonencode
+    @permissionType
+    @exists
+    @loggedin
     def delete(self, id):
         pass
 
 # Aggregates
 # ==============================================================================
 
-class ShiftsController:
+class ShiftsController(ResourceController):
     @jsonencode
     def read(self, userName):
         return data(shift.byUserName(userName))
+
     def feed(self, userName):
         pass
 
 
-class GroupsController:
+class GroupsController(ResourceController):
     @jsonencode
     def read(self, id):
         # return only public groups
@@ -488,6 +555,8 @@ def initRoutes():
               conditions=dict(method="GET"))
 
     # Stream Routes
+    d.connect(name="streamRead", route="stream/:id", controller=stream, action="read",
+              conditions=dict(method="GET"))
 
     # Event Routes
 

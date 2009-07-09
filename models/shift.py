@@ -33,7 +33,7 @@ def create(data):
   return shiftId
 
 
-def get(id):
+def read(id):
   """
   Get a specific shift.
   """
@@ -115,6 +115,18 @@ def canUpdate(shiftId, userId):
 
 
 def canDelete(shiftId, userId):
+  db = core.connect()
+  theShift = db[shiftId]
+  return user.isAdmin(userId) or (userId == theShift['createdBy'])
+
+
+def canPublish(shiftId, userId):
+  db = core.connect()
+  theShift = db[shiftId]
+  return user.isAdmin(userId) or (userId == theShift['createdBy'])
+
+
+def canUnpublish(shiftId, userId):
   db = core.connect()
   theShift = db[shiftId]
   return user.isAdmin(userId) or (userId == theShift['createdBy'])

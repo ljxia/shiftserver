@@ -42,12 +42,15 @@ def create(data):
       "objectRef": userRef, 
       "uniqueName": ref(userId, "messages"), 
       "private": False, 
-      "meta": "userPrivateStream",
+      "meta": "userMessageStream",
       "createdBy": userId
       })
 
   theUser = db[userId]
-  theUser.update({"streams":[messageStream]})
+  theUser.update({
+      "messageStream": messageStream,
+      "publicStream": publicStream
+      })
   db[userId] = theUser
 
   return userId
@@ -151,11 +154,6 @@ def nameIsUnique(userName):
 def publicStream(userName):
   return core.single(schema.streamByUniqueName,
                      ref(idForName(userName), "public"))
-
-
-def privateStream(userName):
-  return core.single(schema.streamByUniqueName,
-                     ref(idForName(userName), "private"))
 
 
 def messageStream(userName):
