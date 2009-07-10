@@ -27,10 +27,7 @@ def create(data):
   newShift = schema.shift()
   newShift.update(data)
   
-  shiftId = db.create(newShift)
-  newShift = db[shiftId]
-
-  return shiftId
+  return db.create(newShift)
 
 
 def read(id):
@@ -39,15 +36,6 @@ def read(id):
   """
   db = core.connect()
   return db[id]
-
-
-def delete(id):
-  """
-  Delete a shift from the database.
-  """
-  db = core.connect()
-  # FIXME: What happens to orphaned comments? - David 7/6/09
-  del db[id]
 
 
 def update(data):
@@ -67,6 +55,15 @@ def update(data):
   else:
     # TODO: throw an exception - David 7/9/09
     return None
+
+
+def delete(id):
+  """
+  Delete a shift from the database.
+  """
+  db = core.connect()
+  # FIXME: What happens to orphaned comments? - David 7/6/09
+  del db[id]
 
 
 # ==============================================================================

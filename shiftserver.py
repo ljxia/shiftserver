@@ -243,6 +243,7 @@ class UserController(ResourceController):
 
     @jsonencode
     def query(self):
+
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
             return loggedInUser
@@ -326,8 +327,8 @@ class ShiftController(ResourceController):
             return error("Operation not permitted. You are not logged in", PermissionError)
 
     @jsonencode
-    @exists
     @shiftType
+    @exists
     def read(self, id):
         allowed = shift.isPublic(id)
         if not allowed:
@@ -405,21 +406,35 @@ class EventController(ResourceController):
     @eventType
     @exists
     def read(self, id):
-        pass
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser and event.canRead(id, loggedInUser["_id"]):
+            return data(event.read(id))
+        else:
+            return error("Operation not permitted. You don't have permission to read this event.", PermissionError)
 
     @jsonencode
     @eventType
     @exists
     @loggedin
     def update(self, id):
-        pass
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser and event.canUpdate(id, loggedInUser["_id"]):
+            data = helper.getResponseBody()
+            return data(event.update(data))
+        else:
+            return error("Operation not permitted. You don't have permission to update this event.", PermissionError)
 
     @jsonencode
     @eventType
     @exists
     @loggedin
     def delete(self, id):
-        pass
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser and event.canDelete(id, loggedInUser["_id"]):
+            event.delete(id)
+            return ack
+        else:
+            return error("Operation not permitted. You don't have permission to delete this event.", PermissionError)
 
 # Stream
 # ==============================================================================
@@ -432,6 +447,7 @@ class StreamController(ResourceController):
 
     @jsonencode
     @streamType
+    @exists
     def read(self, id):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser and stream.canRead(id, loggedInUser["_id"]):
@@ -444,14 +460,24 @@ class StreamController(ResourceController):
     @exists
     @loggedin
     def update(self, id):
-        pass
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser and stream.canUpdate(id, loggedInUser["_id"]):
+            data = helper.getResponseBody()
+            return data(stream.update(data))
+        else:
+            return error("Operation not permitted. You don't have permission to update this stream", PermissionError)
 
     @jsonencode
     @streamType
     @exists
     @loggedin
     def delete(self, id):
-        pass
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser and stream.canDelete(id, loggedInUser["_id"]):
+            stream.delete(id)
+            return ack
+        else:
+            return error("Operation not permitted. You don't have permission to delete this stream.", PermissionError)
 
     def comments(self, shiftId):
         pass
@@ -473,21 +499,35 @@ class PermissionController(ResourceController):
     @exists
     @loggedin    
     def read(self, id):
-        pass
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser and permission.canRead(id, loggedInUser["_id"]):
+            return data(permission.read(id))
+        else:
+            return error("Operation not permitted. You don't have permission to view this permission.", PermissionError)
 
     @jsonencode
     @permissionType
     @exists
     @loggedin
     def update(self, id):
-        pass
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser and permission.canUpdate(id, loggedInUser["_id"]):
+            data = helper.getResponseBody()
+            return data(permission.update(data))
+        else:
+            return error("Operation not permitted. You don't have permission to update this permission.", PermissionError)
 
     @jsonencode
     @permissionType
     @exists
     @loggedin
     def delete(self, id):
-        pass
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser and permission.canDelete(id, loggedInUser["_id"]):
+            permission.delete(id)
+            return ack
+        else:
+            return error("Operation not permitted. You don't have permission to delete this permission.", PermissionError)
 
 # Aggregates
 # ==============================================================================
