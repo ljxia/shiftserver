@@ -86,12 +86,12 @@ def loggedin(func):
     """
     Verify a user is logged in before running a controller action.
     """
-    def afn(*args, **kwargs):
+    def loggedInFn(*args, **kwargs):
         loggedInUser = helper.getLoggedInUser()
         if not loggedInUser:
             return error("User not logged in", UserNotLoggedInError)
         return func(*args, **kwargs)
-    return afn
+    return loggedInFn
 
 def verifyDecoratorGenerator(type):
     """
@@ -100,13 +100,13 @@ def verifyDecoratorGenerator(type):
     where the first parameter is the resource (document) id.
     """
     def verifyDecorator(func):
-        def afn(*args, **kwargs):
+        def verifyFn(*args, **kwargs):
             db = core.connect()
             rid = kwargs["id"]
             if db[rid]["type"] != type:
                 return error("Resource %s is not of type %s" % (rid, type))
             return func(*args, **kwargs)
-        return afn
+        return verifyFn
     return verifyDecorator
 
 shiftType = verifyDecoratorGenerator("shift")
@@ -116,35 +116,46 @@ eventType = verifyDecoratorGenerator("event")
 permissionType = verifyDecoratorGenerator("permission")
 
 def exists(func):
-    def afn(*args, **kwargs):
+    """
+    Ensure that a the resource actually exists before trying to serve it.
+    """
+    def existsFn(*args, **kwargs):
         db = core.connect()
         instance = args[0]
         id = kwargs.values()[0]
+        resolver = None
         
-        resolver = getattr(instance, "resolveResource")
+        if hasattr(instance, "resolveResource"):
+            resolver = getattr(instance, "resolveResource")
+
         if resolver:
             id = resolver(id)
 
-        if (not id) or (not db[id]):
-            fnA = getattr(instance, "resourceDoesNotExistString")
-            errorStr = (fnA and fnA(id)) or ("Resource %s does not exist" % id)
-            fnB = getattr(instance, "resourceDoesNotExistType")
-            errorType = (fnB and fnB()) or ResourceDoesNotExistsError
+        if (not id) or (not db.get(id)):
+            errorStr = ""
+            errorType = ""
+            if hasattr(instance, "resourceDoesNotExistString"):
+                errorStr = getattr(instance, "resourceDoesNotExistString")(id)
+            if hasattr(instance, "resourceDoesNotExistType"):
+                errorType = getattr(instance, "resourceDoesNotExistType")()
             return error(errorStr, errorType)
         else:
             return func(*args, **kwargs)
-    return afn
+    return existsFn
 
 # Resource
 # ==============================================================================
 
 class ResourceController:
-    def resourceExists(self, id):
-        db = core.connect()
-        if db[id]:
-            return True
-        else:
-            return False
+    def resolveSource(self, id):
+        return id
+
+    def resourceDoesNotExistString(self, id):
+        return ("Resource %s does not exist" % id)
+
+    def resourceDoesNotExistType(self):
+        return ResourceDoesNotExistsError
+
  
 # User
 # ==============================================================================
@@ -213,8 +224,8 @@ class UserController(ResourceController):
 
 
     @jsonencode
-    @loggedin
     @exists
+    @loggedin
     def update(self, userName):
         if not user.read(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
@@ -227,8 +238,8 @@ class UserController(ResourceController):
             return error("Operation not permitted. You don't have permission to update this account.")
 
     @jsonencode
-    @loggedin
     @exists
+    @loggedin
     def delete(self, userName):
         if not user.read(userName):
             return error("User %s does not exist" % userName, UserDoesNotExistError)
@@ -327,8 +338,8 @@ class ShiftController(ResourceController):
             return error("Operation not permitted. You are not logged in", PermissionError)
 
     @jsonencode
-    @shiftType
     @exists
+    @shiftType
     def read(self, id):
         allowed = shift.isPublic(id)
         if not allowed:
@@ -341,8 +352,8 @@ class ShiftController(ResourceController):
             return data(shift.get(id))
 
     @jsonencode
-    @shiftType
     @exists
+    @shiftType
     @loggedin
     def update(self, id):
         loggedInUser = helper.getLoggedInUser()
@@ -354,8 +365,8 @@ class ShiftController(ResourceController):
             return error("Operation not permitted. You don't have permission to update this shift.", PermissionError)
 
     @jsonencode
-    @shiftType
     @exists
+    @shiftType
     @loggedin
     def delete(self, id):
         loggedInUser = helper.getLoggedInUser()
@@ -367,8 +378,8 @@ class ShiftController(ResourceController):
             return error("Operation not permitted. You don't have permission to delete this shift.", PermissionError)
 
     @jsonencode
-    @shiftType
     @exists
+    @shiftType
     @loggedin
     def publish(self, id):
         loggedInUser = helper.getLoggedInUser()
@@ -381,8 +392,8 @@ class ShiftController(ResourceController):
             return error("Operation not permitted. You don't have permission to publish this shift.", PermissionError)
 
     @jsonencode
-    @shiftType
     @exists
+    @shiftType
     @loggedin
     def unpublish(self, id):
         loggedInUser = helper.getLoggedInUser()
@@ -403,8 +414,8 @@ class EventController(ResourceController):
         pass
 
     @jsonencode
-    @eventType
     @exists
+    @eventType
     def read(self, id):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser and event.canRead(id, loggedInUser["_id"]):
@@ -413,8 +424,8 @@ class EventController(ResourceController):
             return error("Operation not permitted. You don't have permission to read this event.", PermissionError)
 
     @jsonencode
-    @eventType
     @exists
+    @eventType
     @loggedin
     def update(self, id):
         loggedInUser = helper.getLoggedInUser()
@@ -425,8 +436,8 @@ class EventController(ResourceController):
             return error("Operation not permitted. You don't have permission to update this event.", PermissionError)
 
     @jsonencode
-    @eventType
     @exists
+    @eventType
     @loggedin
     def delete(self, id):
         loggedInUser = helper.getLoggedInUser()
@@ -446,8 +457,8 @@ class StreamController(ResourceController):
         pass
 
     @jsonencode
-    @streamType
     @exists
+    @streamType
     def read(self, id):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser and stream.canRead(id, loggedInUser["_id"]):
@@ -456,8 +467,8 @@ class StreamController(ResourceController):
             return error("Operation not permitted. You don't have permission to view this stream.", PermissionError)
 
     @jsonencode
-    @streamType
     @exists
+    @streamType
     @loggedin
     def update(self, id):
         loggedInUser = helper.getLoggedInUser()
@@ -468,8 +479,8 @@ class StreamController(ResourceController):
             return error("Operation not permitted. You don't have permission to update this stream", PermissionError)
 
     @jsonencode
-    @streamType
     @exists
+    @streamType
     @loggedin
     def delete(self, id):
         loggedInUser = helper.getLoggedInUser()
@@ -495,8 +506,8 @@ class PermissionController(ResourceController):
         pass
 
     @jsonencode
-    @permissionType
     @exists
+    @permissionType
     @loggedin    
     def read(self, id):
         loggedInUser = helper.getLoggedInUser()
@@ -506,8 +517,8 @@ class PermissionController(ResourceController):
             return error("Operation not permitted. You don't have permission to view this permission.", PermissionError)
 
     @jsonencode
-    @permissionType
     @exists
+    @permissionType
     @loggedin
     def update(self, id):
         loggedInUser = helper.getLoggedInUser()
@@ -518,8 +529,8 @@ class PermissionController(ResourceController):
             return error("Operation not permitted. You don't have permission to update this permission.", PermissionError)
 
     @jsonencode
-    @permissionType
     @exists
+    @permissionType
     @loggedin
     def delete(self, id):
         loggedInUser = helper.getLoggedInUser()
@@ -610,15 +621,16 @@ def initRoutes():
     d.connect(name="shiftsRead", route="shifts/:userName", controller=shifts, action="read",
               conditions=dict(method="GET"))
 
-    # Group Routes
-    d.connect(name="groupRead", route="group/:id", controller=group, action="read",
-              conditions=dict(method="GET"))
-
     # Stream Routes
     d.connect(name="streamRead", route="stream/:id", controller=stream, action="read",
               conditions=dict(method="GET"))
 
     # Event Routes
+
+    # Group Routes
+    d.connect(name="groupRead", route="group/:id", controller=group, action="read",
+              conditions=dict(method="GET"))
+
 
     return d
 
