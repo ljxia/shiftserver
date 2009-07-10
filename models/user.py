@@ -97,15 +97,13 @@ def delete(userName):
   db = core.connect()
   id = idForName(userName)
 
-  del db[id]
-
   # delete the user's private, public, and message streams
   userStreams = [astream["_id"] for astream in stream.streamsForObjectRef(ref(id))]
   for streamId in userStreams:
     del db[streamId]
 
   # delete the user's shifts
-  userShifts = [ashift["_id"] for ashift in shift.byUserName(userName)]
+  userShifts = [ashift["_id"] for ashift in shift.byUser(id)]
   for shiftId in userShifts:
     del db[shiftId]
 
@@ -113,6 +111,9 @@ def delete(userName):
   userEvents = [anevent["_id"] for anevent in event.eventsForUser(id)]
   for eventId in userEvents:
     del db[eventId]
+
+  # delete the user
+  del db[id]
 
 # ==============================================================================
 # Validation

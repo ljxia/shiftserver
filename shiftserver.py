@@ -54,7 +54,7 @@ FollowError = "FollowError"
 
 UserDoesNotExistError = "UserDoesNotExistError"
 PermissionError = "PermissionError"
-ResourceDoesNotExistsError = "ResourceDoesNotExistsError"
+ResourceDoesNotExistError = "ResourceDoesNotExistError"
 
 # Utils
 # =============================================================================
@@ -154,7 +154,7 @@ class ResourceController:
         return ("Resource %s does not exist" % id)
 
     def resourceDoesNotExistType(self):
-        return ResourceDoesNotExistsError
+        return ResourceDoesNotExistError
 
  
 # User

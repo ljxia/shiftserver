@@ -230,9 +230,13 @@ def createCommentStream(id):
 # Utilities
 # ==============================================================================
 
+def byUser(userId):
+  return core.query(schema.shiftByUser, userId)
+
+
 def byUserName(userName):
   """
   Return the list of shifts a user has created.
   """
   userId = user.idForName(userName)
-  return core.query(schema.shiftByUser, userId)
+  return byUser(schema.shiftByUser, userId)
