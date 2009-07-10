@@ -55,6 +55,7 @@ FollowError = "FollowError"
 UserDoesNotExistError = "UserDoesNotExistError"
 PermissionError = "PermissionError"
 ResourceDoesNotExistError = "ResourceDoesNotExistError"
+NoDataError = "NoDataError"
 
 # Utils
 # =============================================================================
@@ -330,12 +331,13 @@ class ShiftController(ResourceController):
     @loggedin
     def create(self):
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser:
-            theData = json.loads(helper.getRequestBody())
+        jsonData = helper.getRequestBody()
+        if jsonData != "":
+            theData = json.loads(jsonData)
             theData['createdBy'] = loggedInUser.get("_id")
             return data(shift.create(theData))
         else:
-            return error("Operation not permitted. You are not logged in", PermissionError)
+            return error("No data for shift.", NoDataError)
 
     @jsonencode
     @exists
@@ -454,7 +456,14 @@ class StreamController(ResourceController):
     @jsonencode
     @loggedin
     def create(self):
-        pass
+        loggedInUser = helper.getLoggedInUser()
+        jsonData = helper.getRequestBody()
+        if jsonData != "":
+            theData = json.loads(jsonData)
+            theData['createdBy'] = loggedInUser.get("_id")
+            return data(stream.create(theData))
+        else:
+            return error("No data for stream.", NoDataError)
 
     @jsonencode
     @exists
@@ -622,6 +631,8 @@ def initRoutes():
               conditions=dict(method="GET"))
 
     # Stream Routes
+    d.connect(name="streamRead", route="stream", controller=stream, action="create",
+              conditions=dict(method="POST"))
     d.connect(name="streamRead", route="stream/:id", controller=stream, action="read",
               conditions=dict(method="GET"))
 
