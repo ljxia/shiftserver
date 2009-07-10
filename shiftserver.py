@@ -409,6 +409,10 @@ class ShiftController(ResourceController):
         else:
             return error("Operation not permitted. You don't have permission to publish this shift.", PermissionError)
 
+    @jsonencode
+    def comments(self, id):
+        pass
+
 # Event
 # ==============================================================================
 
@@ -513,6 +517,10 @@ class StreamController(ResourceController):
             return error("Operation not permitted. You don't have permission to delete this stream.", PermissionError)
 
     @jsonencode
+    def invite(self, id, userName):
+        pass
+
+    @jsonencode
     def add(self, id, userName):
         return "add %s to %s" % (userName, id)
 
@@ -520,11 +528,14 @@ class StreamController(ResourceController):
     def remove(self, id, userName):
         return "remove %s from %s" % (userName, id)
 
-    def comments(self, shiftId):
+    @jsonencode
+    def block(self, id, userName):
         pass
 
-    def privateStram(self, userId):
+    @jsonencode
+    def post(self, id):
         pass
+
 
 # Permission
 # ==============================================================================
@@ -640,6 +651,11 @@ def initRoutes():
     d.connect(name="userDelete", route="user/:userName", controller=user, action="delete",
               conditions=dict(method="DELETE"))
 
+    d.connect(name="userMessages", route="user/:userName/messages", controller=user, action="messages",
+              conditions=dict(method="GET"))
+    d.connect(name="userShifts", route="user/:userName/shifts", controller=user, action="shifts",
+              conditions=dict(method="GET"))
+
     d.connect(name="userFollow", route="follow/:userName", controller=user, action="follow",
               conditions=dict(method="POST"))
     d.connect(name="userUnfollow", route="unfollow/:userName", controller=user, action="unfollow",
@@ -655,12 +671,15 @@ def initRoutes():
     d.connect(name="shiftDelete", route="shift/:id", controller=shift, action="delete",
               conditions=dict(method="DELETE"))
 
-    d.connect(name="shiftsPublish", route="publish/:id", controller=shift, action="publish",
+    d.connect(name="shiftPublish", route="shift/:id/publish", controller=shift, action="publish",
               conditions=dict(method="POST"))
-    d.connect(name="shiftsUnpublish", route="unpublish/:id", controller=shift, action="unpublish",
+    d.connect(name="shiftUnpublish", route="shift/:id/unpublish", controller=shift, action="unpublish",
               conditions=dict(method="POST"))
 
-    d.connect(name="shiftsRead", route="shifts/:userName", controller=shifts, action="read",
+    d.connect(name="shiftComments", route="shift/:id/comments", controller=shift, action="comments",
+              conditions=dict(method="POST"))
+
+    d.connect(name="shifts", route="shifts", controller=shifts, action="shifts",
               conditions=dict(method="GET"))
 
     # Stream Routes
@@ -673,20 +692,25 @@ def initRoutes():
     d.connect(name="streamDelete", route="stream/:id", controller=stream, action="read",
               conditions=dict(method="Delete"))
 
+    d.connect(name="streamInvite", route="stream/:id/invite/:userName", controller=stream, action="invite",
+              conditions=dict(method="POST"))
     d.connect(name="streamAdd", route="stream/:id/add/:userName", controller=stream, action="add",
               conditions=dict(method="POST"))
     d.connect(name="streamRemove", route="stream/:id/remove/:userName", controller=stream, action="remove",
               conditions=dict(method="POST"))
+    d.connect(name="streamBlock", route="stream/:id/block/:userName", controller=stream, action="block",
+              conditions=dict(method="POST"))
+
+    d.connect(name="streamPost", route="stream/:id/post", controller=stream, action="post",
+              conditions=dict(method="POST"))
 
     # Event Routes
-    d.connect(name="eventCreate", route="event", controller=event, action="create",
-              conditions=dict(method="POST"))
     d.connect(name="eventRead", route="event/:id", controller=event, action="read",
               conditions=dict(method="GET"))
     d.connect(name="eventUpdate", route="event/:id", controller=event, action="update",
               conditions=dict(method="PUT"))
-    d.connect(name="eventDelete", route="event/:id", controller=event, action="read",
-              conditions=dict(method="Delete"))
+    d.connect(name="eventDelete", route="event/:id", controller=event, action="delete",
+              conditions=dict(method="DELETE"))
 
     # Permission Routes
     d.connect(name="permissionCreate", route="permission", controller=permission, action="create",
@@ -696,7 +720,7 @@ def initRoutes():
     d.connect(name="permissionUpdate", route="permission/:id", controller=permission, action="update",
               conditions=dict(method="PUT"))
     d.connect(name="permissionDelete", route="permission/:id", controller=permission, action="read",
-              conditions=dict(method="Delete"))
+              conditions=dict(method="DELETE"))
 
     # Group Routes
     d.connect(name="groupRead", route="group/:id", controller=group, action="read",
