@@ -345,11 +345,11 @@ class ShiftController(ResourceController):
         if not allowed:
             loggedInUser = helper.getLoggedInUser()
             if loggedInUser and shift.canRead(id, loggedInUser.get("_id")):
-                return data(shift.get(id))
+                return data(shift.read(id))
             else:
                 return error("Operation not permitted. You don't have permission to view this shift.", PermissionError)
         else:
-            return data(shift.get(id))
+            return data(shift.read(id))
 
     @jsonencode
     @exists
@@ -357,7 +357,7 @@ class ShiftController(ResourceController):
     @loggedin
     def update(self, id):
         loggedInUser = helper.getLoggedInUser()
-        theShift = shift.get(id)
+        theShift = shift.read(id)
         if loggedInUser and shift.canUpdate(id, loggedInUser['_id']):
             shift.update(helper.getRequestBody())
             return ack
@@ -370,7 +370,7 @@ class ShiftController(ResourceController):
     @loggedin
     def delete(self, id):
         loggedInUser = helper.getLoggedInUser()
-        theShift = shift.get(id)
+        theShift = shift.read(id)
         if loggedInUser and shift.canDelete(id, loggedInUser['_id']):
             shift.delete(id)
             return ack
@@ -384,7 +384,7 @@ class ShiftController(ResourceController):
     def publish(self, id):
         loggedInUser = helper.getLoggedInUser()
         publishData = json.loads(helper.getRequestBody())
-        theShift = shift.get(id)
+        theShift = shift.read(id)
         if loggedInUser and shift.canPublish(id, loggedInUser['_id']):
             shift.publish(id, publishData)
             return ack
@@ -397,7 +397,7 @@ class ShiftController(ResourceController):
     @loggedin
     def unpublish(self, id):
         loggedInUser = helper.getLoggedInUser()
-        theShift = shift.get(id)
+        theShift = shift.read(id)
         if loggedInUser and shift.canUnpublish(id, loggedInUser['_id']):
             shift.unpublish(id)
             return ack
