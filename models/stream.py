@@ -57,10 +57,10 @@ def canCreate(id, userId):
 def canRead(id, userId):
   """
   Returns true if:
-  1. user is admin
-  2. if the stream is public
-  3. if the user created the stream
-  4. if the user has read permission for the stream
+  1. User is admin.
+  2. The stream is public.
+  3. The user created the stream.
+  4. The user has read permission for the stream.
   """
   if user.isAdmin(userId):
     return True
@@ -76,8 +76,8 @@ def canRead(id, userId):
 def canUpdate(id, userId):
   """
   Returns true if:
-  1. user is admin
-  2. user created teh stream
+  1. User is admin.
+  2. User created the stream.
   """
   if user.isAdmin(userId):
     return True
@@ -89,7 +89,9 @@ def canUpdate(id, userId):
 
 def canDelete(id, userId):
   """
-  Returns true 
+  Returns true if:
+  1. User is admin.
+  2. User created the stream.
   """
   if user.isAdmin(userId):
     return True
@@ -97,6 +99,38 @@ def canDelete(id, userId):
   if theStream["createdBy"] == userId:
     return True
   return False
+
+
+def canPost(id, userId):
+  """
+  Return true if:
+  1. User is admin.
+  2. User created the stream.
+  3. User can write to the stream.
+  """
+  if user.isAdmin(userId):
+    return True
+  theStream = read(id)
+  if theStream["createdBy"] == userId:
+    return True
+  writeable = permission.writeableStreams(userId)
+  return id in writeable
+
+
+def canAdmin(id, userId):
+  """
+  Return true if:
+  1. User is admin.
+  2. User created the stream.
+  3. User can admin the stream.
+  """
+  if user.isAdmin(userId):
+    return True
+  theStream = read(id)
+  if theStream["createdBy"] == userId:
+    return True
+  adminable = permission.adminStreams(userId)
+  return id in adminable
 
 
 def isPublic(id):

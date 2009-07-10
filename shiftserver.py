@@ -57,6 +57,9 @@ PermissionError = "PermissionError"
 ResourceDoesNotExistError = "ResourceDoesNotExistError"
 NoDataError = "NoDataError"
 
+CreateEventError = "CreateEventError"
+CreatePermissionError = "CreatePermissionError"
+
 # Utils
 # =============================================================================
 
@@ -413,7 +416,17 @@ class EventController(ResourceController):
     @jsonencode
     @loggedin
     def create(self):
-        pass
+        loggedInUser = helper.getLoggedInUser()
+        jsonData = helper.getResponseBody()
+        if jsonData != "":
+            theData = json.loads(jsonData)
+            streamId = theData["streamId"]
+            if not streamId:
+                return error("You did not specify a stream to post to", CreateEventError)
+            if stream.canPost(streamId, loggedInUser["_id"]):
+                return data(event.create(theData))
+        else:
+            return error("No data for event.", NoDataError)
 
     @jsonencode
     @exists
@@ -499,6 +512,14 @@ class StreamController(ResourceController):
         else:
             return error("Operation not permitted. You don't have permission to delete this stream.", PermissionError)
 
+    @jsonencode
+    def add(self, id, userName):
+        return "add %s to %s" % (userName, id)
+
+    @jsonencode
+    def remove(self, id, userName):
+        return "remove %s from %s" % (userName, id)
+
     def comments(self, shiftId):
         pass
 
@@ -512,7 +533,17 @@ class PermissionController(ResourceController):
     @jsonencode
     @loggedin
     def create(self):
-        pass
+        loggedInUser = helper.getLoggedInUser()
+        jsonData = helper.getResponseBody()
+        if jsonData != "":
+            theData = json.loads(jsonData)
+            streamId = theData["streamId"]
+            if not streamId:
+                return error("You did not specify a stream to create a permission for", CreatePermissionError)
+            if stream.canAdmin(streamId, loggedInUser["_id"]):
+                return data(permission.create(theData))
+        else:
+            return error("No data for permission.", NoDataError)
 
     @jsonencode
     @exists
@@ -520,7 +551,7 @@ class PermissionController(ResourceController):
     @loggedin    
     def read(self, id):
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser and permission.canRead(id, loggedInUser["_id"]):
+        if permission.canRead(id, loggedInUser["_id"]):
             return data(permission.read(id))
         else:
             return error("Operation not permitted. You don't have permission to view this permission.", PermissionError)
@@ -582,7 +613,9 @@ def initRoutes():
     shift = ShiftController()
     stream = StreamController()
     event = EventController()
+    permission = PermissionController()
     shifts = ShiftsController()
+
     group = GroupsController()
 
     d = cherrypy.dispatch.RoutesDispatcher()
@@ -631,12 +664,39 @@ def initRoutes():
               conditions=dict(method="GET"))
 
     # Stream Routes
-    d.connect(name="streamRead", route="stream", controller=stream, action="create",
+    d.connect(name="streamCreate", route="stream", controller=stream, action="create",
               conditions=dict(method="POST"))
     d.connect(name="streamRead", route="stream/:id", controller=stream, action="read",
               conditions=dict(method="GET"))
+    d.connect(name="streamUpdate", route="stream/:id", controller=stream, action="update",
+              conditions=dict(method="PUT"))
+    d.connect(name="streamDelete", route="stream/:id", controller=stream, action="read",
+              conditions=dict(method="Delete"))
+
+    d.connect(name="streamAdd", route="stream/:id/add/:userName", controller=stream, action="add",
+              conditions=dict(method="POST"))
+    d.connect(name="streamRemove", route="stream/:id/remove/:userName", controller=stream, action="remove",
+              conditions=dict(method="POST"))
 
     # Event Routes
+    d.connect(name="eventCreate", route="event", controller=event, action="create",
+              conditions=dict(method="POST"))
+    d.connect(name="eventRead", route="event/:id", controller=event, action="read",
+              conditions=dict(method="GET"))
+    d.connect(name="eventUpdate", route="event/:id", controller=event, action="update",
+              conditions=dict(method="PUT"))
+    d.connect(name="eventDelete", route="event/:id", controller=event, action="read",
+              conditions=dict(method="Delete"))
+
+    # Permission Routes
+    d.connect(name="permissionCreate", route="permission", controller=permission, action="create",
+              conditions=dict(method="POST"))
+    d.connect(name="permissionRead", route="permission/:id", controller=permission, action="read",
+              conditions=dict(method="GET"))
+    d.connect(name="permissionUpdate", route="permission/:id", controller=permission, action="update",
+              conditions=dict(method="PUT"))
+    d.connect(name="permissionDelete", route="permission/:id", controller=permission, action="read",
+              conditions=dict(method="Delete"))
 
     # Group Routes
     d.connect(name="groupRead", route="group/:id", controller=group, action="read",
