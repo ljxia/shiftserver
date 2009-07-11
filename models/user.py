@@ -105,6 +105,11 @@ def delete(userName):
   db = core.connect()
   id = idForName(userName)
 
+  # delete the user's events
+  userEvents = [anevent["_id"] for anevent in event.eventsForUser(id)]
+  for eventId in userEvents:
+    del db[eventId]
+
   # delete all of the user's streams which have no events
   streams = db[id]["streams"]
   [stream.delete(streamId) for streamId in streams 
@@ -119,11 +124,6 @@ def delete(userName):
   userShifts = [ashift["_id"] for ashift in shift.byUser(id)]
   for shiftId in userShifts:
     del db[shiftId]
-
-  # delete the user's events
-  userEvents = [anevent["_id"] for anevent in event.eventsForUser(id)]
-  for eventId in userEvents:
-    del db[eventId]
 
   # delete the user
   del db[id]
@@ -246,4 +246,11 @@ def addStream(id, streamId):
   if stream.canSubscribe(streamId, id) and (not streamId in theUser["streams"]):
     theUser["streams"].append(streamId)
     db[id] = theUser
+
+
+def isSubscribed(id, streamId):
+  db = core.connect()
+  theUser = db[id]
+  return streamId in theUser["streams"]
+
   

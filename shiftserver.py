@@ -60,6 +60,9 @@ NoDataError = "NoDataError"
 CreateEventError = "CreateEventError"
 CreatePermissionError = "CreatePermissionError"
 
+AlreadySubscribedError = "AlreadySubscribedError"
+NotSubscribedError = "NotSubscribedError"
+
 # Utils
 # =============================================================================
 
@@ -449,7 +452,7 @@ class EventController(ResourceController):
     @loggedin
     def update(self, id):
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser and event.canUpdate(id, loggedInUser["_id"]):
+        if event.canUpdate(id, loggedInUser["_id"]):
             data = helper.getResponseBody()
             return data(event.update(data))
         else:
@@ -461,7 +464,7 @@ class EventController(ResourceController):
     @loggedin
     def delete(self, id):
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser and event.canDelete(id, loggedInUser["_id"]):
+        if event.canDelete(id, loggedInUser["_id"]):
             event.delete(id)
             return ack
         else:
@@ -488,7 +491,7 @@ class StreamController(ResourceController):
     @streamType
     def read(self, id):
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser and stream.canRead(id, loggedInUser["_id"]):
+        if stream.canRead(id, loggedInUser["_id"]):
             return data(stream.read(id))
         else:
             return error("Operation not permitted. You don't have permission to view this stream.", PermissionError)
@@ -499,7 +502,7 @@ class StreamController(ResourceController):
     @loggedin
     def update(self, id):
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser and stream.canUpdate(id, loggedInUser["_id"]):
+        if stream.canUpdate(id, loggedInUser["_id"]):
             data = helper.getResponseBody()
             return data(stream.update(data))
         else:
@@ -511,11 +514,39 @@ class StreamController(ResourceController):
     @loggedin
     def delete(self, id):
         loggedInUser = helper.getLoggedInUser()
-        if loggedInUser and stream.canDelete(id, loggedInUser["_id"]):
+        if stream.canDelete(id, loggedInUser["_id"]):
             stream.delete(id)
             return ack
         else:
             return error("Operation not permitted. You don't have permission to delete this stream.", PermissionError)
+
+    @jsonencode
+    @exists
+    @streamType
+    @loggedin
+    def subscribe(self, id):
+        loggedInUser = helper.getLoggedInUser()
+        if stream.canSubscribe(id, loggedInUser["_id"]):
+            if user.isSubscribed(id):
+                return error("You are already subscribed to that stream.", AlreadySubscribedError)
+            else:
+                stream.subscribe(id, loggedInUser["_id"])
+                return ack
+        else:
+            return error("Operation not permitted. You don't have permission to subscribe to this stream.", PermissionError)
+
+    @jsonencode
+    @exists
+    @streamType
+    @loggedin
+    def unsubscribe(self, id):
+        loggedInUser = helper.getLoggedInUser()
+        if user.isSubscribed(id):
+            stream.unsubscribe(id, loggedInUser["_id"])
+            return ack
+        else:
+            return error("You are not subscribed to that stream.", NotSubscribedError)
+
 
     @jsonencode
     def invite(self, id, userName):
@@ -691,7 +722,12 @@ def initRoutes():
     d.connect(name="streamUpdate", route="stream/:id", controller=stream, action="update",
               conditions=dict(method="PUT"))
     d.connect(name="streamDelete", route="stream/:id", controller=stream, action="read",
-              conditions=dict(method="Delete"))
+              conditions=dict(method="DELETE"))
+
+    d.connect(name="streamSubscribe", route="stream/:id/subscribe", controller=stream, action="subscribe",
+              conditions=dict(method="POST"))
+    d.connect(name="streamUnsubscribe", route="stream/:id/unsubscribe", controller=stream, action="unsubscribe",
+              conditions=dict(method="POST"))
 
     d.connect(name="streamInvite", route="stream/:id/invite/:userName", controller=stream, action="invite",
               conditions=dict(method="POST"))
