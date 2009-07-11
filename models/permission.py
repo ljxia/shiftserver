@@ -79,34 +79,34 @@ def permissionsForUser(userId):
 
 def permissionsForStream(streamId):
   """
-  Returns all permission documents for a particular user.
+  Returns all permission documents a particular user.
   """
   db = core.connect()
   return core.query(schema.permissionByStream, streamId)
 
 
 def joinableStreams(userId):
-  return [aperm["streamId"] for aperm in permissionsForUser[userId]
+  return [aperm["streamId"] for aperm in permissionsForUser(userId)
           if aperm["level"] == 0]
 
 
 def readableStreams(userId):
-  return [aperm["streamId"] for aperm in permissionsForUser[userId]
+  return [aperm["streamId"] for aperm in permissionsForUser(userId)
           if aperm["level"] >= 1]
 
 
 def writableStreams(userId):
-  return [aperm["streamId"] for aperm in permissionsForUser[userId]
+  return [aperm["streamId"] for aperm in permissionsForUser(userId)
           if aperm["level"] >= 2]
 
 
 def adminStreams(userId):
-  return [aperm["streamId"] for aperm in permissionsForUser[userId]
+  return [aperm["streamId"] for aperm in permissionsForUser(userId)
           if aperm["level"] >= 3]
 
 
 def ownerStreams(userId):
-  return [aperm["streamId"] for aperm in permissionsForUser[userId]
+  return [aperm["streamId"] for aperm in permissionsForUser(userId)
           if aperm["level"] == 4]
   
 
