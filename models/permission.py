@@ -3,8 +3,8 @@ import utils
 import schema
 
 class PermissionError(Exception): pass
-class CreateEventMissingCreatorError(PermissionError): pass
-class CreateEventMissingStreamError(PermissionError): pass
+class MissingCreatorError(PermissionError): pass
+class MissingStreamError(PermissionError): pass
 class CreateEventOnPublicStreamError(PermissionError): pass
 class CreateEventPermissionError(PermissionError): pass
 class PermissionAlreadyExistsError(PermissionError): pass
@@ -21,16 +21,17 @@ def create(data):
   3. Attempting to create an event on a public stream.
   4. Attempting to create a permission for a user on a stream if a permission
      for that user on that stream already exists.
-  5. Attempting to create an event without proper permission.
+  5. Attempting to create an event without proper permission. Must either be
+     an amdin for that stream or running as admin for shiftserver.
   """
   db = core.connect()
   streamId = data["streamId"]
   createdBy = data["createdBy"]
 
   if not streamId:
-    raise CreateEventMissingStreamError
+    raise MissingStreamError
   if not createdBy:
-    raise CreateEventMissingCreatorError
+    raise MissingCreatorError
   if stream.isPublic(streamId):
     raise CreateEventOnPublicStreamError
   if permission.permissionForUser(createdBy):
@@ -44,7 +45,7 @@ def create(data):
 
 
 def read(id):
-  pass
+  return db[id]
 
 
 def update(id, level):
@@ -52,11 +53,12 @@ def update(id, level):
   Can only update the level after permission creation.
   """
   perm = read(id)
-  
+  perm["level"] = level
+  db[id] = perm
 
 
 def delete(id):
-  pass
+  del db[id]
 
 # ==============================================================================
 # Utilities
@@ -72,6 +74,14 @@ def permissionsForUser(userId):
   """
   db = core.connect()
   return core.query(schema.permissionByUser, userId)
+
+
+def permissionsForStream(streamId):
+  """
+  Returns all permission documents for a particular user.
+  """
+  db = core.connect()
+  return core.query(schema.permissionByStream, streamId)
 
 
 def joinableStreams(userId):

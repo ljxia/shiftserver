@@ -32,8 +32,8 @@ def single(view, key):
 
 
 def update(doc):
-  db.connect()
-  id = doc.get("_id")
+  db = connect()
+  id = doc["_id"]
   old = db[id]
   new = old.update(doc)
   db[id] = new

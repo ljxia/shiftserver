@@ -3,6 +3,10 @@ import utils
 import schema
 
 import user
+import permission
+
+class StreamError(Exception): pass
+class MissingCreatorError(StreamError): pass
 
 # ==============================================================================
 # CRUD
@@ -10,18 +14,23 @@ import user
 
 def create(data):
   """
-  Create a stream.
+  Create a stream. Will fail if:
+  1. createdBy field missing.
   """
   db = core.connect()
 
   data["created"] = utils.utctime()
-
   newStream = schema.stream()
   newStream.update(data)
-
   userId = newStream["createdBy"]
 
-  return db.create(newStream)
+  if not userId:
+    raise MissingCreatorError
+  
+  id = db.create(newStream)
+  user.addStream(userId, id)
+  
+  return id
 
 
 def read(id):
@@ -36,14 +45,19 @@ def update(data):
   """
   Update a stream.
   """
-  pass
+  core.update(data)
 
 
 def delete(id):
   """
   Delete a stream.
   """
-  pass
+  db = core.connect()
+
+  permIds = [perm["_id"] for perm in permission.permissionsForStream(id)]
+  [permission.delete(permId) for permId in permIds]
+
+  del db[id]
 
 
 # ==============================================================================

@@ -3,6 +3,7 @@
 # ==============================================================================
 
 permissionByUser = "_design/permissions/_view/byuser"
+permissionByStream = "_design/permissions/_view/by_stream"
 permissionByUserAndStream = "_design/permissions/_view/by_user_and_stream"
 streamByObjectRef = "_design/streams/_view/byobjectref"
 streamByUniqueName = "_design/streams/_view/byuniquename"

@@ -234,11 +234,22 @@ function (doc)
 }
 
 // by_user_and_stream
+// ------------------------------------------------------------------------------
 function (doc)
 {
   if(doc.type == "permission")
   {
     emit([doc.userId, doc.streamId], doc);
+  }
+}
+
+// by_stream
+// ------------------------------------------------------------------------------
+function (doc)
+{
+  if(doc.type == "permission")
+  {
+    emit(doc.streamId, doc);
   }
 }
 
