@@ -82,6 +82,14 @@ def readFull(userName, deleteType=True):
   return theUser
 
 
+def readById(id):
+  """
+  Return the user by id.
+  """
+  db = core.connect()
+  return db[id]
+
+
 def update(data):
   """
   Update a user document.
@@ -97,7 +105,7 @@ def delete(userName):
   db = core.connect()
   id = idForName(userName)
 
-  # delete the user's private, public, and message streams
+  # delete the user's public and message streams
   userStreams = [astream["_id"] for astream in stream.streamsForObjectRef(ref(id))]
   for streamId in userStreams:
     del db[streamId]
@@ -111,6 +119,11 @@ def delete(userName):
   userEvents = [anevent["_id"] for anevent in event.eventsForUser(id)]
   for eventId in userEvents:
     del db[eventId]
+
+  # delete all of the user's streams which have no events
+  streams = db[id]["streams"]
+  [stream.delete(streamId) for streamId in streams 
+   if len(event.eventsForStream(streamId)) > 0]
 
   # delete the user
   del db[id]
@@ -225,3 +238,11 @@ def updateLastSeen(userName):
   theUser = readFull(userName, False)
   theUser["lastSeen"] = utils.utctime()
   db[theUser["_id"]] = theUser
+
+
+def addStream(id, streamId):
+  theUser = readById(id)
+  if stream.canSubscribe(streamId, id) and (not streamId in theUser["streams"]):
+    theUser["streams"].append(streamId)
+  core.update(theUser)
+  

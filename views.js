@@ -183,6 +183,15 @@ function (doc)
   }
 }
 
+// by_creator
+// -----------------------------------------------------------------------------
+function (doc)
+{
+  if(doc.type == "stream")
+  {
+    emit(doc.createdBy, doc)
+  }
+}
 
 // We should reduce the two things into one value
 
@@ -221,6 +230,15 @@ function (doc)
   if(doc.type == "permission")
   {
     emit(doc.userId, doc);
+  }
+}
+
+// by_user_and_stream
+function (doc)
+{
+  if(doc.type == "permission")
+  {
+    emit([doc.userId, doc.streamId], doc);
   }
 }
 

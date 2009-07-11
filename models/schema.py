@@ -3,8 +3,10 @@
 # ==============================================================================
 
 permissionByUser = "_design/permissions/_view/byuser"
+permissionByUserAndStream = "_design/permissions/_view/by_user_and_stream"
 streamByObjectRef = "_design/streams/_view/byobjectref"
 streamByUniqueName = "_design/streams/_view/byuniquename"
+streamByCreator = "_design/streams/_view/bycreator"
 streamBySubscribers = "_design/streams/_view/subscribers"
 userByName = "_design/users/_view/byname"
 eventByStream = "_design/events/_view/bystream"
@@ -29,11 +31,8 @@ def user():
     "lastSeen": None,
     "publicStream": None,
     "messageStream": None,
-    "streams": {
-      "groups": [],
-      "following": [],
-      "all": []
-    },
+    "notify": [],
+    "streams": [],
     "preferences": {}
   }
 
@@ -90,6 +89,7 @@ def event():
 def permission():
   return {
     "type": "permission",
+    "createdBy": None,
     "streamId": None,
     "userId": None,
     "level": 0

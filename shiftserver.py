@@ -368,6 +368,7 @@ class ShiftController(ResourceController):
             return ack
         else:
             return error("Operation not permitted. You don't have permission to update this shift.", PermissionError)
+        
 
     @jsonencode
     @exists

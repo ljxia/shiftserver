@@ -19,6 +19,8 @@ def create(data):
   newStream = schema.stream()
   newStream.update(data)
 
+  userId = newStream["createdBy"]
+
   return db.create(newStream)
 
 
@@ -101,6 +103,22 @@ def canDelete(id, userId):
   return False
 
 
+def canSubscribe(id, userId):
+  """
+  Return true if:
+  1. User is admin.
+  2. User created the stream.
+  3. User has join permissions.
+  """
+  if user.isAdmin(userId):
+    return True
+  theStream = read(id)
+  if theStream["createdBy"] == userId:
+    return True
+  joinable = permissions.joinableStreams()
+  return id in joinable
+
+
 def canPost(id, userId):
   """
   Return true if:
@@ -134,17 +152,23 @@ def canAdmin(id, userId):
 
 
 def isPublic(id):
+  """
+  Checks if the stream is public.
+  """
   db = core.connect()
   return not db[id]["private"]
 
 
 def isPublicUserStream(id):
+  """
+  Check if the stream is a userPublicStream.
+  """
   db = core.connect()
   return (not db[id]["meta"] == "userPublicStream")
 
 
 # ==============================================================================
-# Subscribe/Unsubscribe
+# Subscribe/Unsubscribe/Invite
 # ==============================================================================
 
 def subscribe(id, userId, tag=None):
@@ -179,6 +203,15 @@ def unsubscribe(id, userId):
     db[userId] = theUser
 
 
+def invite(id, userId):
+  """
+  Give a user join permission.
+  """
+  permission.create({
+      
+      })
+
+
 # ==============================================================================
 # Utilities
 # ==============================================================================
@@ -192,6 +225,13 @@ def streamsForObjectRef(objectRef):
   All streams for a objectRef, where objectRef is "type:id".
   """
   return core.query(schema.streamByObjectRef, objectRef)
+
+
+def streamsByCreator(userId):
+  """
+  All streams created by a particular user
+  """
+  return core.query(schema.streamByCreator, userId)
 
 
 def byUniqueName(uniqueName):
