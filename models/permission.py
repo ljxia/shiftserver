@@ -58,6 +58,7 @@ def update(id, level):
 
 
 def delete(id):
+  db = core.connect()
   del db[id]
 
 # ==============================================================================

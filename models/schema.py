@@ -2,16 +2,26 @@
 # Views
 # ==============================================================================
 
+allPermissions = "_design/permissions/_view/all"
 permissionByUser = "_design/permissions/_view/byuser"
 permissionByStream = "_design/permissions/_view/by_stream"
 permissionByUserAndStream = "_design/permissions/_view/by_user_and_stream"
+
+allStreams = "_design/streams/_view/all"
 streamByObjectRef = "_design/streams/_view/byobjectref"
 streamByUniqueName = "_design/streams/_view/byuniquename"
 streamByCreator = "_design/streams/_view/bycreator"
 streamBySubscribers = "_design/streams/_view/subscribers"
+
+allUsers = "_design/users/_view/all"
 userByName = "_design/users/_view/byname"
+
+allEvents = "_design/events/_view/all"
 eventByStream = "_design/events/_view/bystream"
 eventByUser= "_design/events/_view/byuser"
+
+allShifts = "_design/shifts/_view/all"
+
 allGroups = "_design/groups/_view/all"
 shiftByUser = "_design/shifts/_view/byuser"
 

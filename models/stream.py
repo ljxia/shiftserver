@@ -129,7 +129,7 @@ def canSubscribe(id, userId):
   theStream = read(id)
   if theStream["createdBy"] == userId:
     return True
-  joinable = permissions.joinableStreams()
+  joinable = permission.joinableStreams()
   return id in joinable
 
 

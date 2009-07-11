@@ -6,20 +6,20 @@ def connect():
   return server["shiftspace"]
 
 
-def query(view, key):
+def query(view, key=None):
   db = connect()
-  options = {"key": key}
-  result = []
-  for row in db.view(view, None, **options):
-    result.append(row.value)
-  return result
 
+  rows = None
+  options = None
 
-def queryRange(view, startKey, endKey):
-  db = connect()
-  options = {"startKey": startKey, "endKey": endKey}
+  if key:
+    options = {"key": key}
+    rows = db.view(view, None, **options)
+  else:
+    rows = db.view(view)
+
   result = []
-  for row in db.view(view, None, **options):
+  for row in rows:
     result.append(row.value)
   return result
 
