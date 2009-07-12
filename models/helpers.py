@@ -8,13 +8,13 @@ import event
 import permission
 
 
+def deleteAllUsers():
+  pass
+
+
 def deleteAllShifts():
   shiftIds = [ashift["_id"] for ashift in core.query(schema.allShifts)]
   [permission.delete(shiftId) for shiftId in shiftIds]
-
-
-def deleteAllUsers():
-  pass
 
 
 def deleteAllPermissions():
@@ -25,3 +25,8 @@ def deleteAllPermissions():
 def deleteAllStreams():
   streamIds = [astream["_id"] for astream in core.query(schema.allStreams)]
   [stream.delete(streamId) for streamId in streamIds]
+
+
+def deleteAllEvents():
+  eventIds = [aevent["_id"] for aevent in core.query(schema.allEvents)]
+  [event.delete(eventId) for eventId in eventIds]
