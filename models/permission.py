@@ -73,6 +73,11 @@ def update(id, level):
   db[id] = perm
 
 
+def updateForUser(userId, streamId, level):
+  perm = permissionForUser(userId, streamId)
+  update(perm["_id"], level)
+
+
 def delete(id):
   db = core.connect()
   del db[id]

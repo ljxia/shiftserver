@@ -577,7 +577,6 @@ class StreamController(ResourceController):
         else:
             return error("Operation not permitted. You don't have permission to subscribe to this stream.", PermissionError)
 
-
     @jsonencode
     def remove(self, id, userName):
         return "remove %s from %s" % (userName, id)
@@ -597,10 +596,20 @@ class StreamController(ResourceController):
     def permissions(self, id):
         loggedInUser = helper.getLoggedInUser()
         if stream.canAdmin(id, loggedInUser["_id"]):
-            return data(stream.permissions(id))
+            return data(permission.permissionsForStream(id))
         else:
             return error("Operation not permitted. You don't have permission to view permssions on this stream.", PermissionError)
-        
+
+    @jsonencode
+    @exists
+    @streamType
+    @loggedin
+    def setPermission(self, id, userName, level):
+        loggedInUser = helper.getLoggedInUser()
+        if stream.canAdmin(id, loggedInUser["_id"]):
+            return data(permission.upateForUser(user.idForName(userName), id, level))
+        else:
+            return error("Operation not permitted. You don't have permission to view permssions on this stream.", PermissionError)
 
 
 # Permission
@@ -771,6 +780,9 @@ def initRoutes():
               conditions=dict(method="POST"))
     d.connect(name="streamBlock", route="stream/:id/block/:userName", controller=stream, action="block",
               conditions=dict(method="POST"))
+
+    d.connect(name="streamPermissions", route="stream/:id/permissions", controller=stream, action="permissions",
+              conditions=dict(method="GET"))
 
     d.connect(name="streamPost", route="stream/:id/post", controller=stream, action="post",
               conditions=dict(method="POST"))
