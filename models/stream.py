@@ -209,12 +209,15 @@ def subscribe(id, userId, tag=None):
   allowed = not theStream["private"]
 
   if not allowed:
-    perms = permission.readableStreams(userId);
+    perms = permission.joinableStreams(userId);
     allowed = id in perms
       
-  if allowed:
+  if allowed and (not id in theUser["streams"]):
     theUser["streams"].append(id)
     db[userId] = theUser
+    if theStream["private"]:
+      perm = permission.permissionForUser(userId, id)
+      permission.update(perm["_id"], 1)
 
 
 def unsubscribe(id, userId):

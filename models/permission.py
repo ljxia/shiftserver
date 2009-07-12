@@ -61,6 +61,7 @@ def create(data):
 
 
 def read(id):
+  db = core.connect()
   return db[id]
 
 
@@ -68,6 +69,7 @@ def update(id, level):
   """
   Can only update the level after permission creation.
   """
+  db = core.connect()
   perm = read(id)
   perm["level"] = level
   db[id] = perm

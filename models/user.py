@@ -12,7 +12,7 @@ ref = utils.genrefn("user")
 # CRUD
 # ==============================================================================
 
-def create(data):
+def create(data, createStreams=True):
   """
   Create a new user.
   """
