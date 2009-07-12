@@ -35,16 +35,16 @@ def create(data):
       "private": False,
       "meta": "userPublicStream",
       "createdBy": userId
-      })
+      }, False)
 
   # create the message stream for the user
   messageStream = stream.create({
       "objectRef": userRef, 
       "uniqueName": ref(userId, "messages"), 
-      "private": False, 
+      "private": True, 
       "meta": "userMessageStream",
       "createdBy": userId
-      })
+      }, False)
 
   theUser = db[userId]
   theUser.update({
@@ -110,15 +110,15 @@ def delete(userName):
   for eventId in userEvents:
     del db[eventId]
 
-  # delete all of the user's streams which have no events
-  streams = db[id]["streams"]
-  [stream.delete(streamId) for streamId in streams 
-   if len(event.eventsForStream(streamId)) == 0]
-
   # delete the user's public and message streams
   userStreams = [astream["_id"] for astream in stream.streamsForObjectRef(ref(id))]
   for streamId in userStreams:
     del db[streamId]
+
+  # delete all of the remaining user's streams which have no events
+  streamIds = utils.ids(stream.streamsByCreator(id))
+  [stream.delete(streamId) for streamId in streamIds
+   if len(event.eventsForStream(streamId)) == 0]
 
   # delete the user's shifts
   userShifts = [ashift["_id"] for ashift in shift.byUser(id)]
@@ -190,6 +190,7 @@ def unfollow(follower, followed):
   should be userNames.
   """
   stream.unsubscribe(publicStream(followed).get("_id"), idForName(follower))
+
 
 def feeds(id, page=0, perPage=25):
   """

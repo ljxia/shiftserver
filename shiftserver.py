@@ -253,8 +253,9 @@ class UserController(ResourceController):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser and user.canDelete(user.idForName(userName),
                                            loggedInUser["_id"]):
+            if user.idForName(userName) == loggedInUser["_id"]:
+                helper.setLoggedInUser(None)
             user.delete(userName)
-            helper.setLoggedInUser(None)
             return ack
         else:
             return error("Operation not permitted. You don't have permission to delete this account.")
@@ -527,7 +528,7 @@ class StreamController(ResourceController):
     def subscribe(self, id):
         loggedInUser = helper.getLoggedInUser()
         if stream.canSubscribe(id, loggedInUser["_id"]):
-            if user.isSubscribed(id):
+            if user.isSubscribed(loggedInUser["_id"], id):
                 return error("You are already subscribed to that stream.", AlreadySubscribedError)
             else:
                 stream.subscribe(id, loggedInUser["_id"])
@@ -553,8 +554,20 @@ class StreamController(ResourceController):
         pass
 
     @jsonencode
+    @exists
+    @streamType
+    @loggedin
     def add(self, id, userName):
-        return "add %s to %s" % (userName, id)
+        loggedInUser = helper.getLoggedInUser()
+        if stream.canAdmin(id, loggedInUser["_id"]):
+            if user.isSubscribed(loggedInUser["_id"], id):
+                return error("User %s is already subscribed to that stream." % userName, AlreadySubscribedError)
+            else:
+                stream.add(id, loggedInUser["_id"])
+                return ack
+        else:
+            return error("Operation not permitted. You don't have permission to subscribe to this stream.", PermissionError)
+
 
     @jsonencode
     def remove(self, id, userName):

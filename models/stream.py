@@ -12,7 +12,7 @@ class MissingCreatorError(StreamError): pass
 # CRUD
 # ==============================================================================
 
-def create(data):
+def create(data, add=True):
   """
   Create a stream. Will fail if:
   1. createdBy field missing.
@@ -28,7 +28,8 @@ def create(data):
     raise MissingCreatorError
   
   id = db.create(newStream)
-  user.addStream(userId, id)
+  if add:
+    user.addStream(userId, id)
   
   return id
 
@@ -122,12 +123,15 @@ def canSubscribe(id, userId):
   Return true if:
   1. User is admin.
   2. User created the stream.
-  3. User has join permissions.
+  3. The stream is public.
+  4. User has join permissions.
   """
   if user.isAdmin(userId):
     return True
   theStream = read(id)
   if theStream["createdBy"] == userId:
+    return True
+  if not theStream["private"]:
     return True
   joinable = permission.joinableStreams(userId)
   return id in joinable

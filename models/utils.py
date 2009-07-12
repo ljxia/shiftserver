@@ -1,6 +1,11 @@
 import time
 import datetime
 
+
+def ids(rows):
+  return [row["_id"] for row in rows]
+
+
 def genrefn(pre):
   def refn(id, post=None):
     if post:
