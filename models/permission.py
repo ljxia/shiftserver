@@ -2,6 +2,10 @@ import core
 import utils
 import schema
 
+import user
+import stream
+import event
+
 class PermissionError(Exception): pass
 class MissingCreatorError(PermissionError): pass
 class MissingStreamError(PermissionError): pass
@@ -34,14 +38,26 @@ def create(data):
     raise MissingCreatorError
   if stream.isPublic(streamId):
     raise CreateEventOnPublicStreamError
-  if permission.permissionForUser(createdBy):
+  if permissionForUser(createdBy, streamId):
     raise PermissionAlreadyExistsError
-  if not user.isAdmin(createdBy):
+
+  allowed = user.isAdmin(createdBy)
+
+  if not allowed:
+    allowed = stream.isOwner(streamId, createdBy)
+
+  if not allowed:
     adminable = adminStreams(createdBy)
-    if not streamId in adminable:
-      raise CreateEventPermissionError
+    allowed = streamId in adminable
+
+  if not allowed:
+    raise CreateEventPermissionError
   
-  return db.create(data)
+  newPermission = schema.permission()
+  newPermission.update(data)
+  newPermission["type"] = "permission"
+
+  return db.create(newPermission)
 
 
 def read(id):

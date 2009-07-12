@@ -129,7 +129,10 @@ def exists(func):
     def existsFn(*args, **kwargs):
         db = core.connect()
         instance = args[0]
-        id = kwargs.values()[0]
+
+        primaryKey = getattr(instance, "primaryKey")()
+        id = kwargs[primaryKey]
+
         resolver = None
         
         if hasattr(instance, "resolveResource"):
@@ -154,6 +157,9 @@ def exists(func):
 # ==============================================================================
 
 class ResourceController:
+    def primaryKey(self):
+        return "id"
+
     def resolveSource(self, id):
         return id
 
@@ -168,6 +174,8 @@ class ResourceController:
 # ==============================================================================
 
 class UserController(ResourceController):
+    def primaryKey(self):
+        return "userName"
 
     def resolveResource(self, userName):
         theUser = user.read(userName)
@@ -560,10 +568,11 @@ class StreamController(ResourceController):
     def add(self, id, userName):
         loggedInUser = helper.getLoggedInUser()
         if stream.canAdmin(id, loggedInUser["_id"]):
-            if user.isSubscribed(loggedInUser["_id"], id):
+            otherId = user.idForName(userName)
+            if user.isSubscribed(otherId, id):
                 return error("User %s is already subscribed to that stream." % userName, AlreadySubscribedError)
             else:
-                stream.add(id, loggedInUser["_id"])
+                stream.invite(id, loggedInUser["_id"], otherId)
                 return ack
         else:
             return error("Operation not permitted. You don't have permission to subscribe to this stream.", PermissionError)
@@ -580,6 +589,18 @@ class StreamController(ResourceController):
     @jsonencode
     def post(self, id):
         pass
+
+    @jsonencode
+    @exists
+    @streamType
+    @loggedin
+    def permissions(self, id):
+        loggedInUser = helper.getLoggedInUser()
+        if stream.canAdmin(id, loggedInUser["_id"]):
+            return data(stream.permissions(id))
+        else:
+            return error("Operation not permitted. You don't have permission to view permssions on this stream.", PermissionError)
+        
 
 
 # Permission

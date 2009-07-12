@@ -100,6 +100,8 @@ def event():
 def permission():
   return {
     "type": "permission",
+    "created": None,
+    "modified": None,
     "createdBy": None,
     "streamId": None,
     "userId": None,

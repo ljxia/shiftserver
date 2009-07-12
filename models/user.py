@@ -23,6 +23,7 @@ def create(data):
   newUser = schema.user()
   newUser.update(data)
 
+  newUser["type"] = "user"
   userId = db.create(newUser)
 
   userRef = ref(userId)
@@ -51,6 +52,7 @@ def create(data):
       "messageStream": messageStream,
       "publicStream": publicStream
       })
+  
   db[userId] = theUser
 
   return userId
@@ -165,14 +167,12 @@ def nameIsUnique(userName):
 # Streams
 # ==============================================================================
 
-def publicStream(userName):
-  return core.single(schema.streamByUniqueName,
-                     ref(idForName(userName), "public"))
+def publicStream(id):
+  return readFull(nameForId(id))["publicStream"]
 
 
-def messageStream(userName):
-  return core.single(schema.streamByUniqueName,
-                     ref(idForName(userName), "messages"))
+def messageStream(id):
+  return readFull(nameForId(id))["messageStream"]
 
 
 def follow(follower, followed):
@@ -231,7 +231,7 @@ def idForName(userName):
 
 def nameForId(id):
   db = core.connect()
-  return db[id].get("userName")
+  return db[id]["userName"]
 
 
 def updateLastSeen(userName):
@@ -254,4 +254,3 @@ def isSubscribed(id, streamId):
   theUser = db[id]
   return streamId in theUser["streams"]
 
-  

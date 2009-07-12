@@ -3,6 +3,8 @@ import utils
 import schema
 
 import user
+import shift
+import event
 import permission
 
 class StreamError(Exception): pass
@@ -27,6 +29,7 @@ def create(data, add=True):
   if not userId:
     raise MissingCreatorError
   
+  newStream["type"] = "stream"
   id = db.create(newStream)
   if add:
     user.addStream(userId, id)
@@ -169,6 +172,11 @@ def canAdmin(id, userId):
   return id in adminable
 
 
+def isOwner(id, userId):
+  db = core.connect()
+  return db[id]["createdBy"] == userId
+
+
 def isPublic(id):
   """
   Checks if the stream is public.
@@ -221,12 +229,23 @@ def unsubscribe(id, userId):
     db[userId] = theUser
 
 
-def invite(id, userId):
+def invite(id, adminId, userId):
   """
   Give a user join permission.
   """
+  db = core.connect();
+
   permission.create({
-      
+      "streamId": id,
+      "createdBy": adminId,
+      "userId": userId,
+      "level": 0
+      })
+
+  event.create({
+      "createdBy": userId,
+      "streamId": user.messageStream(userId),
+      "displayString": "%s has invited you to the %s %s" % (user.nameForId(adminId), displayName(id), meta(id))
       })
 
 
@@ -234,8 +253,19 @@ def invite(id, userId):
 # Utilities
 # ==============================================================================
 
-def subscribers(streamId):
-  return core.query(schema.streamBySubscribers, streamId)
+
+def displayName(id):
+  db = core.connect()
+  return db[id]["displayName"]
+
+
+def meta(id):
+  db = core.connect()
+  return db[id]["meta"]  
+
+
+def subscribers(id):
+  return core.query(schema.streamBySubscribers, id)
 
 
 def streamsForObjectRef(objectRef):

@@ -1,4 +1,5 @@
 import core
+import utils
 import stream
 import schema
 
@@ -18,8 +19,8 @@ def create(data):
 
   newEvent = schema.event()
   newEvent.update(data)
-  
-  return db.create(newShift)
+  newEvent["type"] = "event"
+  return db.create(newEvent)
 
 
 def read(id):

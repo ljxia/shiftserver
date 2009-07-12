@@ -26,7 +26,7 @@ def create(data):
 
   newShift = schema.shift()
   newShift.update(data)
-  
+  newShift["type"] = "shift"
   return db.create(newShift)
 
 
