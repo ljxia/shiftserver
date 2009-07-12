@@ -316,8 +316,8 @@ class UserController(ResourceController):
             return error("No user logged in.", UserNotLoggedInError)
 
     @jsonencode
-    @loggedin
     @exists
+    @loggedin
     def follow(self, userName):
         loggedInUser = helper.getLoggedInUser()
         lname = loggedInUser["userName"]
@@ -327,8 +327,8 @@ class UserController(ResourceController):
         return ack
 
     @jsonencode
-    @loggedin
     @exists
+    @loggedin
     def unfollow(self, userName):
         loggedInUser = helper.getLoggedInUser()
         lname = loggedInUser["userName"]
@@ -336,6 +336,17 @@ class UserController(ResourceController):
             return error("You cannot unfollow yourself.", FollowError)
         user.unfollow(lname, userName)
         return ack
+
+    @jsonencode
+    @loggedin
+    @exists
+    def messages(self, userName):
+        loggedInUser = helper.getLoggedInUser()
+        messageStream = user.messageStream(user.idForName(userName))
+        if stream.canRead(messageStream, loggedInUser["_id"]):
+            return data(event.eventsForStream(messageStream))
+        else:
+            return error("You do not have permission to view this user's messages.", PermissionError)
 
 
 # Shift

@@ -245,7 +245,8 @@ def invite(id, adminId, userId):
   event.create({
       "createdBy": userId,
       "streamId": user.messageStream(userId),
-      "displayString": "%s has invited you to the %s %s" % (user.nameForId(adminId), displayName(id), meta(id))
+      "displayString": "%s has invited you to the %s %s" % (user.nameForId(adminId), meta(id), displayName(id)),
+      "unread": True
       })
 
 

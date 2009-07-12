@@ -44,6 +44,10 @@ def update(data):
     return None
 
 
+def setRead(id, value):
+  pass
+
+
 def delete(id):
   pass
 
