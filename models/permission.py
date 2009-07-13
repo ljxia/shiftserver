@@ -118,7 +118,7 @@ def readableStreams(userId):
           if aperm["level"] >= 1]
 
 
-def writableStreams(userId):
+def writeableStreams(userId):
   return [aperm["streamId"] for aperm in permissionsForUser(userId)
           if aperm["level"] >= 2]
 

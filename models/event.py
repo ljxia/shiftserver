@@ -49,7 +49,8 @@ def setRead(id, value):
 
 
 def delete(id):
-  pass
+  db = core.connect()
+  del db[id]
 
 # ==============================================================================
 # Validation

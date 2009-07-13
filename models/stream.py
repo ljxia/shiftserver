@@ -89,7 +89,7 @@ def canRead(id, userId):
     return True
   if not theStream["private"]:
     return True
-  readableStreams = permissions.readableStreams(userId)
+  readableStreams = permission.readableStreams(userId)
   return (id in readableStreams)
 
 

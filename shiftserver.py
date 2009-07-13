@@ -602,15 +602,18 @@ class StreamController(ResourceController):
     @loggedin
     def post(self, id):
         loggedInUser = helper.getLoggedInUser()
-        jsonData = helper.getRequestBody()
-        if jsonData != "":
-            theData = json.loads(jsonData)
-            theData["streamId"] = id
-            theData["createdBy"] = loggedInUser["_id"]
-            if stream.canPost(streamId, loggedInUser["_id"]):
-                return data(event.create(theData))
+        if stream.canPost(id, loggedInUser["_id"]):
+            jsonData = helper.getRequestBody()
+            if jsonData != "":
+                theData = json.loads(jsonData)
+                theData["streamId"] = id
+                theData["createdBy"] = loggedInUser["_id"]
+                if stream.canPost(id, loggedInUser["_id"]):
+                    return data(event.create(theData))
+            else:
+                return error("No data for event.", NoDataError)
         else:
-            return error("No data for event.", NoDataError)
+            return error("Operation not permitted. You don't have permission to post to this stream.", PermissionError)
 
     @jsonencode
     @exists
@@ -641,7 +644,8 @@ class StreamController(ResourceController):
     def setPermission(self, id, userName, level):
         loggedInUser = helper.getLoggedInUser()
         if stream.canAdmin(id, loggedInUser["_id"]):
-            return data(permission.upateForUser(user.idForName(userName), id, level))
+            permission.updateForUser(user.idForName(userName), id, level)
+            return ack
         else:
             return error("Operation not permitted. You don't have permission to view permssions on this stream.", PermissionError)
 
@@ -798,13 +802,18 @@ def initRoutes():
               conditions=dict(method="GET"))
     d.connect(name="streamUpdate", route="stream/:id", controller=stream, action="update",
               conditions=dict(method="PUT"))
-    d.connect(name="streamDelete", route="stream/:id", controller=stream, action="read",
+    d.connect(name="streamDelete", route="stream/:id", controller=stream, action="delete",
               conditions=dict(method="DELETE"))
 
     d.connect(name="streamSubscribe", route="stream/:id/subscribe", controller=stream, action="subscribe",
               conditions=dict(method="POST"))
     d.connect(name="streamUnsubscribe", route="stream/:id/unsubscribe", controller=stream, action="unsubscribe",
               conditions=dict(method="POST"))
+
+    d.connect(name="streamSetPermission", route="stream/:id/permission", controller=stream, action="setPermission",
+              conditions=dict(method="POST"))
+    d.connect(name="streamPermissions", route="stream/:id/permissions", controller=stream, action="permissions",
+              conditions=dict(method="GET"))
 
     d.connect(name="streamEvents", route="stream/:id/events", controller=stream, action="events",
               conditions=dict(method="GET"))
@@ -819,9 +828,6 @@ def initRoutes():
               conditions=dict(method="POST"))
     d.connect(name="streamBlock", route="stream/:id/block/:userName", controller=stream, action="block",
               conditions=dict(method="POST"))
-
-    d.connect(name="streamPermissions", route="stream/:id/permissions", controller=stream, action="permissions",
-              conditions=dict(method="GET"))
 
     # Event Routes
     d.connect(name="eventRead", route="event/:id", controller=event, action="read",
@@ -844,7 +850,6 @@ def initRoutes():
     # Group Routes
     d.connect(name="groupRead", route="group/:id", controller=group, action="read",
               conditions=dict(method="GET"))
-
 
     return d
 
