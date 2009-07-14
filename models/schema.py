@@ -29,6 +29,13 @@ shiftByUser = "_design/shifts/_view/byuser"
 # Schemas
 # ==============================================================================
 
+"""
+Schema for user-
+
+publicStream: stream of the user's shifts. Can be subscribed to by anyone.
+privateStream: stream of shifts that have been directed towards this user.
+messageStream: stream of events from various people.
+"""
 def user():
   return {
     "type": "user",
@@ -41,12 +48,23 @@ def user():
     "joined": None,
     "lastSeen": None,
     "publicStream": None,
+    "privateStream": None,
     "messageStream": None,
     "notify": [],
     "streams": [],
     "preferences": {}
   }
 
+"""
+Schema for shift-
+
+publishData:
+  draft: The shift is not visible to anyone.
+  publishTime: The time that the shift was published.
+  private: The shift only visible to the specified streams.
+  streams: Streams which the shift is visible on (user or group). Has no effect
+    if the stream is not private.
+"""
 def shift():
   return {
     "type": "shift",
@@ -71,6 +89,14 @@ def shift():
     "content": {}
   }
 
+"""
+Schema for stream-
+
+  meta: free field for categorizing streams.
+  private: Whether the stream is viewable by anyone or only people with the proper
+    permissions.
+  objectRef: the object this stream refers to. For example a shift.
+"""
 def stream():
   return {
     "type": "stream",
@@ -81,6 +107,7 @@ def stream():
     "created": None,
     "modified": None,
     "private": True,
+    "notify" : [],
     "objectRef": None
   }
 
@@ -97,6 +124,19 @@ def event():
     "content": {}
   }
 
+"""
+Schema for permission-
+
+  createdBy: the user that granted the permission.
+  userId: the user who was given the permission.
+  level: 0 - joinable  (can subscribe to the stream)
+         1 - readable  (can read the stream)
+         2 - writeable (can post to the stream)
+         3 - adminable (can invite others to the stream)
+         4 - owner     (can update properties of the stream 
+                        as well as well delete the stream if 
+                        there's no one else's content on it)
+"""
 def permission():
   return {
     "type": "permission",
