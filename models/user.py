@@ -5,6 +5,7 @@ import schema
 import shift
 import stream
 import event
+import permission
 
 ref = utils.genrefn("user")
 
@@ -108,12 +109,12 @@ def delete(userName):
   id = idForName(userName)
 
   # delete the user's events
-  userEvents = [anevent["_id"] for anevent in event.eventsForUser(id)]
+  userEvents = utils.ids(event.eventsForUser(id))
   for eventId in userEvents:
     del db[eventId]
 
   # delete the user's public and message streams
-  userStreams = [astream["_id"] for astream in stream.streamsForObjectRef(ref(id))]
+  userStreams = utils.ids(stream.streamsForObjectRef(ref(id)))
   for streamId in userStreams:
     del db[streamId]
 
@@ -123,9 +124,14 @@ def delete(userName):
    if len(event.eventsForStream(streamId)) == 0]
 
   # delete the user's shifts
-  userShifts = [ashift["_id"] for ashift in shift.byUser(id)]
+  userShifts = utils.ids(shift.byUser(id))
   for shiftId in userShifts:
     del db[shiftId]
+
+  # delete the user's permission
+  userPerms = utils.ids(permission.permissionsForUser(id))
+  for permId in userPerms:
+    del db[permId]
 
   # delete the user
   del db[id]
