@@ -104,7 +104,7 @@ def canRead(shiftId, userId):
   shiftStreams = theShift["publishData"]["streams"]
   readableStreams = permission.readableStreams(userId)
 
-  allowed = set(shiftStreams).intersection(set(readableStreams))
+  allowed = set(shiftStreams).intersection(readableStreams)
 
   return len(allowed) > 0
 
@@ -134,18 +134,25 @@ def canUnpublish(shiftId, userId):
 
 
 def canComment(id, userId):
+  """
+  Check if the user can comment on a shift. Allowed if:
+
+  1. Shift is public.
+  2. If the shift was published to a stream that the user has permissions on.
+  """
   db = core.connect()
   theShift = db[id]
 
   if not theShift["publishData"]["private"]:
     return True
-  else:
-    shiftStreams = theShift["publishData"]["streams"]
-    userStreams = permission.writeableStreams(userId)
-    
-    allowed = set(shiftStreams).intersection(userStreams)
-    
-    return len(allowed) > 0
+
+  # ignore private streams
+  shiftStreams = [astream for astream in theShift["publishData"]["streams"]
+                  if not stream.isUserPrivateStream(astream)]
+  
+  writeable = permission.writeableStreams(userId)
+  allowed = set(shiftStreams).intersection(writeable)
+  return len(allowed) > 0
 
 
 def isPublic(id):
@@ -233,7 +240,11 @@ def unpublish(id):
 # ==============================================================================
 
 def commentStream(id):
-  return core.single(schema.commentStreams, id)
+  stream = core.single(schema.commentStreams, id)
+  if stream:
+    return stream["_id"]
+  else:
+    return None
 
 
 def createCommentStream(id):

@@ -443,6 +443,28 @@ class ShiftController(ResourceController):
         else:
             return error("Operation not permitted. You don't have permission to view comments on this shift.", PermissionError)
 
+    @jsonencode
+    @exists
+    @shiftType
+    @loggedin
+    def comment(self, id):
+        loggedInUser = helper.getLoggedInUser()
+        jsonData = helper.getRequestBody()
+        if jsonData != "":
+            theData = json.loads(jsonData)
+            if shift.canComment(id, loggedInUser["_id"]):
+                event.create({
+                        "streamId": shift.commentStream(id),
+                        "createdBy": loggedInUser["_id"],
+                        "content": {"text":theData["text"]}
+                        })
+                return ack
+            else:
+                return error("Operation not permitted. You don't have permission to comment on this shift.", PermissionError)
+        else:
+            return error("No data for comment.", NoDataError)
+
+
 # Event
 # ==============================================================================
 
@@ -797,6 +819,8 @@ def initRoutes():
 
     d.connect(name="shiftComments", route="shift/:id/comments", controller=shift, action="comments",
               conditions=dict(method="GET"))
+    d.connect(name="shiftComment", route="shift/:id/comment", controller=shift, action="comment",
+              conditions=dict(method="POST"))
 
     d.connect(name="shifts", route="shifts", controller=shifts, action="shifts",
               conditions=dict(method="GET"))
