@@ -274,3 +274,20 @@ def isSubscribed(id, streamId):
   theUser = db[id]
   return streamId in theUser["streams"]
 
+
+def addNotification(id, shiftId):
+  db = core.connect()
+  theUser = db[id]
+  commentStream = shift.commentStream(shiftId)
+  if not commentStream in theUser["notify"]:
+    theUser["notify"].append(commentStream)
+  db[id] = theUser
+
+
+def removeNotification(id, shiftId):
+  db = core.connect()
+  theUser = db[id]
+  commentStream = shift.commentStream(shiftId)
+  if commentStream in theUser["notify"]:
+    theUser["notify"].remove(commentStream)
+  db[id] = theUser

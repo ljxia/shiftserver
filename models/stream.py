@@ -291,3 +291,10 @@ def byUniqueName(uniqueName):
   Return the stream with a unique name.
   """
   return core.single(schema.streamByUniqueName, uniqueName)
+
+
+def notifications(id):
+  """
+  Return a list of all users who should be notified of an event on a stream.
+  """
+  return core.query(schema.notify, id)

@@ -16,6 +16,7 @@ commentStreams = "_design/streams/_view/comments"
 
 allUsers = "_design/users/_view/all"
 userByName = "_design/users/_view/byname"
+notify = "_design/users/_view/notify"
 
 allEvents = "_design/events/_view/all"
 eventByStream = "_design/events/_view/bystream"
@@ -108,7 +109,6 @@ def stream():
     "created": None,
     "modified": None,
     "private": True,
-    "notify" : [],
     "objectRef": None
   }
 

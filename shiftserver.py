@@ -63,6 +63,9 @@ CreatePermissionError = "CreatePermissionError"
 AlreadySubscribedError = "AlreadySubscribedError"
 NotSubscribedError = "NotSubscribedError"
 
+AlreadyBeingNotifiedError = "AlreadyBeingNotifiedError"
+NotBeingNotifiedError = "NotBeingNotifiedError"
+
 # Utils
 # =============================================================================
 
@@ -464,6 +467,36 @@ class ShiftController(ResourceController):
         else:
             return error("No data for comment.", NoDataError)
 
+    @jsonencode
+    @exists
+    @shiftType
+    @loggedin
+    def notify(self, id):
+        loggedInUser = helper.getLoggedInUser()
+        userId = loggedInUser["_id"]
+        if shift.canRead(id, userId):
+            if (not shift.commentStream(id) in user.readById(userId)["notify"]):
+                user.addNotification(userId, id)
+                return ack
+            else:
+                return error("You are already getting notification from this stream", AlreadyBeingNotifiedError)
+        else:
+            return error("Operation not permitted. You don't have permission to be notified of events on this stream.", PermissionError)
+
+    @jsonencode
+    @exists
+    @shiftType
+    @loggedin
+    def unnotify(self, id):
+        loggedInUser = helper.getLoggedInUser()
+        userId = loggedInUser["_id"]
+        if shift.commentStream(id) in user.readById(userId)["notify"]:
+            user.removeNotification(userId, id)
+            return ack
+        else:
+            return error("You are not getting notification from this stream.", NotBeingNotifiedError)
+
+
 
 # Event
 # ==============================================================================
@@ -677,7 +710,6 @@ class StreamController(ResourceController):
         else:
             return error("Operation not permitted. You don't have permission to view permssions on this stream.", PermissionError)
 
-
 # Permission
 # ==============================================================================
 
@@ -820,6 +852,11 @@ def initRoutes():
     d.connect(name="shiftComments", route="shift/:id/comments", controller=shift, action="comments",
               conditions=dict(method="GET"))
     d.connect(name="shiftComment", route="shift/:id/comment", controller=shift, action="comment",
+              conditions=dict(method="POST"))
+
+    d.connect(name="shiftNotify", route="shift/:id/notify", controller=shift, action="notify",
+              conditions=dict(method="POST"))
+    d.connect(name="shiftUnnotify", route="shift/:id/unnotify", controller=shift, action="unnotify",
               conditions=dict(method="POST"))
 
     d.connect(name="shifts", route="shifts", controller=shifts, action="shifts",

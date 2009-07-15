@@ -17,9 +17,21 @@ def create(data):
   theTime = utils.utctime()
   data["created"] = theTime
 
+  # create notification events
+  notifications = stream.notifications(data["streamId"])
+  for userId in notifications:
+    create({
+        "createdBy": data.get("createdBy"),
+        "displayString": data.get("displayString"),
+        "streamId": user.messageStream(userId),
+        "unread": True,
+        "content": data.get("content")
+        })
+
   newEvent = schema.event()
   newEvent.update(data)
   newEvent["type"] = "event"
+
   return db.create(newEvent)
 
 
