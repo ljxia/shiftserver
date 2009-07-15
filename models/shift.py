@@ -193,7 +193,6 @@ def publish(id, publishData):
   publishStreams = publishData.get("streams") or []
 
   if (publishData.get("private") == True) or isPrivate(id):
-    print "Private publish"
     allowedStreams = permission.writeableStreams(userId)
     allowed = list(set(allowedStreams).intersection(set(publishStreams)))
     # add any private user streams this shift is directed to
@@ -205,9 +204,7 @@ def publish(id, publishData):
     # add streams this user can post to
     allowed.extend([astream for astream in publishStreams
                     if stream.canPost(astream, userId)])
-    print allowed
   else:
-    print "Public publish"
     allowed.append(user.publicStream(userId))
 
   # TODO: commentStreams should use the permission of the streams the shift has been published to. -David 7/14/09
