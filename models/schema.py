@@ -72,7 +72,6 @@ def shift():
     "type": "shift",
     "createdBy": None,
     "href": None,
-    "domain": None,
     "space": {
       "name": None,
       "version": None,
@@ -87,7 +86,6 @@ def shift():
       "private": True,
       "streams": []
      },
-    "preferences": {},
     "content": {}
   }
 

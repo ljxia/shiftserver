@@ -7,6 +7,8 @@ import stream
 import event
 import permission
 
+def ShiftError(Exception): pass
+def ShiftSchemaConflictError(ShiftError): pass
 
 def ref(id):
   return "shift:"+id
@@ -23,6 +25,7 @@ def create(data):
 
   theTime = utils.utctime()
   data["created"] = theTime
+  data["modified"] = theTime
 
   newShift = schema.shift()
   newShift.update(data)
@@ -44,17 +47,16 @@ def update(data):
   """
   db = core.connect()
 
-  id = data["id"]
-  doc = db[id]
-  doc.update(data)
-  doc["modified"] = utils.utctime()
+  id = data["_id"]
+  theShift = db[id]
+  theShift.update(data)
+  theShift["modified"] = utils.utctime()
 
-  if core.validate(doc):
-    db[id] = doc
-    return doc
+  if core.validate(theShift):
+    db[id] = theShift
+    return theShift
   else:
-    # TODO: throw an exception - David 7/9/09
-    return None
+    raise ShiftSchemaConflictError
 
 
 def delete(id):

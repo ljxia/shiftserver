@@ -347,5 +347,20 @@ function(newDoc, oldDoc, userCtx)
 	throw {rehost_event: 'You cannot rehost an event to another stream.'};
       }
     }
+    if(newDoc.type == 'shift')
+    {
+      if(newDoc.space.name != oldDoc.space.name)
+      {
+	throw {changing_space: 'You cannot change the space of a shift.'};
+      }
+      if(newDoc.href != oldDoc.href)
+      {
+	throw {changing_href: 'You cannot change the url of a shift.'};
+      }
+      if(newDoc.domain != oldDoc.domain)
+      {
+	throw {changing_domain: 'You cannot change the domain of a shift.'};
+      }
+    }
   }
 }

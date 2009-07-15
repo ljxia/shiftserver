@@ -628,11 +628,6 @@ class StreamController(ResourceController):
         else:
             return error("You are not subscribed to that stream.", NotSubscribedError)
 
-
-    @jsonencode
-    def invite(self, id, userName):
-        pass
-
     @jsonencode
     @exists
     @streamType
@@ -652,10 +647,6 @@ class StreamController(ResourceController):
     @jsonencode
     def remove(self, id, userName):
         return "remove %s from %s" % (userName, id)
-
-    @jsonencode
-    def block(self, id, userName):
-        pass
 
     @jsonencode
     @exists
@@ -887,13 +878,9 @@ def initRoutes():
     d.connect(name="streamPost", route="stream/:id/post", controller=stream, action="post",
               conditions=dict(method="POST"))
 
-    d.connect(name="streamInvite", route="stream/:id/invite/:userName", controller=stream, action="invite",
-              conditions=dict(method="POST"))
     d.connect(name="streamAdd", route="stream/:id/add/:userName", controller=stream, action="add",
               conditions=dict(method="POST"))
     d.connect(name="streamRemove", route="stream/:id/remove/:userName", controller=stream, action="remove",
-              conditions=dict(method="POST"))
-    d.connect(name="streamBlock", route="stream/:id/block/:userName", controller=stream, action="block",
               conditions=dict(method="POST"))
 
     # Event Routes
