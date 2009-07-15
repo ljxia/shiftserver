@@ -78,6 +78,7 @@ def canRead(shiftId, userId):
   1. Created the shift
   2. The shift must be published and public
   3. If the user is subscribed to a stream the shift is on.
+  4. If the shift is published to the user's private stream.
   """
   db = core.connect()
 
@@ -97,8 +98,11 @@ def canRead(shiftId, userId):
   if not theShift["publishData"]["private"]:
     return True
 
+  if theUser["privateStream"] in theShift["publishData"]["streams"]:
+    return True
+
   shiftStreams = theShift["publishData"]["streams"]
-  readableStreams = permissions.readableStreams(userId)
+  readableStreams = permission.readableStreams(userId)
 
   allowed = set(shiftStreams).intersection(set(readableStreams))
 
@@ -151,6 +155,13 @@ def isPublic(id):
   return (not publishData["draft"]) and (not publishData["private"])
 
 
+def isPrivate(id):
+  db = core.connect()
+  theShift = db[id]
+  publishData = theShift["publishData"]
+  return publishData["private"]
+
+
 # ==============================================================================
 # Publishing
 # ==============================================================================
@@ -172,25 +183,34 @@ def publish(id, publishData):
   allowed = []
   publishStreams = publishData.get("streams") or []
 
-  # if private shift check against the streams the user can write to
-  if publishData["private"]:
+  if (publishData.get("private") == True) or isPrivate(id):
+    print "Private publish"
     allowedStreams = permission.writeableStreams(userId)
     allowed = list(set(allowedStreams).intersection(set(publishStreams)))
+    # add any private user streams this shift is directed to
+    if publishData.get("users"):
+      allowed.extend([user.privateStream(user.idForName(userName)) 
+                      for userName in publishData["users"]
+                      if user.read(userName)])
+      del publishData["users"]
+    # add streams this user can post to
+    allowed.extend([astream for astream in publishStreams
+                    if stream.canPost(astream, userId)])
+    print allowed
   else:
-    # publish to the users public stream - used when following
+    print "Public publish"
     allowed.append(user.publicStream(userId))
-    # also include any public streams if specified, excluding
-    # the public streams of other users
-    publicStreams = [astream for astream in publishStreams
-                     if stream.isPublic(astream) and (not stream.isUserPublicStream(astream))]
-    allowed.extend(publicStreams)
-    if not commentStream(id):
-      createCommentStream(id)
 
-  # TODO: publish to user's private stream for @user - David
-    
-  publishData["streams"] = allowed
-  theShift["publishData"] = publishData
+  # TODO: commentStreams should use the permission of the streams the shift has been published to. -David 7/14/09
+  if not commentStream(id):
+    createCommentStream(id)
+
+  # remove duplicates
+  publishData["streams"] = list(set(allowed))
+  
+  newData = theShift["publishData"]
+  newData.update(publishData)
+  theShift["publishData"] = newData
   theShift["publishData"]["draft"] = False
 
   db[id] = theShift

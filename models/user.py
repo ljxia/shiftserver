@@ -39,6 +39,17 @@ def create(data, createStreams=True):
       "createdBy": userId
       }, False)
 
+
+  # private stream for when shifts are sent directly to a user
+  privateStream = stream.create({
+      "objectRef": userRef, 
+      "uniqueName": ref(userId,"private"),
+      "private": True,
+      "meta": "userPrivateStream",
+      "createdBy": userId
+      }, False)
+
+
   # create the message stream for the user
   messageStream = stream.create({
       "objectRef": userRef, 
@@ -51,7 +62,8 @@ def create(data, createStreams=True):
   theUser = db[userId]
   theUser.update({
       "messageStream": messageStream,
-      "publicStream": publicStream
+      "publicStream": publicStream,
+      "privateStream": privateStream
       })
   
   db[userId] = theUser
@@ -176,6 +188,8 @@ def nameIsUnique(userName):
 def publicStream(id):
   return readFull(nameForId(id))["publicStream"]
 
+def privateStream(id):
+  return readFull(nameForId(id))["privateStream"]
 
 def messageStream(id):
   return readFull(nameForId(id))["messageStream"]

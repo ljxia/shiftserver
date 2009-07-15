@@ -415,11 +415,6 @@ class ShiftController(ResourceController):
         publishData = json.loads(helper.getRequestBody())
         theShift = shift.read(id)
         if loggedInUser and shift.canPublish(id, loggedInUser['_id']):
-            if publishData.get("users"):
-                userNames = [user.idForName(userId) for userId in publishData["users"]
-                             if user.idForName(userId)]
-                streams = (publishData.get("streams") or [])
-                publishData["streams"] = streams.extend(userNames)
             shift.publish(id, publishData)
             return ack
         else:
