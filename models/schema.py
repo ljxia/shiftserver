@@ -12,6 +12,7 @@ streamByObjectRef = "_design/streams/_view/byobjectref"
 streamByUniqueName = "_design/streams/_view/byuniquename"
 streamByCreator = "_design/streams/_view/bycreator"
 streamBySubscribers = "_design/streams/_view/subscribers"
+commentStreams = "_design/streams/_view/comments"
 
 allUsers = "_design/users/_view/all"
 userByName = "_design/users/_view/byname"

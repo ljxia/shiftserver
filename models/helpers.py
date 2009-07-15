@@ -30,3 +30,10 @@ def deleteAllStreams():
 def deleteAllEvents():
   eventIds = [aevent["_id"] for aevent in core.query(schema.allEvents)]
   [event.delete(eventId) for eventId in eventIds]
+
+
+def deleteDocs():
+  deleteAllStreams()
+  deleteAllPermissions()
+  deleteAllShifts()
+  deleteAllEvents()

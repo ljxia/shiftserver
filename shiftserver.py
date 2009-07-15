@@ -415,6 +415,11 @@ class ShiftController(ResourceController):
         publishData = json.loads(helper.getRequestBody())
         theShift = shift.read(id)
         if loggedInUser and shift.canPublish(id, loggedInUser['_id']):
+            if publishData.get("users"):
+                userNames = [user.idForName(userId) for userId in publishData["users"]
+                             if user.idForName(userId)]
+                streams = (publishData.get("streams") or [])
+                publishData["streams"] = streams.extend(userNames)
             shift.publish(id, publishData)
             return ack
         else:
@@ -434,8 +439,14 @@ class ShiftController(ResourceController):
             return error("Operation not permitted. You don't have permission to publish this shift.", PermissionError)
 
     @jsonencode
+    @exists
+    @shiftType
     def comments(self, id):
-        pass
+        loggedInUser = helper.getLoggedInUser()
+        if shift.isPublic(id) or (shift.canRead(id, loggedInUser["_id"])):
+            return data(event.eventsForStream(shift.commentStream(id)))
+        else:
+            return error("Operation not permitted. You don't have permission to view comments on this shift.", PermissionError)
 
 # Event
 # ==============================================================================
@@ -790,7 +801,7 @@ def initRoutes():
               conditions=dict(method="POST"))
 
     d.connect(name="shiftComments", route="shift/:id/comments", controller=shift, action="comments",
-              conditions=dict(method="POST"))
+              conditions=dict(method="GET"))
 
     d.connect(name="shifts", route="shifts", controller=shifts, action="shifts",
               conditions=dict(method="GET"))

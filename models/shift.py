@@ -170,7 +170,7 @@ def publish(id, publishData):
   userId = theUser["_id"]
 
   allowed = []
-  publishStreams = publishData["streams"]
+  publishStreams = publishData.get("streams") or []
 
   # if private shift check against the streams the user can write to
   if publishData["private"]:
@@ -178,7 +178,7 @@ def publish(id, publishData):
     allowed = list(set(allowedStreams).intersection(set(publishStreams)))
   else:
     # publish to the users public stream - used when following
-    allowed.append(user.publicStream(theUser["userName"])["_id"])
+    allowed.append(user.publicStream(userId))
     # also include any public streams if specified, excluding
     # the public streams of other users
     publicStreams = [astream for astream in publishStreams
@@ -213,7 +213,7 @@ def unpublish(id):
 # ==============================================================================
 
 def commentStream(id):
-  return core.single("_design/streams/_view/byobjectref", ref(id)+":comment")
+  return core.single(schema.commentStreams, id)
 
 
 def createCommentStream(id):
@@ -221,7 +221,8 @@ def createCommentStream(id):
 
   theShift = db[id]
   stream.create({
-      "objectRef": ref(id)+":comment",
+      "meta": "comments",
+      "objectRef": ref(id),
       "createdBy": theShift["createdBy"]
       })
 
