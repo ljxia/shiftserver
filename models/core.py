@@ -41,7 +41,9 @@ def update(doc):
 
 
 def validate(doc):
-  schema = getattr(schema, doc.type)()
-  schemaKeys = schema.keys()
+  theSchema = getattr(schema, doc["type"])()
+  schemaKeys = theSchema.keys()
   docKeys = doc.keys()
+  print schemaKeys
+  print docKeys
   return set(docKeys).issubset(set(schemaKeys))

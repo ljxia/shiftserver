@@ -254,6 +254,13 @@ function (doc)
   {
     emit(doc.streamId, doc);
   }
+  if(doc.type == "shift")
+  {
+    for(var i = 0; i < doc.publishData.streams.length; i++)
+    {
+      emit(doc.publishData.streams[i], doc);
+    }
+  }
 }
 
 // by_user

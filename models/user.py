@@ -201,7 +201,7 @@ def follow(follower, followed):
   stream is only for shifts at the moment. Both arguments should
   be the userNames.
   """
-  stream.subscribe(publicStream(followed).get("_id"), idForName(follower))
+  stream.subscribe(publicStream(followed), follower)
 
 
 def unfollow(follower, followed):
@@ -209,7 +209,7 @@ def unfollow(follower, followed):
   Unsubscribe a user from another user's public stream. Both arguments
   should be userNames.
   """
-  stream.unsubscribe(publicStream(followed).get("_id"), idForName(follower))
+  stream.unsubscribe(publicStream(followed), follower)
 
 
 def feeds(id, page=0, perPage=25):
@@ -219,7 +219,10 @@ def feeds(id, page=0, perPage=25):
   db = core.connect()
   theUser = db[id]
   streams = theUser["streams"]
-  pass
+  allEvents = []
+  for astream in streams:
+    allEvents.extend(event.eventsForStream(astream))
+  return allEvents
 
 
 def feed(id, streamId):

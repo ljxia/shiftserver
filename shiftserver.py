@@ -323,26 +323,30 @@ class UserController(ResourceController):
     @loggedin
     def follow(self, userName):
         loggedInUser = helper.getLoggedInUser()
-        lname = loggedInUser["userName"]
-        if lname == userName:
+        follower = loggedInUser["_id"]
+        followed = user.idForName(userName)
+        if follower == followed:
             return error("You cannot follow yourself.", FollowError)
-        user.follow(lname, userName)
-        return ack
+        else:
+            user.follow(follower, followed)
+            return ack
 
     @jsonencode
     @exists
     @loggedin
     def unfollow(self, userName):
         loggedInUser = helper.getLoggedInUser()
-        lname = loggedInUser["userName"]
-        if lname == userName:
+        follower = loggedInUser["_id"]
+        followed = user.idForName(userName)
+        if follower == followed:
             return error("You cannot unfollow yourself.", FollowError)
-        user.unfollow(lname, userName)
-        return ack
+        else:
+            user.unfollow(follower, followed)
+            return ack
 
     @jsonencode
-    @loggedin
     @exists
+    @loggedin
     def messages(self, userName):
         loggedInUser = helper.getLoggedInUser()
         messageStream = user.messageStream(user.idForName(userName))
@@ -350,6 +354,17 @@ class UserController(ResourceController):
             return data(event.eventsForStream(messageStream))
         else:
             return error("You do not have permission to view this user's messages.", PermissionError)
+
+    @jsonencode
+    @exists
+    @loggedin
+    def feeds(self, userName):
+        loggedInUser = helper.getLoggedInUser()
+        userId = loggedInUser["_id"]
+        if user.isAdmin(userId) or user.idForName(userName) == userId:
+            return data(user.feeds(userId))
+        else:
+            return error("You don't have permission to view this feed.", PermissionError)
 
 
 # Shift
@@ -388,13 +403,16 @@ class ShiftController(ResourceController):
     @loggedin
     def update(self, id):
         loggedInUser = helper.getLoggedInUser()
-        theShift = shift.read(id)
-        if loggedInUser and shift.canUpdate(id, loggedInUser['_id']):
-            shift.update(helper.getRequestBody())
-            return ack
+        jsonData = helper.getRequestBody()
+        if jsonData != "":
+            shiftData = json.loads(jsonData)
+            if shift.canUpdate(id, loggedInUser['_id']):
+                shift.update(id, shiftData)
+                return ack
+            else:
+                return error("Operation not permitted. You don't have permission to update this shift.", PermissionError)
         else:
-            return error("Operation not permitted. You don't have permission to update this shift.", PermissionError)
-        
+            return error("No data for shift.", NoDataError)
 
     @jsonencode
     @exists
@@ -816,6 +834,8 @@ def initRoutes():
               conditions=dict(method="DELETE"))
 
     d.connect(name="userMessages", route="user/:userName/messages", controller=user, action="messages",
+              conditions=dict(method="GET"))
+    d.connect(name="userFeeds", route="user/:userName/feeds", controller=user, action="feeds",
               conditions=dict(method="GET"))
     d.connect(name="userShifts", route="user/:userName/shifts", controller=user, action="shifts",
               conditions=dict(method="GET"))

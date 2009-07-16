@@ -41,22 +41,19 @@ def read(id):
   return db[id]
 
 
-def update(data):
+def update(id, data):
   """
   Update a shift in the database.
   """
   db = core.connect()
 
-  id = data["_id"]
   theShift = db[id]
   theShift.update(data)
+  print theShift
   theShift["modified"] = utils.utctime()
 
-  if core.validate(theShift):
-    db[id] = theShift
-    return theShift
-  else:
-    raise ShiftSchemaConflictError
+  db[id] = theShift
+  return theShift
 
 
 def delete(id):
@@ -192,7 +189,7 @@ def publish(id, publishData):
   allowed = []
   publishStreams = publishData.get("streams") or []
 
-  if (publishData.get("private") == True) or isPrivate(id):
+  if (publishData.get("private") == True) or (publishData.get("private") == None and isPrivate(id)):
     allowedStreams = permission.writeableStreams(userId)
     allowed = list(set(allowedStreams).intersection(set(publishStreams)))
     # add any private user streams this shift is directed to
