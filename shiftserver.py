@@ -9,7 +9,7 @@ import simplejson as json
 from decorators import jsonencode
 from decorators import simple_decorator
 
-import core
+import models.core as core
 import models.user as user
 import models.shift as shift
 import models.stream as stream
