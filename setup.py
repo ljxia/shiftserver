@@ -11,7 +11,7 @@ def isJsFile(path):
 
 def walk(dir, op=None):
   """
-  Parse a directory for javascript files.
+  Parse a directory for view files.
   """
   files = os.listdir(dir)
   for afile in files:
@@ -25,7 +25,7 @@ def walk(dir, op=None):
         print "dir: %s, file: %s" % (dir, path)
 
 
-def loadViews(viewDir="views"):
+def collectDesignDocs(viewDir="views"):
   """
   Load all database views into a dictionary
   """
@@ -34,7 +34,6 @@ def loadViews(viewDir="views"):
   def collect(path):
     parts = path.split("/")
     designDoc = parts[1]
-    print designDoc
     view = os.path.splitext(parts[2])[0]
     if not designDocs.get(designDoc):
       designDocs[designDoc] = {}
@@ -43,6 +42,10 @@ def loadViews(viewDir="views"):
   walk(viewDir, collect)
 
   return designDocs
+
+
+def createDesignDoc(designDoc):
+  pass
   
 
 def init(dbname="shiftspace"):
