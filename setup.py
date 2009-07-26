@@ -38,7 +38,7 @@ def collectDesignDocs(viewDir="views"):
 
     designDoc = designDocs.get(designDocName)
     if not designDoc:
-      designDoc = {"_id":designDocName, "language":"javascript"}
+      designDoc = {"_id": designDocName, "language":"javascript"}
 
     view = parts[2]
 
@@ -60,19 +60,49 @@ def collectDesignDocs(viewDir="views"):
   return designDocs
 
 
-def createDesignDoc(designDoc):
-  pass
-  
+adminUser = {
+  "type": "user",
+  "userName": "shiftspace",
+  "password": "shiftspace"
+  }
+
+
+adminDoc = {
+  "admins": ["shiftspace"]
+  }
+
+
+def loadDocs(db, createAdmin=True):
+  """
+  Load all of the initial documents for the database.
+  Optional create admin user for debugging. Not recommended
+  for deployment.
+  """
+  docs = collectDesignDocs()
+
+  if createAdmin:
+    docs["admin"] = adminDoc
+    docs["shiftspace"] = adminUser
+
+  for k, v in docs.items():
+    db[k] = v
+  print "Design documents loaded."
+
 
 def init(dbname="shiftspace"):
+  """
+  Initialize the shiftspace database. Defaults to
+  shiftspace for the database name.
+  """
   server = core.server()
   if not server.__contains__(dbname):
     print "Creating database %s." % dbname
     server.create(dbname)
   else:
     print "%s database already exists." % dbname
-  loadViews()
+  db = server[dbname]
+  loadDocs(db)
 
 
 if __name__ == "__main__":
-  pass
+  init()
