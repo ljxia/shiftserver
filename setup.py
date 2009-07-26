@@ -45,14 +45,13 @@ def loadViews(viewDir="views"):
   return designDocs
   
 
-
-def init():
+def init(dbname="shiftspace"):
   server = core.server()
-  if not server.__contains__("shiftspace"):
-    print "Creating shiftspace database"
-    server.create("shiftspace")
+  if not server.__contains__(dbname):
+    print "Creating database %s." % dbname
+    server.create(dbname)
   else:
-    print "shiftspace database already exists"
+    print "%s database already exists." % dbname
   loadViews()
 
 
