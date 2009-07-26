@@ -1,4 +1,5 @@
 import os
+import md5
 import models.core as core
 
 
@@ -60,10 +61,16 @@ def collectDesignDocs(viewDir="views"):
   return designDocs
 
 
+def md5hash(str):
+    m = md5.new()
+    m.update(str)
+    return m.hexdigest()
+
+
 adminUser = {
   "type": "user",
   "userName": "shiftspace",
-  "password": "shiftspace"
+  "password": md5hash("shiftspace")
   }
 
 
