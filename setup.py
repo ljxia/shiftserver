@@ -68,7 +68,8 @@ adminUser = {
 
 
 adminDoc = {
-  "admins": ["shiftspace"]
+  "type": "system",
+  "ids": ["shiftspace"]
   }
 
 
@@ -81,10 +82,11 @@ def loadDocs(db, createAdmin=True):
   docs = collectDesignDocs()
 
   if createAdmin:
-    docs["admin"] = adminDoc
+    docs["admins"] = adminDoc
     docs["shiftspace"] = adminUser
 
   for k, v in docs.items():
+    print "Loading %s" % k
     db[k] = v
   print "Design documents loaded."
 
