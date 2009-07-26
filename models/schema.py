@@ -3,29 +3,29 @@
 # ==============================================================================
 
 allPermissions = "_design/permissions/_view/all"
-permissionByUser = "_design/permissions/_view/byuser"
+permissionByUser = "_design/permissions/_view/by_user"
 permissionByStream = "_design/permissions/_view/by_stream"
 permissionByUserAndStream = "_design/permissions/_view/by_user_and_stream"
 
 allStreams = "_design/streams/_view/all"
-streamByObjectRef = "_design/streams/_view/byobjectref"
-streamByUniqueName = "_design/streams/_view/byuniquename"
-streamByCreator = "_design/streams/_view/bycreator"
+streamByObjectRef = "_design/streams/_view/by_object_ref"
+streamByUniqueName = "_design/streams/_view/by_unique_name"
+streamByCreator = "_design/streams/_view/by_creator"
 streamBySubscribers = "_design/streams/_view/subscribers"
 commentStreams = "_design/streams/_view/comments"
 
 allUsers = "_design/users/_view/all"
-userByName = "_design/users/_view/byname"
+userByName = "_design/users/_view/by_name"
 notify = "_design/users/_view/notify"
 
 allEvents = "_design/events/_view/all"
-eventByStream = "_design/events/_view/bystream"
-eventByUser= "_design/events/_view/byuser"
+eventByStream = "_design/events/_view/by_stream"
+eventByUser= "_design/events/_view/by_user"
 
 allShifts = "_design/shifts/_view/all"
 
 allGroups = "_design/groups/_view/all"
-shiftByUser = "_design/shifts/_view/byuser"
+shiftByUser = "_design/shifts/_view/by_user"
 
 # ==============================================================================
 # Schemas
