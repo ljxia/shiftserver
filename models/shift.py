@@ -268,3 +268,10 @@ def byUserName(userName):
   """
   userId = user.idForName(userName)
   return byUser(schema.shiftByUser, userId)
+
+
+def byHref(href):
+  """
+  Return the list of shifts at a particular url.
+  """
+  return core.query(schema.shiftByHref, href)

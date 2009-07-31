@@ -23,9 +23,11 @@ eventByStream = "_design/events/_view/by_stream"
 eventByUser= "_design/events/_view/by_user"
 
 allShifts = "_design/shifts/_view/all"
+shiftByHref = "_design/shifts/_view/by_href"
+shiftByUser = "_design/shifts/_view/by_user"
 
 allGroups = "_design/groups/_view/all"
-shiftByUser = "_design/shifts/_view/by_user"
+
 
 # ==============================================================================
 # Schemas

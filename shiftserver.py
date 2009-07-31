@@ -366,11 +366,26 @@ class UserController(ResourceController):
         else:
             return error("You don't have permission to view this feed.", PermissionError)
 
+    @jsonencode
+    @exists
+    @loggedin
+    def shifts(self, userName):
+        loggedInUser = helper.getLoggedInUser()
+        userId = loggedInUser["_id"]
+        if user.isAdmin(userId) or user.idForName(userName) == userId:
+            return data(shift.byUserName(userName))
+        else:
+            return error("You don't have permission to view this user's shifts.", PermissionError)
+
 
 # Shift
 # ==============================================================================
 
 class ShiftController(ResourceController):
+    @jsonencode
+    def shifts(self, href):
+        return data(shift.byHref(href))
+
     @jsonencode
     @loggedin
     def create(self):
@@ -777,10 +792,6 @@ class PermissionController(ResourceController):
 # ==============================================================================
 
 class ShiftsController(ResourceController):
-    @jsonencode
-    def read(self, userName):
-        return data(shift.byUserName(userName))
-
     def feed(self, userName):
         pass
 
@@ -870,7 +881,7 @@ def initRoutes():
     d.connect(name="shiftUnnotify", route="shift/:id/unnotify", controller=shift, action="unnotify",
               conditions=dict(method="POST"))
 
-    d.connect(name="shifts", route="shifts", controller=shifts, action="shifts",
+    d.connect(name="shifts", route="shifts", controller=shift, action="shifts",
               conditions=dict(method="GET"))
 
     # Stream Routes
