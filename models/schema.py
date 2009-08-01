@@ -48,6 +48,7 @@ def user():
     "email": None,
     "bio": None,
     "url": None,
+    "gravatar": None,
     "password": None,
     "joined": None,
     "lastSeen": None,

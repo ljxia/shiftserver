@@ -274,4 +274,7 @@ def byHref(href):
   """
   Return the list of shifts at a particular url.
   """
-  return core.query(schema.shiftByHref, href)
+  shifts = core.query(schema.shiftByHref, href)
+  for shift in shifts:
+    shift["gravatar"] = user.readById(shift["createdBy"])["gravatar"]
+  return shifts
