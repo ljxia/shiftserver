@@ -73,6 +73,7 @@ def shift():
   return {
     "type": "shift",
     "createdBy": None,
+    "userName": None,
     "href": None,
     "space": {
       "name": None,

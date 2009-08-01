@@ -393,7 +393,9 @@ class ShiftController(ResourceController):
         jsonData = helper.getRequestBody()
         if jsonData != "":
             theData = json.loads(jsonData)
-            theData['createdBy'] = loggedInUser.get("_id")
+            id = loggedInUser.get("_id")
+            theData['createdBy'] = id
+            theData['userName'] = user.nameForId(id)
             return data(shift.create(theData))
         else:
             return error("No data for shift.", NoDataError)
