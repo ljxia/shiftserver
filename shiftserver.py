@@ -953,5 +953,5 @@ appconf = {'/': {'tools.proxy.on':True,
 if __name__ == "__main__":
     cherrypy.config.update({'server.socket_port':8080})
     # TODO: The following value should be read from an environment file - David 7/4/09
-    app = cherrypy.tree.mount(root=None, script_name='/~davidnolen/shiftspace/shiftserver', config=appconf)
+    app = cherrypy.tree.mount(root=None, script_name='/~davidnolen/shiftspace/server', config=appconf)
     cherrypy.quickstart(app)
