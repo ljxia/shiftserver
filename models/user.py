@@ -300,11 +300,11 @@ def followStreams(id):
   db = core.connect()
   theUser = db[id]
   streamIds = theUser["streams"]
-  return [db[streamId] for stream in streamIds if db[streamId]["meta"] == "public"]
+  return [streamId for streamId in streamIds if db[streamId]["meta"] == "public"]
 
 
 def groupStreams(id):
   db = core.connect()
   theUser = db[id]
   streamIds = theUser["streams"]
-  return [db[streamId] for stream in streamIds if db[streamId]["meta"] == "group"]
+  return [streamId for streamId in streamIds if db[streamId]["meta"] == "group"]

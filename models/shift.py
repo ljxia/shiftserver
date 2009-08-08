@@ -280,7 +280,7 @@ def byHref(href):
   return shifts
 
 
-def shifts(byHref, userId=None, byFollowing=False, byGroups=False):
+def shifts(byHref, userId=None, byFollowing=False, byGroups=False, start=0, perPage=25):
   """
   Returns a list of shifts based on whether
   1. href
@@ -294,8 +294,17 @@ def shifts(byHref, userId=None, byFollowing=False, byGroups=False):
   byGroups - a user id
   """
   lucene = core.lucene()
-  queryString = "href:%s" % byHref
-  if byFollowing:
-    streams = user.readById(userId)
-    
-  pass
+  # TODO: validate byHref - David
+  queryString = "(href:%s AND draft:false AND private:false)" % byHref
+  if userId:
+    streams = ""
+    if byFollowing:
+      following = user.followStreams(userId)
+      streams = streams + " ".join(following)
+    if byGroups:
+      groups = user.groupStreams(userId)
+      stream = stream + " ".join(groups)
+    # TODO: make sure streams cannot be manipulated from client - David
+    queryString = queryString + (" OR (draft:false AND streams:%s)" % streams)
+  ids = lucene.search("shifts", q=queryString, sort="\modified", skip=start, limit=perPage)
+  return [db[id] for id in ids]
