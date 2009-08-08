@@ -385,7 +385,11 @@ class UserController(ResourceController):
 class ShiftController(ResourceController):
     @jsonencode
     def shifts(self, byHref, byDomain=None, byFollowing=False, byGroups=False):
-        return data(shift.shifts(byHref))
+        loggedInUser = helper.getLoggedInUser()
+        if loggedInUser:
+            return data(shift.shifts(byHref, loggedInUser.get("_id"), byFollowing, byGroups))
+        else:
+            return data(shift.shifts(byHref, None, byFollowing, byGroups))
 
     @jsonencode
     @loggedin
