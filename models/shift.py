@@ -293,6 +293,7 @@ def shifts(byHref, userId=None, byFollowing=False, byGroups=False, start=0, perP
   byFollowing - a user id
   byGroups - a user id
   """
+  db = core.connect()
   lucene = core.lucene()
   # TODO: validate byHref - David
   queryString = "(href:%s AND draft:false AND private:false)" % byHref
@@ -303,8 +304,9 @@ def shifts(byHref, userId=None, byFollowing=False, byGroups=False, start=0, perP
       streams = streams + " ".join(following)
     if byGroups:
       groups = user.groupStreams(userId)
-      stream = stream + " ".join(groups)
+      streams = streams + " ".join(groups)
     # TODO: make sure streams cannot be manipulated from client - David
     queryString = queryString + (" OR (draft:false AND streams:%s)" % streams)
-  ids = lucene.search("shifts", q=queryString, sort="\modified", skip=start, limit=perPage)
-  return [db[id] for id in ids]
+  print queryString
+  rows = lucene.search("shifts", q=queryString, sort="\modified", skip=start, limit=perPage)
+  return [db[row["id"]] for row in rows]
