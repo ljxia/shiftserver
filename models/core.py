@@ -1,5 +1,19 @@
 import couchdb.client
 import schema
+import simplejson as json
+
+
+class Lucene():
+  def __init__(self):
+    self.resource = couchdb.client.Resource(None, "http://localhost:5984/shiftspace/_fti/lucene")
+  
+  def search(self, view, debug=False, **params):
+    if debug:
+      return self.resource.get(view, **params)[1]
+    else:
+      return self.resource.get(view, **params)[1].get("rows")
+
+_lucene = Lucene()
 
 
 def server():
@@ -9,6 +23,10 @@ def server():
 def connect():
   server = couchdb.client.Server("http://localhost:5984/")
   return server["shiftspace"]
+
+
+def lucene():
+  return _lucene
 
 
 def query(view, key=None):
