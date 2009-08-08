@@ -187,10 +187,10 @@ def isPublic(id):
 
 def isPublicUserStream(id):
   """
-  Check if the stream is a userPublicStream.
+  Check if the stream is a user's public stream.
   """
   db = core.connect()
-  return (not db[id]["meta"] == "userPublicStream")
+  return (not db[id]["meta"] == "public")
 
 
 # ==============================================================================

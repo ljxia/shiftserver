@@ -278,3 +278,24 @@ def byHref(href):
   for shift in shifts:
     shift["gravatar"] = user.readById(shift["createdBy"])["gravatar"]
   return shifts
+
+
+def shifts(byHref, userId=None, byFollowing=False, byGroups=False):
+  """
+  Returns a list of shifts based on whether
+  1. href
+  3. By public streams specified user is following. 
+  4. By groups streams specified user is following.
+  
+  Parameters:
+  byHref - a url
+  byDomain - a url string
+  byFollowing - a user id
+  byGroups - a user id
+  """
+  lucene = core.lucene()
+  queryString = "href:%s" % byHref
+  if byFollowing:
+    streams = user.readById(userId)
+    
+  pass

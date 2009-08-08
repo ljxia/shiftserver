@@ -35,7 +35,7 @@ def create(data, createStreams=True):
       "objectRef": userRef, 
       "uniqueName": ref(userId,"public"),
       "private": False,
-      "meta": "userPublicStream",
+      "meta": "public",
       "createdBy": userId
       }, False)
 
@@ -45,7 +45,7 @@ def create(data, createStreams=True):
       "objectRef": userRef, 
       "uniqueName": ref(userId,"private"),
       "private": True,
-      "meta": "userPrivateStream",
+      "meta": "private",
       "createdBy": userId
       }, False)
 
@@ -55,7 +55,7 @@ def create(data, createStreams=True):
       "objectRef": userRef, 
       "uniqueName": ref(userId, "messages"), 
       "private": True, 
-      "meta": "userMessageStream",
+      "meta": "message",
       "createdBy": userId
       }, False)
 
@@ -294,3 +294,17 @@ def removeNotification(id, shiftId):
   if commentStream in theUser["notify"]:
     theUser["notify"].remove(commentStream)
   db[id] = theUser
+
+
+def followStreams(id):
+  db = core.connect()
+  theUser = db[id]
+  streamIds = theUser["streams"]
+  return [db[streamId] for stream in streamIds if db[streamId]["meta"] == "public"]
+
+
+def groupStreams(id):
+  db = core.connect()
+  theUser = db[id]
+  streamIds = theUser["streams"]
+  return [db[streamId] for stream in streamIds if db[streamId]["meta"] == "group"]
