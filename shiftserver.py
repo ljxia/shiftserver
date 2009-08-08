@@ -385,7 +385,7 @@ class UserController(ResourceController):
 class ShiftController(ResourceController):
     @jsonencode
     def shifts(self, byHref, byDomain=None, byFollowing=False, byGroups=False):
-        return data(shift.byHref(byHref))
+        return data(shift.shifts(byHref))
 
     @jsonencode
     @loggedin
