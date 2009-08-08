@@ -55,7 +55,6 @@ def collectDesignDocs(viewDir="views"):
       view = os.path.splitext(os.path.basename(path))[0]
       designDoc[view] = open(path).read()
 
-    print designDocName
     designDocs[designDocName] = designDoc
 
   walk(viewDir, collect)
