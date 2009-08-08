@@ -28,8 +28,8 @@ def walk(dir, op=None):
 
 def collectDesignDocs(viewDir="views"):
   """
-  Load all CouchDB design documents, their views, and validation
-  documents into an array.
+  Load all CouchDB design documents, their views, validation,
+  and lucene documents into an array.
   """
   designDocs = {}
 
@@ -44,16 +44,18 @@ def collectDesignDocs(viewDir="views"):
     view = parts[2]
 
     if parts[1] != "validation":
-      if not designDoc.get("views"):
-        designDoc["views"] = {}
-      if not designDoc["views"].get(view):
-        designDoc["views"][view] = {}
+      key = (parts[1] == "lucene" and "fulltext") or "views"
+      if not designDoc.get(key):
+        designDoc[key] = {}
+      if not designDoc[key].get(view):
+        designDoc[key][view] = {}
       fn = os.path.splitext(os.path.basename(path))[0]
-      designDoc["views"][view][fn] = open(path).read()
+      designDoc[key][view][fn] = open(path).read()
     else:
       view = os.path.splitext(os.path.basename(path))[0]
       designDoc[view] = open(path).read()
 
+    print designDocName
     designDocs[designDocName] = designDoc
 
   walk(viewDir, collect)
