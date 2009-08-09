@@ -9,6 +9,7 @@ function(doc)
     ret.add(doc.publishData.streams.join(" "), {field:"streams"});
     ret.add(doc.publishData['private'], {field:"private"});
     ret.add(doc.publishData.draft, {field:"draft"});
+    ret.add(Date.parse(doc.created), {field:"created"});
     ret.add(Date.parse(doc.modified), {field:"modified"});
     return ret;
   }
