@@ -310,4 +310,7 @@ def shifts(byHref, userId=None, byFollowing=False, byGroups=False, start=0, perP
     queryString = queryString + ((" OR (draft:false%s)" % ((len(streams) > 0 and (" AND streams:%s" % streams)) or "")))
   print queryString
   rows = lucene.search("shifts", q=queryString, sort="\modified", skip=start, limit=perPage)
-  return [db[row["id"]] for row in rows]
+  shifts = [db[row["id"]] for row in rows]
+  for shift in shifts:
+    shift["gravatar"] = user.readById(shift["createdBy"])["gravatar"]
+  return shifts
