@@ -50,8 +50,6 @@ def query(view, key=None):
 def single(view, key):
   db = connect()
   options = {"key": key}
-  print "single"
-  print key
   for row in db.view(view, None, **options):
     return row.value
 
