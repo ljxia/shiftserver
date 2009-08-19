@@ -267,7 +267,7 @@ def byUserName(userName):
   Return the list of shifts a user has created.
   """
   userId = user.idForName(userName)
-  return byUser(schema.shiftByUser, userId)
+  return core.query(schema.shiftByUser, userId)
 
 
 def byHref(href):
