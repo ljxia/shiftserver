@@ -5,17 +5,14 @@ import schema
 import user
 import permission
 
-
 # ==============================================================================
 # CRUD
 # ==============================================================================
 
 def create(data):
     db = core.connect()
-
     theTime = utils.utctime()
     data["created"] = theTime
-
     # create notification events
     notifications = stream.notifications(data["streamId"])
     for userId in notifications:
@@ -26,27 +23,21 @@ def create(data):
                 "unread": True,
                 "content": data.get("content")
                 })
-
     newEvent = schema.event()
     newEvent.update(data)
     newEvent["type"] = "event"
-
     return db.create(newEvent)
-
 
 def read(id):
     db = core.connect()
     return 
 
-
 def update(data):
     db = core.connect()
-
     id = data["id"]
     doc = db[id]
     doc.update(data)
     doc["modified"] = utils.utctime()
-
     if core.validate(doc):
         db[id] = doc
         return doc
@@ -54,10 +45,8 @@ def update(data):
         # TODO: throw an exception - David 7/9/09
         return None
 
-
 def setRead(id, value):
     pass
-
 
 def delete(id):
     db = core.connect()
@@ -77,7 +66,6 @@ def canCreate(data, userId):
     writeable = permission.writeableStreams(userId)
     return (streamId in writeable)
 
-
 def canRead(id, userId):
     if user.isAdmin(userId):
         return True
@@ -88,13 +76,11 @@ def canRead(id, userId):
     readable = permission.readableStreams(userId)
     return (streamId in readable)
 
-
 def canUpdate(id, userId):
     if user.isAdmin(userId):
         return True
     theEvent = read(id)
     return theEvent["createdBy"] == userId
-  
 
 def canDelete(id, userId):
     if user.isAdmin(userId):
@@ -108,7 +94,6 @@ def canDelete(id, userId):
 
 def eventsForStream(streamId):
     return core.query(schema.eventByStream, streamId)
-
 
 def eventsForUser(userId):
     return core.query(schema.eventByUser, userId)

@@ -30,7 +30,6 @@ def create(data):
     db = core.connect()
     streamId = data["streamId"]
     createdBy = data["createdBy"]
-  
     if not streamId:
         raise MissingStreamError
     if not createdBy:
@@ -39,30 +38,22 @@ def create(data):
         raise CreateEventOnPublicStreamError
     if permissionForUser(createdBy, streamId):
         raise PermissionAlreadyExistsError
-  
     allowed = user.isAdmin(createdBy)
-  
     if not allowed:
         allowed = stream.isOwner(streamId, createdBy)
-  
     if not allowed:
         adminable = adminStreams(createdBy)
         allowed = streamId in adminable
-  
     if not allowed:
         raise CreateEventPermissionError
-    
     newPermission = schema.permission()
     newPermission.update(data)
     newPermission["type"] = "permission"
-  
     return db.create(newPermission)
-
 
 def read(id):
     db = core.connect()
     return db[id]
-
 
 def update(id, level):
     """
@@ -73,11 +64,9 @@ def update(id, level):
     perm["level"] = level
     db[id] = perm
 
-
 def updateForUser(userId, streamId, level):
     perm = permissionForUser(userId, streamId)
     update(perm["_id"], level)
-
 
 def delete(id):
     db = core.connect()
@@ -90,14 +79,12 @@ def delete(id):
 def permissionForUser(userId, streamId):
     return core.single(schema.permissionByUserAndStream, [userId, streamId])
 
-
 def permissionsForUser(userId):
     """
     Returns all permission documents for a particular user.
     """
     db = core.connect()
     return core.query(schema.permissionByUser, userId)
-
 
 def permissionsForStream(streamId):
     """
@@ -106,29 +93,22 @@ def permissionsForStream(streamId):
     db = core.connect()
     return core.query(schema.permissionByStream, streamId)
 
-
 def joinableStreams(userId):
     return [aperm["streamId"] for aperm in permissionsForUser(userId)
             if aperm["level"] == 0]
-
 
 def readableStreams(userId):
     return [aperm["streamId"] for aperm in permissionsForUser(userId)
             if aperm["level"] >= 1]
 
-
 def writeableStreams(userId):
     return [aperm["streamId"] for aperm in permissionsForUser(userId)
             if aperm["level"] >= 2]
-
 
 def adminStreams(userId):
     return [aperm["streamId"] for aperm in permissionsForUser(userId)
             if aperm["level"] >= 3]
 
-
 def ownerStreams(userId):
     return [aperm["streamId"] for aperm in permissionsForUser(userId)
             if aperm["level"] == 4]
-  
-

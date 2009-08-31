@@ -388,6 +388,8 @@ def followStreams(id):
     Return all the user public stream ids the user is subscribed to.
     Parameters:
         id - a user id.
+    Returns:
+        A list of user public stream ids.
     """
     db = core.connect()
     theUser = db[id]
@@ -399,6 +401,8 @@ def groupStreams(id):
     Return all the group stream ids the user is subscribed to.
     Parameters:
         id - a user id.
+    Returns:
+        A list of group stream ids.
     """
     db = core.connect()
     theUser = db[id]

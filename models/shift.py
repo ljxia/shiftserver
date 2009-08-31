@@ -248,97 +248,109 @@ def publish(id, publishData):
     db[id] = theShift
 
 def unpublish(id):
-  """
-  Set the draft status of a shift back to True"
-  """
-  db = core.connect()
-
-  theShift = db[id]
-  theShift["publishData"]["draft"] = True
-
-  db[id] = theShift
-
+    """
+    Set the draft status of a shift back to True"
+    Parameters:
+        id - a shift id.
+    """
+    db = core.connect()
+    theShift = db[id]
+    theShift["publishData"]["draft"] = True
+    db[id] = theShift
 
 # ==============================================================================
 # Comments
 # ==============================================================================
 
 def commentStream(id):
-  stream = core.single(schema.commentStreams, id)
-  if stream:
-    return stream["_id"]
-  else:
-    return None
-
+    """
+    Return the comment stream id for the specified shift.
+    Parameters:
+        id - a shift id.
+    """
+    stream = core.single(schema.commentStreams, id)
+    if stream:
+        return stream["_id"]
+    else:
+        return None
 
 def createCommentStream(id):
-  db = core.connect()
-
-  theShift = db[id]
-  stream.create({
-      "meta": "comments",
-      "objectRef": ref(id),
-      "createdBy": theShift["createdBy"]
-      })
-
+    """
+    Create a comment stream for a shift if it doesn't already exist.
+    Parameters:
+        id - a shift id.
+    """
+    db = core.connect()
+    theShift = db[id]
+    stream.create({
+        "meta": "comments",
+        "objectRef": ref(id),
+        "createdBy": theShift["createdBy"]
+        })
 
 # ==============================================================================
 # Utilities
 # ==============================================================================
 
 def byUser(userId):
-  return core.query(schema.shiftByUser, userId)
-
+    return core.query(schema.shiftByUser, userId)
 
 def byUserName(userName):
-  """
-  Return the list of shifts a user has created.
-  """
-  userId = user.idForName(userName)
-  return core.query(schema.shiftByUser, userId)
-
+    """
+    Return the list of shifts a user has created.
+    Parameters:
+        userName - a user name.
+    Returns:
+        A list of the user's shifts.
+    """
+    userId = user.idForName(userName)
+    return core.query(schema.shiftByUser, userId)
 
 def byHref(href):
-  """
-  Return the list of shifts at a particular url.
-  """
-  shifts = core.query(schema.shiftByHref, href)
-  for shift in shifts:
-    shift["gravatar"] = user.readById(shift["createdBy"])["gravatar"]
-  return shifts
-
+    """
+    Return the list of shifts at a particular url.
+    Parameters:
+        href - a url.
+    Returns:
+        A list of public shift's on the specified url.
+    """
+    shifts = core.query(schema.shiftByHref, href)
+    for shift in shifts:
+        shift["gravatar"] = user.readById(shift["createdBy"])["gravatar"]
+    return shifts
 
 def shifts(byHref, userId=None, byFollowing=False, byGroups=False, start=0, perPage=25):
-  """
-  Returns a list of shifts based on whether
-  1. href
-  3. By public streams specified user is following. 
-  4. By groups streams specified user is following.
-  
-  Parameters:
-  byHref - a url
-  byDomain - a url string
-  byFollowing - a user id
-  byGroups - a user id
-  """
-  db = core.connect()
-  lucene = core.lucene()
-  # TODO: validate byHref - David
-  queryString = "(href:\"%s\" AND draft:false AND private:false)" % byHref
-  if userId:
-    queryString = queryString + " OR createdBy:%s" % userId
-    streams = ""
-    if byFollowing:
-      following = user.followStreams(userId)
-      streams = streams + " ".join(following)
-    if byGroups:
-      groups = user.groupStreams(userId)
-      streams = streams + " ".join(groups)
-    # TODO: make sure streams cannot be manipulated from client - David
-    queryString = queryString + ((" OR (draft:false%s)" % ((len(streams) > 0 and (" AND streams:%s" % streams)) or "")))
-  print queryString
-  rows = lucene.search("shifts", q=queryString, sort="\modified", skip=start, limit=perPage)
-  shifts = [db[row["id"]] for row in rows]
-  for shift in shifts:
-    shift["gravatar"] = user.readById(shift["createdBy"])["gravatar"]
-  return shifts
+    """
+    Returns a list of shifts based on whether
+        1. href
+        3. By public streams specified user is following. 
+        4. By groups streams specified user is following.
+    Parameters:
+        byHref - a url
+        byDomain - a url string
+        byFollowing - a user id
+        byGroups - a user id
+    Returns:
+        A list of shifts that match the specifications.
+    """
+    db = core.connect()
+    lucene = core.lucene()
+    # TODO: validate byHref - David
+    queryString = "(href:\"%s\" AND draft:false AND private:false)" % byHref
+    if userId:
+        queryString = queryString + " OR createdBy:%s" % userId
+        streams = ""
+        if byFollowing:
+            following = user.followStreams(userId)
+            streams = streams + " ".join(following)
+        if byGroups:
+            groups = user.groupStreams(userId)
+            streams = streams + " ".join(groups)
+        # TODO: make sure streams cannot be manipulated from client - David
+        queryString = queryString + ((" OR (draft:false%s)" % ((len(streams) > 0 and (" AND streams:%s" % streams)) or "")))
+    print queryString
+    rows = lucene.search("shifts", q=queryString, sort="\modified", skip=start, limit=perPage)
+    shifts = [db[row["id"]] for row in rows]
+    for shift in shifts:
+        shift["gravatar"] = user.readById(shift["createdBy"])["gravatar"]
+    return shifts
