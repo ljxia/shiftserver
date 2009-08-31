@@ -1,7 +1,6 @@
+import utils.utils as utils
 import core
-import utils
 import schema
-
 import user
 import shift
 import event

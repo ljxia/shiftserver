@@ -1,10 +1,14 @@
 import time
 import datetime
+import md5
 
+def md5hash(str):
+    m = md5.new()
+    m.update(str)
+    return m.hexdigest()
 
 def ids(rows):
   return [row["_id"] for row in rows]
-
 
 def genrefn(pre):
   def refn(id, post=None):

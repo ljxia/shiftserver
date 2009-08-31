@@ -1,7 +1,6 @@
-import utils
+import utils.utils as utils
 import core
 import schema
-
 import user
 import stream
 import event
