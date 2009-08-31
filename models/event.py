@@ -11,104 +11,104 @@ import permission
 # ==============================================================================
 
 def create(data):
-  db = core.connect()
+    db = core.connect()
 
-  theTime = utils.utctime()
-  data["created"] = theTime
+    theTime = utils.utctime()
+    data["created"] = theTime
 
-  # create notification events
-  notifications = stream.notifications(data["streamId"])
-  for userId in notifications:
-    create({
-        "createdBy": data.get("createdBy"),
-        "displayString": data.get("displayString"),
-        "streamId": user.messageStream(userId),
-        "unread": True,
-        "content": data.get("content")
-        })
+    # create notification events
+    notifications = stream.notifications(data["streamId"])
+    for userId in notifications:
+        create({
+                "createdBy": data.get("createdBy"),
+                "displayString": data.get("displayString"),
+                "streamId": user.messageStream(userId),
+                "unread": True,
+                "content": data.get("content")
+                })
 
-  newEvent = schema.event()
-  newEvent.update(data)
-  newEvent["type"] = "event"
+    newEvent = schema.event()
+    newEvent.update(data)
+    newEvent["type"] = "event"
 
-  return db.create(newEvent)
+    return db.create(newEvent)
 
 
 def read(id):
-  db = core.connect()
-  return 
+    db = core.connect()
+    return 
 
 
 def update(data):
-  db = core.connect()
+    db = core.connect()
 
-  id = data["id"]
-  doc = db[id]
-  doc.update(data)
-  doc["modified"] = utils.utctime()
+    id = data["id"]
+    doc = db[id]
+    doc.update(data)
+    doc["modified"] = utils.utctime()
 
-  if core.validate(doc):
-    db[id] = doc
-    return doc
-  else:
-    # TODO: throw an exception - David 7/9/09
-    return None
+    if core.validate(doc):
+        db[id] = doc
+        return doc
+    else:
+        # TODO: throw an exception - David 7/9/09
+        return None
 
 
 def setRead(id, value):
-  pass
+    pass
 
 
 def delete(id):
-  db = core.connect()
-  del db[id]
+    db = core.connect()
+    del db[id]
 
 # ==============================================================================
 # Validation
 # ==============================================================================
 
 def canCreate(data, userId):
-  if user.isAdmin(userId):
-    return True
-  streamId = data["streamId"]
-  theStream = stream.read(userId)
-  if not theStream["private"]:
-    return True
-  writeable = permission.writeableStreams(userId)
-  return (streamId in writeable)
+    if user.isAdmin(userId):
+        return True
+    streamId = data["streamId"]
+    theStream = stream.read(userId)
+    if not theStream["private"]:
+        return True
+    writeable = permission.writeableStreams(userId)
+    return (streamId in writeable)
 
 
 def canRead(id, userId):
-  if user.isAdmin(userId):
-    return True
-  streamId = data["streamId"]
-  theStream = stream.read(userId)
-  if not theStream["private"]:
-    return True
-  readable = permission.readableStreams(userId)
-  return (streamId in readable)
+    if user.isAdmin(userId):
+        return True
+    streamId = data["streamId"]
+    theStream = stream.read(userId)
+    if not theStream["private"]:
+        return True
+    readable = permission.readableStreams(userId)
+    return (streamId in readable)
 
 
 def canUpdate(id, userId):
-  if user.isAdmin(userId):
-    return True
-  theEvent = read(id)
-  return theEvent["createdBy"] == userId
+    if user.isAdmin(userId):
+        return True
+    theEvent = read(id)
+    return theEvent["createdBy"] == userId
   
 
 def canDelete(id, userId):
-  if user.isAdmin(userId):
-    return True
-  theEvent = read(id)
-  return theEvent["createdBy"] == userId
+    if user.isAdmin(userId):
+        return True
+    theEvent = read(id)
+    return theEvent["createdBy"] == userId
 
 # ==============================================================================
 # Utilities
 # ==============================================================================
 
 def eventsForStream(streamId):
-  return core.query(schema.eventByStream, streamId)
+    return core.query(schema.eventByStream, streamId)
 
 
 def eventsForUser(userId):
-  return core.query(schema.eventByUser, userId)
+    return core.query(schema.eventByUser, userId)

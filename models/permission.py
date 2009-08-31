@@ -17,118 +17,118 @@ class PermissionAlreadyExistsError(PermissionError): pass
 # ==============================================================================
 
 def create(data):
-  """
-  Create will fail if:
-  1. No stream specified.
-  2. No creator specified.
-  3. Attempting to create an event on a public stream.
-  4. Attempting to create a permission for a user on a stream if a permission
-     for that user on that stream already exists.
-  5. Attempting to create an event without proper permission. Must either be
-     an amdin for that stream or running as admin for shiftserver.
-  """
-  db = core.connect()
-  streamId = data["streamId"]
-  createdBy = data["createdBy"]
-
-  if not streamId:
-    raise MissingStreamError
-  if not createdBy:
-    raise MissingCreatorError
-  if stream.isPublic(streamId):
-    raise CreateEventOnPublicStreamError
-  if permissionForUser(createdBy, streamId):
-    raise PermissionAlreadyExistsError
-
-  allowed = user.isAdmin(createdBy)
-
-  if not allowed:
-    allowed = stream.isOwner(streamId, createdBy)
-
-  if not allowed:
-    adminable = adminStreams(createdBy)
-    allowed = streamId in adminable
-
-  if not allowed:
-    raise CreateEventPermissionError
+    """
+    Create will fail if:
+    1. No stream specified.
+    2. No creator specified.
+    3. Attempting to create an event on a public stream.
+    4. Attempting to create a permission for a user on a stream if a permission
+    for that user on that stream already exists.
+    5. Attempting to create an event without proper permission. Must either be
+    an amdin for that stream or running as admin for shiftserver.
+    """
+    db = core.connect()
+    streamId = data["streamId"]
+    createdBy = data["createdBy"]
   
-  newPermission = schema.permission()
-  newPermission.update(data)
-  newPermission["type"] = "permission"
-
-  return db.create(newPermission)
+    if not streamId:
+        raise MissingStreamError
+    if not createdBy:
+        raise MissingCreatorError
+    if stream.isPublic(streamId):
+        raise CreateEventOnPublicStreamError
+    if permissionForUser(createdBy, streamId):
+        raise PermissionAlreadyExistsError
+  
+    allowed = user.isAdmin(createdBy)
+  
+    if not allowed:
+        allowed = stream.isOwner(streamId, createdBy)
+  
+    if not allowed:
+        adminable = adminStreams(createdBy)
+        allowed = streamId in adminable
+  
+    if not allowed:
+        raise CreateEventPermissionError
+    
+    newPermission = schema.permission()
+    newPermission.update(data)
+    newPermission["type"] = "permission"
+  
+    return db.create(newPermission)
 
 
 def read(id):
-  db = core.connect()
-  return db[id]
+    db = core.connect()
+    return db[id]
 
 
 def update(id, level):
-  """
-  Can only update the level after permission creation.
-  """
-  db = core.connect()
-  perm = read(id)
-  perm["level"] = level
-  db[id] = perm
+    """
+    Can only update the level after permission creation.
+    """
+    db = core.connect()
+    perm = read(id)
+    perm["level"] = level
+    db[id] = perm
 
 
 def updateForUser(userId, streamId, level):
-  perm = permissionForUser(userId, streamId)
-  update(perm["_id"], level)
+    perm = permissionForUser(userId, streamId)
+    update(perm["_id"], level)
 
 
 def delete(id):
-  db = core.connect()
-  del db[id]
+    db = core.connect()
+    del db[id]
 
 # ==============================================================================
 # Utilities
 # ==============================================================================
 
 def permissionForUser(userId, streamId):
-  return core.single(schema.permissionByUserAndStream, [userId, streamId])
+    return core.single(schema.permissionByUserAndStream, [userId, streamId])
 
 
 def permissionsForUser(userId):
-  """
-  Returns all permission documents for a particular user.
-  """
-  db = core.connect()
-  return core.query(schema.permissionByUser, userId)
+    """
+    Returns all permission documents for a particular user.
+    """
+    db = core.connect()
+    return core.query(schema.permissionByUser, userId)
 
 
 def permissionsForStream(streamId):
-  """
-  Returns all permission documents a particular user.
-  """
-  db = core.connect()
-  return core.query(schema.permissionByStream, streamId)
+    """
+    Returns all permission documents a particular user.
+    """
+    db = core.connect()
+    return core.query(schema.permissionByStream, streamId)
 
 
 def joinableStreams(userId):
-  return [aperm["streamId"] for aperm in permissionsForUser(userId)
-          if aperm["level"] == 0]
+    return [aperm["streamId"] for aperm in permissionsForUser(userId)
+            if aperm["level"] == 0]
 
 
 def readableStreams(userId):
-  return [aperm["streamId"] for aperm in permissionsForUser(userId)
-          if aperm["level"] >= 1]
+    return [aperm["streamId"] for aperm in permissionsForUser(userId)
+            if aperm["level"] >= 1]
 
 
 def writeableStreams(userId):
-  return [aperm["streamId"] for aperm in permissionsForUser(userId)
-          if aperm["level"] >= 2]
+    return [aperm["streamId"] for aperm in permissionsForUser(userId)
+            if aperm["level"] >= 2]
 
 
 def adminStreams(userId):
-  return [aperm["streamId"] for aperm in permissionsForUser(userId)
-          if aperm["level"] >= 3]
+    return [aperm["streamId"] for aperm in permissionsForUser(userId)
+            if aperm["level"] >= 3]
 
 
 def ownerStreams(userId):
-  return [aperm["streamId"] for aperm in permissionsForUser(userId)
-          if aperm["level"] == 4]
+    return [aperm["streamId"] for aperm in permissionsForUser(userId)
+            if aperm["level"] == 4]
   
 

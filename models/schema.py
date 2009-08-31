@@ -41,24 +41,24 @@ privateStream: stream of shifts that have been directed towards this user.
 messageStream: stream of events from various people.
 """
 def user():
-  return {
-    "type": "user",
-    "userName": None,
-    "displayName": None,
-    "email": None,
-    "bio": None,
-    "url": None,
-    "gravatar": None,
-    "password": None,
-    "joined": None,
-    "lastSeen": None,
-    "publicStream": None,
-    "privateStream": None,
-    "messageStream": None,
-    "notify": [],
-    "streams": [],
-    "preferences": {}
-  }
+    return {
+        "type": "user",
+        "userName": None,
+        "displayName": None,
+        "email": None,
+        "bio": None,
+        "url": None,
+        "gravatar": None,
+        "password": None,
+        "joined": None,
+        "lastSeen": None,
+        "publicStream": None,
+        "privateStream": None,
+        "messageStream": None,
+        "notify": [],
+        "streams": [],
+        "preferences": {}
+        }
 
 """
 Schema for shift-
@@ -71,27 +71,27 @@ publishData:
     if the stream is not private.
 """
 def shift():
-  return {
-    "type": "shift",
-    "createdBy": None,
-    "userName": None,
-    "href": None,
-    "space": {
-      "name": None,
-      "version": None,
-    },
-    "summary": None,
-    "created": None,
-    "modified": None,
-    "broken": False,
-    "publishData": {
-      "draft": True,
-      "publishTime": None,
-      "private": True,
-      "streams": []
-     },
-    "content": {}
-  }
+    return {
+        "type": "shift",
+        "createdBy": None,
+        "userName": None,
+        "href": None,
+        "space": {
+            "name": None,
+            "version": None,
+            },
+        "summary": None,
+        "created": None,
+        "modified": None,
+        "broken": False,
+        "publishData": {
+            "draft": True,
+            "publishTime": None,
+            "private": True,
+            "streams": []
+            },
+          "content": {}
+        }
 
 """
 Schema for stream-
@@ -102,30 +102,30 @@ Schema for stream-
   objectRef: the object this stream refers to. For example a shift.
 """
 def stream():
-  return {
-    "type": "stream",
-    "meta": None,
-    "createdBy": None,
-    "displayName": None,
-    "uniqueName": None,
-    "created": None,
-    "modified": None,
-    "private": True,
-    "objectRef": None
-  }
+    return {
+        "type": "stream",
+        "meta": None,
+        "createdBy": None,
+        "displayName": None,
+        "uniqueName": None,
+        "created": None,
+        "modified": None,
+        "private": True,
+        "objectRef": None
+        }
 
 def event(): 
-  return {
-    "type": "event",
-    "createdBy": None,
-    "streamId": None,
-    "objectRef": None,
-    "uniqueName": None,
-    "displayString": None,
-    "created": None,
-    "modified": None,
-    "content": {}
-  }
+    return {
+        "type": "event",
+        "createdBy": None,
+        "streamId": None,
+        "objectRef": None,
+        "uniqueName": None,
+        "displayString": None,
+        "created": None,
+        "modified": None,
+        "content": {}
+        }
 
 """
 Schema for permission-
@@ -141,13 +141,13 @@ Schema for permission-
                         there's no one else's content on it)
 """
 def permission():
-  return {
-    "type": "permission",
-    "created": None,
-    "modified": None,
-    "createdBy": None,
-    "streamId": None,
-    "userId": None,
-    "level": 0
-  }
+    return {
+        "type": "permission",
+        "created": None,
+        "modified": None,
+        "createdBy": None,
+        "streamId": None,
+        "userId": None,
+        "level": 0
+        }
 
