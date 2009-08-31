@@ -31,7 +31,8 @@ def create(data):
     newShift = schema.shift()
     newShift.update(data)
     newShift["type"] = "shift"
-    return db.create(newShift)
+    id = db.create(newShift)
+    return db[id]
 
 def read(id):
     """
