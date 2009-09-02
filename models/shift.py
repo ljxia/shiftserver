@@ -1,4 +1,5 @@
 import utils.utils as utils
+from  utils.decorators import *
 import core
 import schema
 import user
@@ -289,12 +290,6 @@ def createCommentStream(id):
         "createdBy": theShift["createdBy"]
         })
 
-def addCommentCount(shifts):
-    for shift in shifts:
-        stream = commentStream(shift)
-        shift["commentCount"] = len(event.eventsForStream(stream))
-    return shifts
-
 # ==============================================================================
 # Favoriting
 # ==============================================================================
@@ -324,30 +319,37 @@ def unfavorite(id, userId):
         return
     del db[favoriteId(id, userId)]
 
-def addFavoriteData(shifts, userId=None):
-    for shift in shifts:
-        id = shift["_id"]
-        if userId:
-            shift["favorite"] = isFavorited(id, userId)
-        shift["favoriteCount"] = favoriteCount(id)
-    return shifts
-
 def favoriteCount(id):
-    return core.single(schema.favoritesByShift, id)
+    return core.single(schema.favoritesByShift, id) or 0
 
 # ==============================================================================
 # Utilities
 # ==============================================================================
 
-def addGravatar(shifts):
+def joinData(shifts, userId=None):
+    print userId
     for shift in shifts:
+        id = shift["_id"]
+        if userId:
+            shift["favorite"] = isFavorited(id, userId)
+        shift["favoriteCount"] = favoriteCount(id)
+        stream = commentStream(id)
+        shift["commentCount"] = len(event.eventsForStream(stream))
         shift["gravatar"] = user.readById(shift["createdBy"])["gravatar"]
     return shifts
 
-def byUser(userId):
-    return core.query(schema.shiftByUser, userId)
+@simple_decorator
+def joindecorator(func):
+    def afn(*args, **kwargs):
+        return joinData(func(*args, **kwargs), **kwargs)
+    return afn
 
-def byUserName(userName):
+@joindecorator
+def byUser(id, userId=None):
+    return core.query(schema.shiftByUser, id)
+
+@joindecorator
+def byUserName(userName, userId=None):
     """
     Return the list of shifts a user has created.
     Parameters:
@@ -355,10 +357,11 @@ def byUserName(userName):
     Returns:
         A list of the user's shifts.
     """
-    userId = user.idForName(userName)
-    return core.query(schema.shiftByUser, userId)
+    id = user.idForName(userName)
+    return core.query(schema.shiftByUser, id)
 
-def byHref(href):
+@joindecorator
+def byHref(href, userId=None):
     """
     Return the list of shifts at a particular url.
     Parameters:
@@ -367,10 +370,9 @@ def byHref(href):
         A list of public shift's on the specified url.
     """
     shifts = core.query(schema.shiftByHref, href)
-    for shift in shifts:
-        shift["gravatar"] = user.readById(shift["createdBy"])["gravatar"]
     return shifts
 
+@joindecorator
 def shifts(byHref, userId=None, byFollowing=False, byGroups=False, start=0, perPage=25):
     """
     Returns a list of shifts based on whether
@@ -403,6 +405,4 @@ def shifts(byHref, userId=None, byFollowing=False, byGroups=False, start=0, perP
     print queryString
     rows = lucene.search("shifts", q=queryString, sort="\modified", skip=start, limit=perPage)
     shifts = [db[row["id"]] for row in rows]
-    for shift in shifts:
-        shift["gravatar"] = user.readById(shift["createdBy"])["gravatar"]
     return shifts
