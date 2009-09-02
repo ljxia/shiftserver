@@ -333,7 +333,7 @@ def addFavoriteData(shifts, userId=None):
     return shifts
 
 def favoriteCount(id):
-    pass
+    return core.single(schema.favoritesByShift, id)
 
 # ==============================================================================
 # Utilities
