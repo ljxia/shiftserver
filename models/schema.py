@@ -153,3 +153,8 @@ def permission():
         "level": 0
         }
 
+def group():
+    return stream().update({
+            "shortName": None,
+            "description": None
+            })
