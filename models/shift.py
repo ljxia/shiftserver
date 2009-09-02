@@ -313,7 +313,8 @@ def favorite(id, userId):
         return
     fav = {
         "created": utils.utctime(),
-        "createdBy": userId
+        "createdBy": userId,
+        "type": "favorite"
         }
     db[favoriteId(id, userId)] = fav
 
