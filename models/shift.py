@@ -289,9 +289,56 @@ def createCommentStream(id):
         "createdBy": theShift["createdBy"]
         })
 
+def addCommentCount(shifts):
+    for shift in shifts:
+        stream = commentStream(shift)
+        shift["commentCount"] = len(event.eventsForStream(stream))
+    return shifts
+
+# ==============================================================================
+# Favoriting
+# ==============================================================================
+
+def isFavorited(id, userId):
+    db = core.connect()
+    favId = "favorite:%s:%s" % (userId, id)
+    return db[favId] != None
+
+def favorite(id, userId):
+    db = core.connect()
+    if isFavorited(id, userId):
+        return
+    fav = {
+        "created": utils.utctime(),
+        "createdBy": userId
+        }
+    db[favId] = fav
+
+def unfavorite(id, userId):
+    db = core.connect()
+    if not isFavorited(id, userId):
+        return
+    del db[favId]
+
+def addFavoriteData(shifts, userId=None):
+    for shift in shifts:
+        id = shift["_id"]
+        if userId:
+            shift["favorite"] = isFavorited(id, userId)
+        shift["favoriteCount"] = favoriteCount(id)
+    return shifts
+
+def favoriteCount(id):
+    pass
+
 # ==============================================================================
 # Utilities
 # ==============================================================================
+
+def addGravatar(shifts):
+    for shift in shifts:
+        shift["gravatar"] = user.readById(shift["createdBy"])["gravatar"]
+    return shifts
 
 def byUser(userId):
     return core.query(schema.shiftByUser, userId)
