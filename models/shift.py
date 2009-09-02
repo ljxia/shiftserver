@@ -309,7 +309,7 @@ def isFavorited(id, userId):
 
 def favorite(id, userId):
     db = core.connect()
-    if isFavorited(id, userId):
+    if (not canRead(id, userId)) or isFavorited(id, userId):
         return
     fav = {
         "created": utils.utctime(),
@@ -320,7 +320,7 @@ def favorite(id, userId):
 
 def unfavorite(id, userId):
     db = core.connect()
-    if not isFavorited(id, userId):
+    if (not canRead(id, userId)) or (not isFavorited(id, userId)):
         return
     del db[favoriteId(id, userId)]
 
