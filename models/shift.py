@@ -60,7 +60,7 @@ def update(id, data):
     print theShift
     theShift["modified"] = utils.utctime()
     db[id] = theShift
-    return theShift
+    return db[id]
 
 def delete(id):
     """

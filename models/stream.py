@@ -35,7 +35,7 @@ def create(data, add=True):
     id = db.create(newStream)
     if add:
         user.addStream(userId, id)
-    return id
+    return db[id]
 
 def read(id):
     """
@@ -55,7 +55,7 @@ def update(data):
         data - a dictionary of fields to update. This dictionary should contain
             an _id field as well as a _rev field.
     """
-    core.update(data)
+    return core.update(data)
 
 def delete(id):
     """

@@ -30,7 +30,7 @@ def create(data):
 
 def read(id):
     db = core.connect()
-    return 
+    return db[id]
 
 def update(data):
     db = core.connect()
@@ -40,13 +40,10 @@ def update(data):
     doc["modified"] = utils.utctime()
     if core.validate(doc):
         db[id] = doc
-        return doc
+        return db[id]
     else:
         # TODO: throw an exception - David 7/9/09
         return None
-
-def setRead(id, value):
-    pass
 
 def delete(id):
     db = core.connect()
@@ -97,3 +94,6 @@ def eventsForStream(streamId):
 
 def eventsForUser(userId):
     return core.query(schema.eventByUser, userId)
+
+def setRead(id, value):
+    pass

@@ -59,7 +59,7 @@ def create(data, createStreams=True):
         "privateStream": privateStream
         })
     db[userId] = theUser
-    return userId
+    return db[userId]
 
 def read(userName):
     """

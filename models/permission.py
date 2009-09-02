@@ -49,7 +49,8 @@ def create(data):
     newPermission = schema.permission()
     newPermission.update(data)
     newPermission["type"] = "permission"
-    return db.create(newPermission)
+    id = db.create(newPermission)
+    return db[id]
 
 def read(id):
     db = core.connect()
@@ -63,6 +64,7 @@ def update(id, level):
     perm = read(id)
     perm["level"] = level
     db[id] = perm
+    return db[id]
 
 def updateForUser(userId, streamId, level):
     perm = permissionForUser(userId, streamId)
