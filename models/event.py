@@ -10,6 +10,13 @@ import permission
 # ==============================================================================
 
 def create(data):
+    """
+    Create an event document.
+    Parameters:
+        data - a dictionary of the event data.
+    Returns:
+        an event document.
+    """
     db = core.connect()
     theTime = utils.utctime()
     data["created"] = theTime
@@ -29,10 +36,24 @@ def create(data):
     return db.create(newEvent)
 
 def read(id):
+    """
+    Read the event document.
+    Parameters:
+        id - an event id.
+    Returns:
+        an event document.
+    """
     db = core.connect()
     return db[id]
 
 def update(data):
+    """
+    Update an event document.
+    Parameters:
+        data - dictionary of key-values to update.
+    Returns:
+        an event document.
+    """
     db = core.connect()
     id = data["id"]
     doc = db[id]
@@ -46,6 +67,11 @@ def update(data):
         return None
 
 def delete(id):
+    """
+    Delete a event document.
+    Parameters:
+        id - an event id.
+    """
     db = core.connect()
     del db[id]
 
@@ -54,6 +80,17 @@ def delete(id):
 # ==============================================================================
 
 def canCreate(data, userId):
+    """
+    Check if a user can create an event. Allowed under the following conditions:
+        1. user is admin.
+        2. the stream is public.
+        3. the stream is writeable by the user.
+    Parameters:
+        data - the event data.
+        userId - a user id.
+    Returns:
+        bool.
+    """
     if user.isAdmin(userId):
         return True
     streamId = data["streamId"]
@@ -64,6 +101,17 @@ def canCreate(data, userId):
     return (streamId in writeable)
 
 def canRead(id, userId):
+    """
+    Check if a user can read an event. Allowed under the following conditions:
+        1. the user is admin.
+        2. the stream is public.
+        3. the stream is readable by the user.
+    Parameters:
+        id - an event id.
+        userId - a user id.
+    Returns:
+        bool.
+    """
     if user.isAdmin(userId):
         return True
     streamId = data["streamId"]
@@ -74,12 +122,32 @@ def canRead(id, userId):
     return (streamId in readable)
 
 def canUpdate(id, userId):
+    """
+    Check if a user can update an event. Allowed under the following conditions:
+        1. the user is admin.
+        2. the user created the event.
+    Parameters:
+        id - an event id.
+        userId - a user id.
+    Returns:
+        bool.
+    """
     if user.isAdmin(userId):
         return True
     theEvent = read(id)
     return theEvent["createdBy"] == userId
 
 def canDelete(id, userId):
+    """
+    Check if a user can delete an event. Allowed under the following conditions:
+        1. the user is admin.
+        2. the user created the event.
+    Parameters:
+        id - an event id.
+        userId - a user id.
+    Returns:
+        bool.
+    """
     if user.isAdmin(userId):
         return True
     theEvent = read(id)
@@ -90,9 +158,23 @@ def canDelete(id, userId):
 # ==============================================================================
 
 def eventsForStream(streamId):
+    """
+    Return all the events on a stream.
+    Parameters:
+        streamId - a stream id.
+    Returns:
+        a list of event documents.
+    """
     return core.query(schema.eventByStream, streamId)
 
 def eventsForUser(userId):
+    """
+    Return all the user's events.
+    Parameters:
+        userId - a user id.
+    Returns:
+        a list of event documents.
+    """
     return core.query(schema.eventByUser, userId)
 
 def setRead(id, value):
