@@ -299,10 +299,13 @@ def addCommentCount(shifts):
 # Favoriting
 # ==============================================================================
 
+def favoriteId(id, userId):
+    return "favorite:%s:%s" % (userId, id)
+
 def isFavorited(id, userId):
     db = core.connect()
-    favId = "favorite:%s:%s" % (userId, id)
-    return db[favId] != None
+    favId = favoriteId(id, userId)
+    return db.get(favId) != None
 
 def favorite(id, userId):
     db = core.connect()
@@ -312,13 +315,13 @@ def favorite(id, userId):
         "created": utils.utctime(),
         "createdBy": userId
         }
-    db[favId] = fav
+    db[favoriteId(id, userId)] = fav
 
 def unfavorite(id, userId):
     db = core.connect()
     if not isFavorited(id, userId):
         return
-    del db[favId]
+    del db[favoriteId(id, userId)]
 
 def addFavoriteData(shifts, userId=None):
     for shift in shifts:
