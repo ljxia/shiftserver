@@ -29,6 +29,7 @@ shiftByUser = "_design/shifts/_view/by_user"
 favoritesByShift = "_design/favorites/_view/by_shift"
 
 allGroups = "_design/groups/_view/all"
+groupByShortName = "_design/groups/_view/by_short_name"
 
 
 # ==============================================================================
