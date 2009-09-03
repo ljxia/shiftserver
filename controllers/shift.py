@@ -15,7 +15,10 @@ class ShiftController(ResourceController):
     def shifts(self, byHref, byDomain=None, byFollowing=False, byGroups=False):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser:
-            return data(shift.shifts(byHref, loggedInUser.get("_id"), byFollowing, byGroups))
+            return data(shift.shifts(byHref, 
+                                     userId=loggedInUser.get("_id"), 
+                                     byFollowing=byFollowing, 
+                                     byGroups=byGroups))
         else:
             return data(shift.shifts(byHref, None, byFollowing, byGroups))
 

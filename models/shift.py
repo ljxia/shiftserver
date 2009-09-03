@@ -58,7 +58,6 @@ def update(id, data):
     db = core.connect()
     theShift = db[id]
     theShift.update(data)
-    print theShift
     theShift["modified"] = utils.utctime()
     db[id] = theShift
     return db[id]
@@ -327,7 +326,6 @@ def favoriteCount(id):
 # ==============================================================================
 
 def joinData(shifts, userId=None):
-    print userId
     for shift in shifts:
         id = shift["_id"]
         if userId:
@@ -341,7 +339,7 @@ def joinData(shifts, userId=None):
 @simple_decorator
 def joindecorator(func):
     def afn(*args, **kwargs):
-        return joinData(func(*args, **kwargs), **kwargs)
+        return joinData(func(*args, **kwargs), userId=kwargs.get("userId"))
     return afn
 
 @joindecorator
@@ -402,7 +400,6 @@ def shifts(byHref, userId=None, byFollowing=False, byGroups=False, start=0, perP
             streams = streams + " ".join(groups)
         # TODO: make sure streams cannot be manipulated from client - David
         queryString = queryString + ((" OR (draft:false%s)" % ((len(streams) > 0 and (" AND streams:%s" % streams)) or "")))
-    print queryString
     rows = lucene.search("shifts", q=queryString, sort="\modified", skip=start, limit=perPage)
     shifts = [db[row["id"]] for row in rows]
     return shifts

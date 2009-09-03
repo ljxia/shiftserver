@@ -155,7 +155,9 @@ def permission():
         }
 
 def group():
-    return stream().update({
+    temp = stream()
+    temp.update({
             "shortName": None,
             "description": None
             })
+    return temp
