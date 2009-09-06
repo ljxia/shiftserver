@@ -56,8 +56,7 @@ class UserController(ResourceController):
             theData["password"] = md5hash(theData["password"])
             del theData["passwordVerify"]
             theData["gravatar"] = "http://www.gravatar.com/avatar/%s?s=32" % md5hash(theData["email"])
-            id = user.create(theData)
-            theUser = user.getById(id)
+            theUser = user.create(theData)
             helper.setLoggedInUser(theUser)
             return data(theUser)
         else:

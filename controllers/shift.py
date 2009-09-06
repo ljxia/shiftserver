@@ -85,6 +85,7 @@ class ShiftController(ResourceController):
     @shiftType
     @loggedin
     def publish(self, id):
+        # NOTE: should mabye take publishData url parameter - David 9/5/2009
         loggedInUser = helper.getLoggedInUser()
         publishData = json.loads(helper.getRequestBody())
         theShift = shift.read(id)
