@@ -124,7 +124,7 @@ def delete(userName):
         del db[eventId]
     # delete the user's public and message streams
     userStreams = utils.ids(stream.streamsForObjectRef(ref(id)))
-    for stpreamId in userStreams:
+    for streamId in userStreams:
         del db[streamId]
     # delete all of the remaining user's streams which have no events
     streamIds = utils.ids(stream.streamsByCreator(id))
