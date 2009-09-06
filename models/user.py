@@ -54,9 +54,9 @@ def create(data, createStreams=True):
         }, False)
     theUser = db[userId]
     theUser.update({
-        "messageStream": messageStream,
-        "publicStream": publicStream,
-        "privateStream": privateStream
+        "messageStream": messageStream["_id"],
+        "publicStream": publicStream["_id"],
+        "privateStream": privateStream["_id"]
         })
     db[userId] = theUser
     return db[userId]
