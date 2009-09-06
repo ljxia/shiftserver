@@ -131,15 +131,19 @@ def delete(userName):
     [stream.delete(streamId) for streamId in streamIds
      if len(event.eventsForStream(streamId)) == 0]
     # delete all the user's shifts
-    userShifts = utils.ids(shift.byUser(id))
-    for shiftId in userShifts:
-        del db[shiftId]
+    deleteShifts(id)
     # delete all the user's permission
     userPerms = utils.ids(permission.permissionsForUser(id))
     for permId in userPerms:
         del db[permId]
     # delete the user
     del db[id]
+
+def deleteShifts(id):
+    db = core.connect()
+    userShifts = utils.ids(shift.byUser(id))
+    for shiftId in userShifts:
+        del db[shiftId]    
 
 # ==============================================================================
 # Validation

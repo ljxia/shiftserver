@@ -333,7 +333,10 @@ def joinData(shifts, userId=None):
         shift["favoriteCount"] = favoriteCount(id)
         stream = commentStream(id)
         shift["commentCount"] = len(event.eventsForStream(stream))
-        shift["gravatar"] = user.readById(shift["createdBy"])["gravatar"]
+        creator = user.readById(shift["createdBy"])
+        gravatar = creator.get("gravatar")
+        if gravatar != None:
+            shift["gravatar"] = gravatar
     return shifts
 
 @simple_decorator
