@@ -115,7 +115,8 @@ class ShiftController(ResourceController):
         loggedInUser = helper.getLoggedInUser()
         loggedInId = loggedInUser["_id"]
         if shift.isPublic(id) or (shift.canRead(id, loggedInId)):
-            return data(shift.favorite(id, userId))
+            shift.favorite(id, loggedInId)
+            return ack
         else:
             return error("Operation not permitted. You don't have permission to favorite this shift.", PermissionError)
 
@@ -126,7 +127,8 @@ class ShiftController(ResourceController):
         loggedInUser = helper.getLoggedInUser()
         loggedInId = loggedInUser["_id"]
         if shift.isPublic(id) or (shift.canRead(id, loggedInId)):
-            return data(shift.unfavorite(id, userId))
+            shift.unfavorite(id, loggedInId)
+            return ack
         else:
             return error("Operation not permitted. You don't have permission to unfavorite this shift.", PermissionError)
 

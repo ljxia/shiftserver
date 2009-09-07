@@ -78,6 +78,11 @@ def initRoutes():
     d.connect(name="shiftUnpublish", route="shift/:id/unpublish", controller=shift, action="unpublish",
               conditions=dict(method="POST"))
 
+    d.connect(name="shiftFavorite", route="shift/:id/favorite", controller=shift, action="favorite",
+              conditions=dict(method="POST"))
+    d.connect(name="shiftUnfavorite", route="shift/:id/unfavorite", controller=shift, action="unfavorite",
+              conditions=dict(method="POST"))
+
     d.connect(name="shiftComments", route="shift/:id/comments", controller=shift, action="comments",
               conditions=dict(method="GET"))
     d.connect(name="shiftComment", route="shift/:id/comment", controller=shift, action="comment",
