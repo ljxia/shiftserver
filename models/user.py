@@ -289,6 +289,14 @@ def feed(id, streamId):
 # Utilties
 # ==============================================================================
 
+# NOTE: Will probably be slow, two joins - David
+# should look into grabbing multiple keys
+def favorites(id):
+    db = core.connect()
+    shiftIds = core.query(schema.favoritesByUser, id)
+    shifts = [db[id] for id in shiftIds]
+    return shift.joinData(shifts, id)
+
 def getById(id):
     """
     Get a user by id.

@@ -211,3 +211,25 @@ class UserController(ResourceController):
             return data(shift.byUserName(userName))
         else:
             return error("You don't have permission to view this user's shifts.", PermissionError)
+
+    @jsonencode
+    @exists
+    @loggedin
+    def favorites(self, userName):
+        loggedInUser = helper.getLoggedInUser()
+        userId = loggedInUser["_id"]
+        if user.isAdmin(userId) or user.idForName(userName) == userId:
+            return data(user.favorites(userId))
+        else:
+            return error("You don't have permission to view this user's favorite shifts.", PermissionError)
+
+    @jsonencode
+    @exists
+    @loggedin
+    def comments(self, userName):
+        loggedInUser = helper.getLoggedInUser()
+        userId = loggedInUser["_id"]
+        if user.isAdmin(userId) or user.idForName(userName) == userId:
+            return data(user.comments(userId))
+        else:
+            return error("You don't have permission to view this user's comments.", PermissionError)
