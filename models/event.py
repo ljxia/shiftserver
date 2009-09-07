@@ -20,6 +20,7 @@ def create(data):
     db = core.connect()
     theTime = utils.utctime()
     data["created"] = theTime
+    data["modified"] = theTime
     # create notification events
     notifications = stream.notifications(data["streamId"])
     for userId in notifications:
@@ -177,5 +178,25 @@ def eventsForUser(userId):
     """
     return core.query(schema.eventByUser, userId)
 
-def setRead(id, value):
-    pass
+def markRead(id):
+    db = core.connect()
+    event = db[id]
+    event["unread"] = False
+    db[id] = event
+    return db[id]
+
+def markUnread(id):
+    db = core.connect()
+    event = db[id]
+    event["unread"] = True
+    db[id] = event
+    return db[id]
+
+def joinData(events):
+    for event in events:
+        creator = user.readById(event["createdBy"])
+        gravatar = creator.get("gravatar")
+        if gravatar != None:
+            event["gravatar"] = gravatar
+        event["userName"] = creator["userName"]
+    return events

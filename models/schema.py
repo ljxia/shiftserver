@@ -120,6 +120,7 @@ def stream():
 def event(): 
     return {
         "type": "event",
+        "meta": None,
         "createdBy": None,
         "streamId": None,
         "objectRef": None,

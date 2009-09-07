@@ -186,7 +186,7 @@ class UserController(ResourceController):
         loggedInUser = helper.getLoggedInUser()
         messageStream = user.messageStream(user.idForName(userName))
         if stream.canRead(messageStream, loggedInUser["_id"]):
-            return data(event.eventsForStream(messageStream))
+            return data(event.joinData(event.eventsForStream(messageStream)))
         else:
             return error("You do not have permission to view this user's messages.", PermissionError)
 

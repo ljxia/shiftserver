@@ -59,3 +59,26 @@ class EventController(ResourceController):
             return ack
         else:
             return error("Operation not permitted. You don't have permission to delete this event.", PermissionError)
+
+    @jsonencode
+    @exists
+    @eventType
+    @loggedin
+    def markRead(self, id):
+        loggedInUser = helper.getLoggedInUser()
+        if event.canUpdate(id, loggedInUser["_id"]):
+            return data(event.markRead(id))
+        else:
+            return error("Operation not permitted. You don't have permission to mark this event as read.", PermissionError)
+
+    @jsonencode
+    @exists
+    @eventType
+    @loggedin
+    def markUnread(self, id):
+        loggedInUser = helper.getLoggedInUser()
+        if event.canUpdate(id, loggedInUser["_id"]):
+            return data(event.markUnread(id))
+        else:
+            return error("Operation not permitted. You don't have permission to mark this event as unread.", PermissionError)
+

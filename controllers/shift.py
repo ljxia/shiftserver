@@ -150,8 +150,13 @@ class ShiftController(ResourceController):
         if jsonData != "":
             theData = json.loads(jsonData)
             if shift.canComment(id, loggedInUser["_id"]):
+                theUser = user.readById(loggedInUser["_id"])
+                theShift = shift.read(id)
                 event.create({
+                        "meta": "comment",
+                        "objectRef": "shift:%s" % id,
                         "streamId": shift.commentStream(id),
+                        "displayString": "%s just commented on your %s on %s" % (theUser["userName"], theShift["space"]["name"], theShift["href"]),
                         "createdBy": loggedInUser["_id"],
                         "content": {"text":theData["text"]}
                         })
