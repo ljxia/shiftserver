@@ -239,7 +239,9 @@ def publish(id, publishData):
         allowed.append(user.publicStream(userId))
     # TODO: commentStreams should use the permission of the streams the shift has been published to. -David 7/14/09
     if not commentStream(id):
-        createCommentStream(id)
+        streamId = createCommentStream(id)
+        user.addNotification(userId, streamId)
+        
     # remove duplicates
     publishData["streams"] = list(set(allowed))
     newData = theShift["publishData"]
@@ -283,11 +285,12 @@ def createCommentStream(id):
     """
     db = core.connect()
     theShift = db[id]
-    stream.create({
-        "meta": "comments",
-        "objectRef": ref(id),
-        "createdBy": theShift["createdBy"]
-        })
+    commentStream = stream.create({
+            "meta": "comments",
+            "objectRef": ref(id),
+            "createdBy": theShift["createdBy"]
+            })
+    return commentStream["_id"]
 
 # ==============================================================================
 # Favoriting
