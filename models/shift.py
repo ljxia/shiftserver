@@ -315,12 +315,14 @@ def favorite(id, userId):
         "type": "favorite"
         }
     db[favoriteId(id, userId)] = fav
+    return joinData(db[id], userId)
 
 def unfavorite(id, userId):
     db = core.connect()
     if (not canRead(id, userId)) or (not isFavorited(id, userId)):
         return
     del db[favoriteId(id, userId)]
+    return joinData(db[id], userId)
 
 def favoriteCount(id):
     return core.single(schema.favoritesByShift, id) or 0
