@@ -359,7 +359,7 @@ def isSubscribed(id, streamId):
     theUser = db[id]
     return streamId in theUser["streams"]
 
-def addNotification(id, shiftId):
+def addNotification(id, streamId):
     """
     Add a user to be notified when comments are added to a shift comment stream.
     Parameters:
@@ -368,9 +368,8 @@ def addNotification(id, shiftId):
     """
     db = core.connect()
     theUser = db[id]
-    commentStream = shift.commentStream(shiftId)
-    if not commentStream in theUser["notify"]:
-        theUser["notify"].append(commentStream)
+    if not streamId in theUser["notify"]:
+        theUser["notify"].append(streamId)
     db[id] = theUser
 
 def removeNotification(id, shiftId):

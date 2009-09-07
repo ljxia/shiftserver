@@ -84,8 +84,9 @@ class UserController(ResourceController):
         loggedInUser = helper.getLoggedInUser()
         if loggedInUser and user.canUpdate(user.idForName(userName),
                                            loggedInUser["_id"]):
-            shift.update(helper.getRequestBody())
-            return ack
+            theData = json.loads(helper.getRequestBody())
+            theData["_id"] = user.idForName(userName)
+            return data(user.update(theData))
         else:
             return error("Operation not permitted. You don't have permission to update this account.")
 

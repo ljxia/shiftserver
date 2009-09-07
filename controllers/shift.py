@@ -60,8 +60,7 @@ class ShiftController(ResourceController):
         if jsonData != "":
             shiftData = json.loads(jsonData)
             if shift.canUpdate(id, loggedInUser['_id']):
-                shift.update(id, shiftData)
-                return ack
+                return data(shift.update(id, shiftData))
             else:
                 return error("Operation not permitted. You don't have permission to update this shift.", PermissionError)
         else:
@@ -171,7 +170,7 @@ class ShiftController(ResourceController):
         userId = loggedInUser["_id"]
         if shift.canRead(id, userId):
             if (not shift.commentStream(id) in user.readById(userId)["notify"]):
-                user.addNotification(userId, id)
+                user.addNotification(userId, shift.commentStream(id))
                 return ack
             else:
                 return error("You are already getting notification from this stream", AlreadyBeingNotifiedError)
