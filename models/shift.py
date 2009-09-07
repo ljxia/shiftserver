@@ -33,7 +33,8 @@ def create(data):
     newShift.update(data)
     newShift["type"] = "shift"
     id = db.create(newShift)
-    return db[id]
+    newShift = db[id]
+    return joinData(newShift, newShift["createdBy"])
 
 def read(id):
     """
@@ -328,8 +329,8 @@ def favoriteCount(id):
 # Utilities
 # ==============================================================================
 
-def joinData(shifts, userId=None):
-    for shift in shifts:
+def joinData(data, userId=None):
+    def join(shift):
         id = shift["_id"]
         if userId:
             shift["favorite"] = isFavorited(id, userId)
@@ -340,7 +341,12 @@ def joinData(shifts, userId=None):
         gravatar = creator.get("gravatar")
         if gravatar != None:
             shift["gravatar"] = gravatar
-    return shifts
+        return shift
+    if type(data) == list:
+        data = [join(item) for item in data]
+    else:
+        data = join(data)
+    return data
 
 @simple_decorator
 def joindecorator(func):
