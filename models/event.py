@@ -9,11 +9,12 @@ import permission
 # CRUD
 # ==============================================================================
 
-def create(data):
+def create(data, notifData=None):
     """
     Create an event document.
     Parameters:
         data - a dictionary of the event data.
+        notifData - a dictionary of data to be sent in the notifications.
     Returns:
         an event document.
     """
