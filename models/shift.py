@@ -337,8 +337,9 @@ def joinData(data, userId=None):
         if userId:
             shift["favorite"] = isFavorited(id, userId)
         shift["favoriteCount"] = favoriteCount(id)
-        stream = commentStream(id)
-        shift["commentCount"] = len(event.eventsForStream(stream))
+        streamId = commentStream(id)
+        if streamId:
+            shift["commentCount"] = len(event.eventsForStream(streamId))
         creator = user.readById(shift["createdBy"])
         gravatar = creator.get("gravatar")
         if gravatar != None:
