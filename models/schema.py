@@ -82,6 +82,7 @@ def shift():
         "createdBy": None,
         "userName": None,
         "href": None,
+        "domain": None,
         "space": {
             "name": None,
             "version": None,
