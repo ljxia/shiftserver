@@ -292,10 +292,38 @@ def feed(id, streamId):
 # NOTE: Will probably be slow, two joins - David
 # should look into grabbing multiple keys
 def favorites(id):
+    """
+    Get all of a user's favorites.
+    Parameters:
+        id - a user id.
+    Returns:
+        A list of favorites.
+    """
     db = core.connect()
     shiftIds = core.query(schema.favoritesByUser, id)
     shifts = [db[id] for id in shiftIds]
     return shift.joinData(shifts, id)
+
+def comments(id):
+    """
+    Get all the comments posted by a user.
+    Parameters:
+        id - a user id
+    Returns:
+        A list of comments.
+    """ 
+    db = core.connect()
+    return joinCommentData(core.query(schema.commentsByUser, id))
+
+def joinCommentData(comments):
+    def join(comment):
+        content = comment["content"]
+        shiftId = content["_id"]
+        theShift = shift.read(shiftId)
+        theUser = user.readById(theShift["createdBy"])
+        content["shift"] = theShift
+        content["user"] = theUser
+    return [join(comment) for comment in comments]
 
 def getById(id):
     """

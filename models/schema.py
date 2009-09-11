@@ -32,6 +32,8 @@ favoritesByUser = "_design/favorites/_view/by_user"
 allGroups = "_design/groups/_view/all"
 groupByShortName = "_design/groups/_view/by_short_name"
 
+commentsByUser = "_design/comments/_view/by_user"
+
 
 # ==============================================================================
 # Schemas

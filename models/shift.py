@@ -29,6 +29,7 @@ def create(data):
     theTime = utils.utctime()
     data["created"] = theTime
     data["modified"] = theTime
+    data["domain"] = utils.domain(data["href"])
     newShift = schema.shift()
     newShift.update(data)
     newShift["type"] = "shift"
