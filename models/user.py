@@ -318,11 +318,12 @@ def comments(id):
 def joinCommentData(comments):
     def join(comment):
         content = comment["content"]
-        shiftId = content["_id"]
+        shiftId = comment["objectRef"].split(":")[1]
         theShift = shift.read(shiftId)
-        theUser = user.readById(theShift["createdBy"])
+        theUser = readById(theShift["createdBy"])
         content["shift"] = theShift
         content["user"] = theUser
+        return comment
     return [join(comment) for comment in comments]
 
 def getById(id):

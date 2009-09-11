@@ -402,6 +402,9 @@ def shifts(byHref, userId=None, byFollowing=False, byGroups=False, start=0, perP
         A list of shifts that match the specifications.
     """
     db = core.connect()
+    # NOTE: to prevent errors on a newly created DB - David 9/11/09
+    if core.single(schema.statsCount, "shift") == None:
+        return []
     lucene = core.lucene()
     # TODO: validate byHref - David
     queryString = "(href:\"%s\" AND draft:false AND private:false)" % byHref

@@ -34,6 +34,8 @@ groupByShortName = "_design/groups/_view/by_short_name"
 
 commentsByUser = "_design/comments/_view/by_user"
 
+statsCount = "_design/stats/_view/count"
+
 
 # ==============================================================================
 # Schemas
