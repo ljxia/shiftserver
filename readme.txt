@@ -27,3 +27,62 @@ mod_wsgi
 
 proxy
 ================================================================================
+
+apache config
+================================================================================
+<VirtualHost *>                                                                                                                                         
+    ServerAdmin you@yoursite.com
+    ServerName www.yoursite.com
+    ProxyPreserveHost On
+
+    DocumentRoot /Users/username/Sites/shiftserver
+
+    # this prevents the follow path from being proxied                                                                                                  
+    ProxyPass /~username/shiftspace/server/static !
+
+    <Location /~username/shiftspace/server>
+        Order allow,deny
+        allow from all
+        ProxyPass http://localhost:8080/~username/shiftspace/server
+        ProxyPassReverse http://localhost:8080/~username/shiftspace/server
+    </Location>
+</VirtualHost>
+
+couchdb local.ini
+================================================================================
+; CouchDB Configuration Settings
+
+; Custom settings should be made in this file. They will override settings
+; in default.ini, but unlike changes made to default.ini, this file won't be
+; overwritten on server upgrade.
+
+[couchdb]
+;max_document_size = 4294967296 ; bytes
+os_process_timeout=60000 ; 60 seconds for couchdb-lucene
+
+[httpd]
+;port = 5984
+;bind_address = 127.0.0.1
+
+[log]
+;level = debug                                                                                                      
+
+[update_notification]
+;unique notifier name=/full/path/to/exe -with "cmd line arg"
+indexer=/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Home/bin/java -jar /Users/username/Sites/shiftserver/couchdb-lucene-0.4-jar-with-dependencies.jar -index
+
+; To create an admin account uncomment the '[admins]' section below and add a
+; line in the format 'username = password'. When you next start CouchDB, it                                        
+; will change the password to a hash (so that your passwords don't linger                                                    
+; around in plain-text files). You can add more admin accounts with more                                                      
+; 'username = password' lines. Don't forget to restart CouchDB after                                                       
+; changing this.                                                           
+;[admins]                                                                                                               
+;admin = mysecretpassword                                                                                                      
+
+[external]
+; the following provides search, trying to figure out indexing
+fti=/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Home/bin/java -jar /Users/username/Sites/shiftserver/couchdb-lucene-0.4-jar-with-dependencies.jar -search
+
+[httpd_db_handlers]
+_fti={couch_httpd_external, handle_external_req, <<"fti">>}

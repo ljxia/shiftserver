@@ -7,10 +7,25 @@ from models import shift
 from models import stream
 from models import event
 from models import permission
+from models import group
 from resource import *
 
 
 class GroupsController(ResourceController):
+    @jsonencode
+    @loggedin
+    def create(self):
+        loggedInUser = helper.getLoggedInUser()
+        jsonData = helper.getRequestBody()
+        if jsonData != "":
+            theData = json.loads(jsonData)
+            id = loggedInUser.get("_id")
+            theData['createdBy'] = id
+            return data(group.create(theData))
+        else:
+            return error("No data for group.", NoDataError)
+        pass
+
     @jsonencode
     def read(self, id):
         # return only public groups
