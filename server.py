@@ -1,8 +1,10 @@
 import os
+import sys
 import time
 import cherrypy
 import routes
 import email
+import simplejson as json
 
 from utils.utils import *
 from utils.errors import *
@@ -15,6 +17,13 @@ from controllers.event import EventController
 from controllers.permission import PermissionController
 from controllers.group import GroupsController
 
+try:
+    appconfigfile = open("config.json")
+except Exception:
+    print "\nError: Looks like you need to cd into scripts and run ./setup.sh first.\n"
+    sys.exit(2)
+
+appconfig = json.loads(appconfigfile.read())
 
 class RootController:
     def read(self):
@@ -159,12 +168,12 @@ appconf = {'/': {'tools.proxy.on':True,
                  'request.dispatch': initRoutes(),
                  'tools.sessions.on': True,
                  'tools.sessions.storage_type': "file",
-                 'tools.sessions.storage_path':"/Users/davidnolen/Sites/shiftserver/sessions",
+                 'tools.sessions.storage_path': appconfig['tools.sessions.storage_path'],
                  'tools.sessions.timeout': 60}}
 
 
 if __name__ == "__main__":
     cherrypy.config.update({'server.socket_port':8080})
     # TODO: The following value should be read from an environment file - David 7/4/09
-    app = cherrypy.tree.mount(root=None, script_name='/~davidnolen/shiftspace/server', config=appconf)
+    app = cherrypy.tree.mount(root=None, script_name=appconfig['script_name'], config=appconf)
     cherrypy.quickstart(app)
