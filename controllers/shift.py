@@ -158,7 +158,11 @@ class ShiftController(ResourceController):
                         "streamId": shift.commentStream(id),
                         "displayString": "%s just commented on your %s on %s" % (theUser["userName"], theShift["space"]["name"], theShift["href"]),
                         "createdBy": loggedInUser["_id"],
-                        "content": {"text":theData["text"]}
+                        "content": {
+                            "href": theShift["href"],
+                            "domain": theShift["domain"],
+                            "text": theData["text"]
+                            }
                         })
                 return ack
             else:

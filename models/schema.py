@@ -32,6 +32,10 @@ favoritesByUser = "_design/favorites/_view/by_user"
 allGroups = "_design/groups/_view/all"
 groupByShortName = "_design/groups/_view/by_short_name"
 
+commentsByUser = "_design/comments/_view/by_user"
+
+statsCount = "_design/stats/_view/count"
+
 
 # ==============================================================================
 # Schemas
@@ -80,6 +84,7 @@ def shift():
         "createdBy": None,
         "userName": None,
         "href": None,
+        "domain": None,
         "space": {
             "name": None,
             "version": None,

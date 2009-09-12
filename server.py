@@ -59,6 +59,8 @@ def initRoutes():
               conditions=dict(method="GET"))
     d.connect(name="userFavorites", route="user/:userName/favorites", controller=user, action="favorites",
               conditions=dict(method="GET"))
+    d.connect(name="userComments", route="user/:userName/comments", controller=user, action="comments",
+              conditions=dict(method="GET"))
 
     d.connect(name="userFollow", route="follow/:userName", controller=user, action="follow",
               conditions=dict(method="POST"))
