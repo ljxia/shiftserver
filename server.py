@@ -20,6 +20,18 @@ from controllers.event import EventController
 from controllers.permission import PermissionController
 from controllers.group import GroupsController
 
+# attempt to bring in sandalphon and preprocess
+try:
+    sandalphon = import_path("../sandalphon/sandalphon.py")
+except Exception:
+    print "Could not import sandalphon"
+    print Exception
+try:
+    preprocess = import_path("../builder/preprocess.py")
+except Exception:
+    print "Could not import preprocess"
+    print Exception
+
 
 class RootController:
     def read(self):
