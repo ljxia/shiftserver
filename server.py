@@ -17,14 +17,6 @@ from controllers.event import EventController
 from controllers.permission import PermissionController
 from controllers.group import GroupsController
 
-try:
-    appconfigfile = open("config.json")
-except Exception:
-    print "\nError: Looks like you need to cd into scripts and run ./setup.sh first.\n"
-    sys.exit(2)
-
-appconfig = json.loads(appconfigfile.read())
-
 class RootController:
     def read(self):
         return "ShiftSpace Server 1.0"
@@ -156,20 +148,26 @@ def initRoutes():
               conditions=dict(method="GET"))
     return d
 
-appconf = {'/': {'tools.proxy.on':True,
-                 'request.dispatch': initRoutes(),
-                 'tools.sessions.on': True,
-                 'tools.sessions.storage_type': 'file',
-                 'tools.sessions.storage_path': appconfig['tools.sessions.storage_path'],
-                 'tools.sessions.timeout': 60,
-                 'tools.staticdir.root': '/Users/davidnolen/Sites/shiftspace'},
-           '/builds': {'tools.staticdir.on': True,
-                       'tools.staticdir.dir': 'builds'},
+# Configure the application, sessions, and static file serving
+appconf = {'/':          {'tools.proxy.on':True,
+                          'request.dispatch': initRoutes(),
+                          'tools.sessions.on': True,
+                          'tools.sessions.storage_type': 'file',
+                          'tools.sessions.timeout': 60},
+
+           '/builds':    {'tools.staticdir.on': True,
+                          'tools.staticdir.dir': 'builds'},
+
            '/externals': {'tools.staticdir.on': True,
                           'tools.staticdir.dir': 'externals'}}
 
 if __name__ == '__main__':
+    serverroot = os.path.dirname(os.path.abspath(__file__))
+    webroot = os.path.dirname(serverroot)
+    appconf['/']['tools.staticdir.root'] = webroot
+    appconf['/']['tools.sessions.storage_path'] = os.path.join(serverroot, 'sessions')
+
     cherrypy.config.update({'server.socket_port':8080})
     # TODO: The following value should be read from an environment file - David 7/4/09
-    app = cherrypy.tree.mount(root=None, script_name=appconfig['script_name'], config=appconf)
+    app = cherrypy.tree.mount(root=None, script_name="/", config=appconf)
     cherrypy.quickstart(app)
