@@ -11,6 +11,37 @@ from resource import *
 
 
 class UserController(ResourceController):
+    def routes(self, d):
+        d.connect(name="userLogin", route="login", controller=self, action="login",
+                  conditions=dict(method="POST"))
+        d.connect(name="userLogout", route="logout", controller=self, action="logout",
+              conditions=dict(method="POST"))
+        d.connect(name="userQuery", route="query", controller=self, action="query",
+              conditions=dict(method="GET"))
+        d.connect(name="userJoin", route="join", controller=self, action="join",
+              conditions=dict(method="POST"))
+        d.connect(name="userRead", route="user/:userName", controller=self, action="read",
+              conditions=dict(method="GET"))
+        d.connect(name="userUpdate", route="user/:userName", controller=self, action="update",
+              conditions=dict(method="PUT"))
+        d.connect(name="userDelete", route="user/:userName", controller=self, action="delete",
+              conditions=dict(method="DELETE"))
+        d.connect(name="userMessages", route="user/:userName/messages", controller=self, action="messages",
+              conditions=dict(method="GET"))
+        d.connect(name="userFeeds", route="user/:userName/feeds", controller=self, action="feeds",
+              conditions=dict(method="GET"))
+        d.connect(name="userShifts", route="user/:userName/shifts", controller=self, action="shifts",
+              conditions=dict(method="GET"))
+        d.connect(name="userFavorites", route="user/:userName/favorites", controller=self, action="favorites",
+              conditions=dict(method="GET"))
+        d.connect(name="userComments", route="user/:userName/comments", controller=self, action="comments",
+              conditions=dict(method="GET"))
+        d.connect(name="userFollow", route="follow/:userName", controller=self, action="follow",
+              conditions=dict(method="POST"))
+        d.connect(name="userUnfollow", route="unfollow/:userName", controller=self, action="unfollow",
+              conditions=dict(method="POST"))
+        return d
+
     def primaryKey(self):
         return "userName"
 
