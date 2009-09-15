@@ -37,14 +37,17 @@ def initRoutes():
     return d
 
 def start(conf=None):
+    conf = conf or 'default.conf'
+
     serverroot = os.path.dirname(os.path.abspath(__file__))
     webroot = os.path.dirname(serverroot)
-    serveStaticFiles = False
-    if conf == None:
-        conf = open(os.path.join(serverroot, 'default.conf'))
     config = ConfigParser.ConfigParser({'webroot':webroot,
                                         'serverroot':serverroot})
-    config.readfp(conf)
+
+    fh = open(os.path.join(serverroot, conf))
+    config.readfp(fh)
+    fh.close()
+
     d = {}
     for section in config.sections():
         for k, v in config.items(section):
@@ -54,6 +57,7 @@ def start(conf=None):
                 v = int(v)
             d[section][k] = v
     d['/']['request.dispatch'] = initRoutes()
+
     cherrypy.config.update({'server.socket_port':8080})
     app = cherrypy.tree.mount(root=None, script_name="/", config=d)
     cherrypy.quickstart(app)
@@ -74,7 +78,7 @@ def parseArgs(argv):
             usage()
             sys.exit()
         elif opt in ("-f", "--file"):
-            conf = open(arg)
+            conf = arg
     start(conf)
 
 if __name__ == '__main__':
