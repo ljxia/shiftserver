@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import cherrypy
+from cherrypy.lib.static import serve_file
 import routes
 import email
 import simplejson as json
@@ -149,23 +150,34 @@ def initRoutes():
     return d
 
 # Configure the application, sessions, and static file serving
-appconf = {'/':          {'tools.proxy.on':True,
-                          'request.dispatch': initRoutes(),
-                          'tools.sessions.on': True,
-                          'tools.sessions.storage_type': 'file',
-                          'tools.sessions.timeout': 60},
-
-           '/builds':    {'tools.staticdir.on': True,
-                          'tools.staticdir.dir': 'builds'},
-
-           '/externals': {'tools.staticdir.on': True,
-                          'tools.staticdir.dir': 'externals'}}
+appconf = {'/': {'tools.proxy.on':True,
+                 'request.dispatch': initRoutes(),
+                 'tools.sessions.on': True,
+                 'tools.sessions.storage_type': 'file',
+                 'tools.sessions.timeout': 60}}
 
 if __name__ == '__main__':
     serverroot = os.path.dirname(os.path.abspath(__file__))
     webroot = os.path.dirname(serverroot)
-    appconf['/']['tools.staticdir.root'] = webroot
-    appconf['/']['tools.sessions.storage_path'] = os.path.join(serverroot, 'sessions')
+    serveStaticFiles = True
+
+    try:
+        appconfigfile = open("config.json")
+        appconfig = json.loads(appconfigfile.read())
+        serveStaticFiles = appconfig['serve_static_files']
+        appconf['/'].update({'tools.staticdir.root': appconfig['tools.staticdir.root'],
+                             'tools.sessions.storage_path': appconf['tools.sessions.storage_path']})
+    except Exception:
+        appconf['/'].update({'tools.staticdir.root': webroot,
+                             'tools.sessions.storage_path': os.path.join(serverroot, 'sessions')})
+
+    if serveStaticFiles:
+        appconf.update({'/builds':    {'tools.staticdir.on': True,
+                                        'tools.staticdir.dir': 'builds'},
+                        '/externals': {'tools.staticdir.on': True,
+                                       'tools.staticdir.dir': 'externals'},
+                        '/sandbox':   {'tools.staticdir.on': True,
+                                       'tools.staticdir.dir': 'sandbox'}})
 
     cherrypy.config.update({'server.socket_port':8080})
     # TODO: The following value should be read from an environment file - David 7/4/09
