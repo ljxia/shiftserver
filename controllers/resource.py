@@ -82,6 +82,13 @@ helper = Helper()
 
 
 class ResourceController:
+    def __init__(self, dispatcher=None):
+        if dispatcher:
+            self.routes(dispatcher)
+    
+    def routes(self, dispatcher):
+        return dispatcher
+
     def primaryKey(self):
         return "id"
 
