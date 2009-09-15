@@ -6,3 +6,4 @@
 /utils/*.pyc
 /lucene
 /sessions/session-*
+/erl_crash.dump
