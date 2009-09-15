@@ -1,8 +1,10 @@
 import os
 import sys
+import getopt
 import time
 import cherrypy
 from cherrypy.lib.static import serve_file
+import ConfigParser
 import routes
 import email
 import simplejson as json
@@ -156,7 +158,52 @@ appconf = {'/': {'tools.proxy.on':True,
                  'tools.sessions.storage_type': 'file',
                  'tools.sessions.timeout': 60}}
 
+def start(conf=None):
+    serverroot = os.path.dirname(os.path.abspath(__file__))
+    webroot = os.path.dirname(serverroot)
+    serveStaticFiles = False
+    if conf == None:
+        conf = open(os.path.join(serverroot, 'default.conf'))
+    print os.path.join(serverroot, 'default.conf')
+    print conf
+    config = ConfigParser.ConfigParser({"webroot":webroot})
+    config.readfp(conf)
+    d = {}
+    for section in config.sections():
+        for k, v in config.items(section):
+            if d.get(section) == None:
+                d[section] = {}
+            d[section][k] = v
+    print d
+    cherrypy.config.update({'server.socket_port':8080})
+    app = cherrypy.tree.mount(root=None, script_name="/", config=d)
+    cherrypy.quickstart(app)
+
+def usage():
+    print "You may only pass in a configuration file to load via the -f flag."
+
+def parseArgs(argv):
+    conf = "default.conf"
+    try:
+        opts, args = getopt.getopt(argv, "f:h", ["file="])
+    except:
+        print "Invalid flag\n"
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit()
+        elif opt in ("-f", "--file"):
+            conf = open(arg)
+    start(conf)
+
 if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        parseArgs(sys.argv[1:])
+    else:
+        start()
+    """
     serverroot = os.path.dirname(os.path.abspath(__file__))
     webroot = os.path.dirname(serverroot)
     serveStaticFiles = True
@@ -173,7 +220,7 @@ if __name__ == '__main__':
 
     if serveStaticFiles:
         appconf.update({'/builds':    {'tools.staticdir.on': True,
-                                        'tools.staticdir.dir': 'builds'},
+                                       'tools.staticdir.dir': 'builds'},
                         '/externals': {'tools.staticdir.on': True,
                                        'tools.staticdir.dir': 'externals'},
                         '/sandbox':   {'tools.staticdir.on': True,
@@ -183,3 +230,4 @@ if __name__ == '__main__':
     # TODO: The following value should be read from an environment file - David 7/4/09
     app = cherrypy.tree.mount(root=None, script_name="/", config=appconf)
     cherrypy.quickstart(app)
+    """
