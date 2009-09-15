@@ -42,7 +42,6 @@ def initRoutes():
 
     # Root
     d.connect(name="root", route="", controller=root, action="read")
-
     # User Routes
     d.connect(name="userLogin", route="login", controller=user, action="login",
               conditions=dict(method="POST"))
@@ -75,7 +74,6 @@ def initRoutes():
               conditions=dict(method="POST"))
     d.connect(name="userUnfollow", route="unfollow/:userName", controller=user, action="unfollow",
               conditions=dict(method="POST"))
-
     # Shift Routes
     d.connect(name="shiftCreate", route="shift", controller=shift, action="create",
               conditions=dict(method="POST"))
@@ -108,7 +106,6 @@ def initRoutes():
 
     d.connect(name="shifts", route="shifts", controller=shift, action="shifts",
               conditions=dict(method="GET"))
-
     # Stream Routes
     d.connect(name="streamCreate", route="stream", controller=stream, action="create",
               conditions=dict(method="POST"))
@@ -138,7 +135,6 @@ def initRoutes():
               conditions=dict(method="POST"))
     d.connect(name="streamRemove", route="stream/:id/remove/:userName", controller=stream, action="remove",
               conditions=dict(method="POST"))
-
     # Event Routes
     d.connect(name="eventRead", route="event/:id", controller=event, action="read",
               conditions=dict(method="GET"))
@@ -146,7 +142,6 @@ def initRoutes():
               conditions=dict(method="PUT"))
     d.connect(name="eventDelete", route="event/:id", controller=event, action="delete",
               conditions=dict(method="DELETE"))
-
     # Permission Routes
     d.connect(name="permissionCreate", route="permission", controller=permission, action="create",
               conditions=dict(method="POST"))
@@ -156,23 +151,24 @@ def initRoutes():
               conditions=dict(method="PUT"))
     d.connect(name="permissionDelete", route="permission/:id", controller=permission, action="read",
               conditions=dict(method="DELETE"))
-
     # Group Routes
     d.connect(name="groupRead", route="group/:id", controller=group, action="read",
               conditions=dict(method="GET"))
-
     return d
-
 
 appconf = {'/': {'tools.proxy.on':True,
                  'request.dispatch': initRoutes(),
                  'tools.sessions.on': True,
-                 'tools.sessions.storage_type': "file",
+                 'tools.sessions.storage_type': 'file',
                  'tools.sessions.storage_path': appconfig['tools.sessions.storage_path'],
-                 'tools.sessions.timeout': 60}}
+                 'tools.sessions.timeout': 60,
+                 'tools.staticdir.root': '/Users/davidnolen/Sites/shiftspace'},
+           '/builds': {'tools.staticdir.on': True,
+                       'tools.staticdir.dir': 'builds'},
+           '/externals': {'tools.staticdir.on': True,
+                          'tools.staticdir.dir': 'externals'}}
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     cherrypy.config.update({'server.socket_port':8080})
     # TODO: The following value should be read from an environment file - David 7/4/09
     app = cherrypy.tree.mount(root=None, script_name=appconfig['script_name'], config=appconf)
