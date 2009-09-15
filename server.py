@@ -151,30 +151,24 @@ def initRoutes():
               conditions=dict(method="GET"))
     return d
 
-# Configure the application, sessions, and static file serving
-appconf = {'/': {'tools.proxy.on':True,
-                 'request.dispatch': initRoutes(),
-                 'tools.sessions.on': True,
-                 'tools.sessions.storage_type': 'file',
-                 'tools.sessions.timeout': 60}}
-
 def start(conf=None):
     serverroot = os.path.dirname(os.path.abspath(__file__))
     webroot = os.path.dirname(serverroot)
     serveStaticFiles = False
     if conf == None:
         conf = open(os.path.join(serverroot, 'default.conf'))
-    print os.path.join(serverroot, 'default.conf')
-    print conf
-    config = ConfigParser.ConfigParser({"webroot":webroot})
+    config = ConfigParser.ConfigParser({'webroot':webroot,
+                                        'serverroot':serverroot})
     config.readfp(conf)
     d = {}
     for section in config.sections():
         for k, v in config.items(section):
             if d.get(section) == None:
                 d[section] = {}
+            if k == "tools.sessions.timeout":
+                v = int(v)
             d[section][k] = v
-    print d
+    d['/']['request.dispatch'] = initRoutes()
     cherrypy.config.update({'server.socket_port':8080})
     app = cherrypy.tree.mount(root=None, script_name="/", config=d)
     cherrypy.quickstart(app)
@@ -203,31 +197,3 @@ if __name__ == '__main__':
         parseArgs(sys.argv[1:])
     else:
         start()
-    """
-    serverroot = os.path.dirname(os.path.abspath(__file__))
-    webroot = os.path.dirname(serverroot)
-    serveStaticFiles = True
-
-    try:
-        appconfigfile = open("config.json")
-        appconfig = json.loads(appconfigfile.read())
-        serveStaticFiles = appconfig['serve_static_files']
-        appconf['/'].update({'tools.staticdir.root': appconfig['tools.staticdir.root'],
-                             'tools.sessions.storage_path': appconf['tools.sessions.storage_path']})
-    except Exception:
-        appconf['/'].update({'tools.staticdir.root': webroot,
-                             'tools.sessions.storage_path': os.path.join(serverroot, 'sessions')})
-
-    if serveStaticFiles:
-        appconf.update({'/builds':    {'tools.staticdir.on': True,
-                                       'tools.staticdir.dir': 'builds'},
-                        '/externals': {'tools.staticdir.on': True,
-                                       'tools.staticdir.dir': 'externals'},
-                        '/sandbox':   {'tools.staticdir.on': True,
-                                       'tools.staticdir.dir': 'sandbox'}})
-
-    cherrypy.config.update({'server.socket_port':8080})
-    # TODO: The following value should be read from an environment file - David 7/4/09
-    app = cherrypy.tree.mount(root=None, script_name="/", config=appconf)
-    cherrypy.quickstart(app)
-    """
