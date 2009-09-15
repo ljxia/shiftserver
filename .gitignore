@@ -1,0 +1,6 @@
+/config.json
+/*.pyc
+/*.jar
+/controllers/*.pyc
+/models/*.pyc
+/utils/*.pyc
