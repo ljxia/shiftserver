@@ -20,21 +20,33 @@ from controllers.event import EventController
 from controllers.permission import PermissionController
 from controllers.group import GroupsController
 
+
 class RootController:
     def read(self):
-        return "ShiftSpace Server 1.0"
+        return 'ShiftSpace Server 1.0'
+
+    def sandbox(self):
+        serverroot = os.path.dirname(os.path.abspath(__file__))
+        webroot = os.path.dirname(serverroot)
+        return serve_file(os.path.join(webroot, 'sandbox/index.html'))
+
 
 def initRoutes():
     d = cherrypy.dispatch.RoutesDispatcher()
-    root = RootController()
+
     user = UserController(d)
     shift = ShiftController(d)
     stream = StreamController(d)
     event = EventController(d)
     permission = PermissionController(d)
     group = GroupsController(d)
-    d.connect(name="root", route="", controller=root, action="read")
+
+    root = RootController()
+    d.connect(name='root', route='', controller=root, action='read')
+    d.connect(name='rootSandbox', route='sandbox/', controller=root, action='sandbox')
+
     return d
+
 
 def start(conf=None):
     conf = conf or 'default.conf'
@@ -53,33 +65,36 @@ def start(conf=None):
         for k, v in config.items(section):
             if d.get(section) == None:
                 d[section] = {}
-            if k == "tools.sessions.timeout":
+            if k == 'tools.sessions.timeout':
                 v = int(v)
             d[section][k] = v
     d['/']['request.dispatch'] = initRoutes()
 
     cherrypy.config.update({'server.socket_port':8080})
-    app = cherrypy.tree.mount(root=None, script_name="/", config=d)
+    app = cherrypy.tree.mount(root=None, script_name='/', config=d)
     cherrypy.quickstart(app)
 
+
 def usage():
-    print "You may only pass in a configuration file to load via the -f flag."
+    print 'You may only pass in a configuration file to load via the -f flag.'
+
 
 def parseArgs(argv):
-    conf = "default.conf"
+    conf = 'default.conf'
     try:
-        opts, args = getopt.getopt(argv, "f:h", ["file="])
+        opts, args = getopt.getopt(argv, 'f:h', ['file='])
     except:
-        print "Invalid flag\n"
+        print 'Invalid flag\n'
         usage()
         sys.exit(2)
     for opt, arg in opts:
-        if opt in ("-h", "--help"):
+        if opt in ('-h', '--help'):
             usage()
             sys.exit()
-        elif opt in ("-f", "--file"):
+        elif opt in ('-f', '--file'):
             conf = arg
     start(conf)
+
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
