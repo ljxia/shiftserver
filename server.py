@@ -31,20 +31,22 @@ class RootController:
         return serve_file(os.path.join(webroot, 'sandbox/index.html'))
 
 
-def initRoutes():
+def initAppRoutes():
     d = cherrypy.dispatch.RoutesDispatcher()
-
     user = UserController(d)
     shift = ShiftController(d)
     stream = StreamController(d)
     event = EventController(d)
     permission = PermissionController(d)
     group = GroupsController(d)
+    return d
 
+
+def initDevRoutes():
+    d = cherrypy.dispatch.RoutesDispatcher()
     root = RootController()
     d.connect(name='root', route='', controller=root, action='read')
     d.connect(name='rootSandbox', route='sandbox/', controller=root, action='sandbox')
-
     return d
 
 
@@ -68,11 +70,16 @@ def start(conf=None):
             if k == 'tools.sessions.timeout':
                 v = int(v)
             d[section][k] = v
-    d['/']['request.dispatch'] = initRoutes()
 
     cherrypy.config.update({'server.socket_port':8080})
-    app = cherrypy.tree.mount(root=None, script_name='/', config=d)
-    cherrypy.quickstart(app)
+
+    d['/']['request.dispatch'] = initDevRoutes()
+    dev = cherrypy.tree.mount(root=None, script_name='/', config=d)
+
+    d['/']['request.dispatch'] = initAppRoutes()
+    app = cherrypy.tree.mount(root=None, script_name='/server', config=d)
+
+    cherrypy.quickstart()
 
 
 def usage():
