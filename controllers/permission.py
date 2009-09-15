@@ -11,6 +11,17 @@ from resource import *
 
 
 class PermissionController(ResourceController):
+    def routes(self, d):
+        d.connect(name="permissionCreate", route="permission", controller=self, action="create",
+                  conditions=dict(method="POST"))
+        d.connect(name="permissionRead", route="permission/:id", controller=self, action="read",
+                  conditions=dict(method="GET"))
+        d.connect(name="permissionUpdate", route="permission/:id", controller=self, action="update",
+                  conditions=dict(method="PUT"))
+        d.connect(name="permissionDelete", route="permission/:id", controller=self, action="read",
+                  conditions=dict(method="DELETE"))
+        return d
+
     @jsonencode
     @loggedin
     def create(self):

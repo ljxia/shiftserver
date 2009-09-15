@@ -12,33 +12,32 @@ from resource import *
 
 class ShiftController(ResourceController):
     def routes(self, d):
-        # Shift Routes
         d.connect(name="shiftCreate", route="shift", controller=self, action="create",
-              conditions=dict(method="POST"))
+                  conditions=dict(method="POST"))
         d.connect(name="shiftRead", route="shift/:id", controller=self, action="read",
-              conditions=dict(method="GET"))
+                  conditions=dict(method="GET"))
         d.connect(name="shiftUpdate", route="shift/:id", controller=self, action="update",
-              conditions=dict(method="PUT"))
+                  conditions=dict(method="PUT"))
         d.connect(name="shiftDelete", route="shift/:id", controller=self, action="delete",
-              conditions=dict(method="DELETE"))
+                  conditions=dict(method="DELETE"))
         d.connect(name="shiftPublish", route="shift/:id/publish", controller=self, action="publish",
-              conditions=dict(method="POST"))
+                  conditions=dict(method="POST"))
         d.connect(name="shiftUnpublish", route="shift/:id/unpublish", controller=self, action="unpublish",
-              conditions=dict(method="POST"))
+                  conditions=dict(method="POST"))
         d.connect(name="shiftFavorite", route="shift/:id/favorite", controller=self, action="favorite",
-              conditions=dict(method="POST"))
+                  conditions=dict(method="POST"))
         d.connect(name="shiftUnfavorite", route="shift/:id/unfavorite", controller=self, action="unfavorite",
-              conditions=dict(method="POST"))
+                  conditions=dict(method="POST"))
         d.connect(name="shiftComments", route="shift/:id/comments", controller=self, action="comments",
-              conditions=dict(method="GET"))
+                  conditions=dict(method="GET"))
         d.connect(name="shiftComment", route="shift/:id/comment", controller=self, action="comment",
-              conditions=dict(method="POST"))
+                  conditions=dict(method="POST"))
         d.connect(name="shiftNotify", route="shift/:id/notify", controller=self, action="notify",
-              conditions=dict(method="POST"))
+                  conditions=dict(method="POST"))
         d.connect(name="shiftUnnotify", route="shift/:id/unnotify", controller=self, action="unnotify",
-              conditions=dict(method="POST"))
+                  conditions=dict(method="POST"))
         d.connect(name="shifts", route="shifts", controller=self, action="shifts",
-              conditions=dict(method="GET"))
+                  conditions=dict(method="GET"))
         return d
 
     @jsonencode

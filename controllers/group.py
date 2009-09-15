@@ -12,6 +12,11 @@ from resource import *
 
 
 class GroupsController(ResourceController):
+    def routes(self, d):
+        d.connect(name="groupRead", route="group/:id", controller=self, action="read",
+                  conditions=dict(method="GET"))
+        return d
+
     @jsonencode
     @loggedin
     def create(self):

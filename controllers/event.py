@@ -11,6 +11,15 @@ from resource import *
 
 
 class EventController(ResourceController):
+    def routes(self, d):
+        d.connect(name="eventRead", route="event/:id", controller=self, action="read",
+                  conditions=dict(method="GET"))
+        d.connect(name="eventUpdate", route="event/:id", controller=self, action="update",
+                  conditions=dict(method="PUT"))
+        d.connect(name="eventDelete", route="event/:id", controller=self, action="delete",
+                  conditions=dict(method="DELETE"))
+        return d
+
     @jsonencode
     @loggedin
     def create(self):

@@ -26,65 +26,14 @@ class RootController:
 
 def initRoutes():
     d = cherrypy.dispatch.RoutesDispatcher()
-
     root = RootController()
     user = UserController(d)
     shift = ShiftController(d)
-    stream = StreamController()
-    event = EventController()
-    permission = PermissionController()
-    group = GroupsController()
-
-    # Root
+    stream = StreamController(d)
+    event = EventController(d)
+    permission = PermissionController(d)
+    group = GroupsController(d)
     d.connect(name="root", route="", controller=root, action="read")
-    # Stream Routes
-    d.connect(name="streamCreate", route="stream", controller=stream, action="create",
-              conditions=dict(method="POST"))
-    d.connect(name="streamRead", route="stream/:id", controller=stream, action="read",
-              conditions=dict(method="GET"))
-    d.connect(name="streamUpdate", route="stream/:id", controller=stream, action="update",
-              conditions=dict(method="PUT"))
-    d.connect(name="streamDelete", route="stream/:id", controller=stream, action="delete",
-              conditions=dict(method="DELETE"))
-
-    d.connect(name="streamSubscribe", route="stream/:id/subscribe", controller=stream, action="subscribe",
-              conditions=dict(method="POST"))
-    d.connect(name="streamUnsubscribe", route="stream/:id/unsubscribe", controller=stream, action="unsubscribe",
-              conditions=dict(method="POST"))
-
-    d.connect(name="streamSetPermission", route="stream/:id/permission", controller=stream, action="setPermission",
-              conditions=dict(method="POST"))
-    d.connect(name="streamPermissions", route="stream/:id/permissions", controller=stream, action="permissions",
-              conditions=dict(method="GET"))
-
-    d.connect(name="streamEvents", route="stream/:id/events", controller=stream, action="events",
-              conditions=dict(method="GET"))
-    d.connect(name="streamPost", route="stream/:id/post", controller=stream, action="post",
-              conditions=dict(method="POST"))
-
-    d.connect(name="streamAdd", route="stream/:id/add/:userName", controller=stream, action="add",
-              conditions=dict(method="POST"))
-    d.connect(name="streamRemove", route="stream/:id/remove/:userName", controller=stream, action="remove",
-              conditions=dict(method="POST"))
-    # Event Routes
-    d.connect(name="eventRead", route="event/:id", controller=event, action="read",
-              conditions=dict(method="GET"))
-    d.connect(name="eventUpdate", route="event/:id", controller=event, action="update",
-              conditions=dict(method="PUT"))
-    d.connect(name="eventDelete", route="event/:id", controller=event, action="delete",
-              conditions=dict(method="DELETE"))
-    # Permission Routes
-    d.connect(name="permissionCreate", route="permission", controller=permission, action="create",
-              conditions=dict(method="POST"))
-    d.connect(name="permissionRead", route="permission/:id", controller=permission, action="read",
-              conditions=dict(method="GET"))
-    d.connect(name="permissionUpdate", route="permission/:id", controller=permission, action="update",
-              conditions=dict(method="PUT"))
-    d.connect(name="permissionDelete", route="permission/:id", controller=permission, action="read",
-              conditions=dict(method="DELETE"))
-    # Group Routes
-    d.connect(name="groupRead", route="group/:id", controller=group, action="read",
-              conditions=dict(method="GET"))
     return d
 
 def start(conf=None):

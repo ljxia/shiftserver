@@ -11,6 +11,33 @@ from resource import *
 
 
 class StreamController(ResourceController):
+    def routes(self, d):
+        d.connect(name="streamCreate", route="stream", controller=self, action="create",
+                  conditions=dict(method="POST"))
+        d.connect(name="streamRead", route="stream/:id", controller=self, action="read",
+                  conditions=dict(method="GET"))
+        d.connect(name="streamUpdate", route="stream/:id", controller=self, action="update",
+                  conditions=dict(method="PUT"))
+        d.connect(name="streamDelete", route="stream/:id", controller=self, action="delete",
+                  conditions=dict(method="DELETE"))
+        d.connect(name="streamSubscribe", route="stream/:id/subscribe", controller=self, action="subscribe",
+                  conditions=dict(method="POST"))
+        d.connect(name="streamUnsubscribe", route="stream/:id/unsubscribe", controller=self, action="unsubscribe",
+                  conditions=dict(method="POST"))
+        d.connect(name="streamSetPermission", route="stream/:id/permission", controller=self, action="setPermission",
+                  conditions=dict(method="POST"))
+        d.connect(name="streamPermissions", route="stream/:id/permissions", controller=self, action="permissions",
+                  conditions=dict(method="GET"))
+        d.connect(name="streamEvents", route="stream/:id/events", controller=self, action="events",
+                  conditions=dict(method="GET"))
+        d.connect(name="streamPost", route="stream/:id/post", controller=self, action="post",
+                  conditions=dict(method="POST"))
+        d.connect(name="streamAdd", route="stream/:id/add/:userName", controller=self, action="add",
+                  conditions=dict(method="POST"))
+        d.connect(name="streamRemove", route="stream/:id/remove/:userName", controller=self, action="remove",
+                  conditions=dict(method="POST"))
+        return d
+
     @jsonencode
     @loggedin
     def create(self):
