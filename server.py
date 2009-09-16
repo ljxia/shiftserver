@@ -40,6 +40,11 @@ class RootController:
     def sandbox(self):
         serverroot = os.path.dirname(os.path.abspath(__file__))
         webroot = os.path.dirname(serverroot)
+        compiler = sandalphon.SandalphonCompiler("../client/compiledViews", "mydev")
+        compiler.compile(inputFile="../client/views/SSConsole/SSConsole.html")
+        preprocessor = preprocess.SSPreProcessor(project="sandbox", env="mydev")
+        preprocessor.preprocess(input="../client/ShiftSpace.js",
+                                output="../builds/shiftspace.sandbox.js")
         return serve_file(os.path.join(webroot, 'sandbox/index.html'))
 
 
