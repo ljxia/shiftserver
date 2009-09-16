@@ -2,6 +2,7 @@ import os
 import sys
 import getopt
 import time
+import StringIO
 import cherrypy
 from cherrypy.lib.static import serve_file
 import ConfigParser
@@ -32,20 +33,46 @@ except Exception:
     print "Could not import preprocess"
     print Exception
 
+serverroot = os.path.dirname(os.path.abspath(__file__))
+webroot = os.path.dirname(serverroot)
 
 class RootController:
     def read(self):
-        return 'ShiftSpace Server 1.0'
+        return 'The ShiftSpace 1.0 Robot says \"Hello\"'
 
     def sandbox(self):
-        serverroot = os.path.dirname(os.path.abspath(__file__))
-        webroot = os.path.dirname(serverroot)
         compiler = sandalphon.SandalphonCompiler("../client/compiledViews", "mydev")
         compiler.compile(inputFile="../client/views/SSConsole/SSConsole.html")
         preprocessor = preprocess.SSPreProcessor(project="sandbox", env="mydev")
         preprocessor.preprocess(input="../client/ShiftSpace.js",
                                 output="../builds/shiftspace.sandbox.js")
         return serve_file(os.path.join(webroot, 'sandbox/index.html'))
+
+    def tests(self, test="SSDefaultTest", env="mydev"):
+        fh = open(os.path.join(webroot, "config/tests.json"))
+        teststr = fh.read()
+        tests = json.loads(teststr)
+        fh.close()
+        fileOrder = tests['dependencies'].get(test)
+        if fileOrder == None:
+            return "Error: %s does not exists, perhaps you need to run setup.sh" % test
+        else:
+            out = StringIO.StringIO()
+            preprocessor = preprocess.SSPreProcessor(project="sandalphon", env="sandalphon")
+            for f in fileOrder:
+                preprocessor.preprocess(f, out)
+            cherrypy.response.headers['Content-Type'] = "text/plain"
+            str = out.getvalue()
+            out.close()
+            return str
+
+    def install(self):
+        compiler = sandalphon.SandalphonCompiler("../client/compiledViews", "dev")
+        compiler.compile(inputFile="../client/views/SSConsole/SSConsole.html")
+        preprocessor = preprocess.SSPreProcessor(project="sandbox", env="dev")
+        preprocessor.preprocess(input="../client/ShiftSpace.js",
+                                output="../builds/shiftspace.dev.user.js")
+        return serve_file(os.path.join(webroot, 'builds/shiftspace.dev.user.js'))
 
 
 def initAppRoutes():
@@ -63,7 +90,9 @@ def initDevRoutes():
     d = cherrypy.dispatch.RoutesDispatcher()
     root = RootController()
     d.connect(name='root', route='', controller=root, action='read')
-    d.connect(name='rootSandbox', route='sandbox/', controller=root, action='sandbox')
+    d.connect(name='rootSandbox', route='sandbox', controller=root, action='sandbox')
+    d.connect(name='rootTests', route='tests', controller=root, action='tests')
+    d.connect(name='rootInstall', route='install', controller=root, action='install')
     return d
 
 
