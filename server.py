@@ -48,7 +48,7 @@ class RootController:
                                 output="../builds/shiftspace.sandbox.js")
         return serve_file(os.path.join(webroot, 'sandbox/index.html'))
 
-    def tests(self, test="SSDefaultTest", env="mydev"):
+    def test(self, test="SSDefaultTest", env="mydev"):
         fh = open(os.path.join(webroot, "config/tests.json"))
         teststr = fh.read()
         tests = json.loads(teststr)
@@ -65,6 +65,9 @@ class RootController:
             str = out.getvalue()
             out.close()
             return str
+
+    def tests(self):
+        return serve_file(os.path.join(webroot, 'tests/index.html'))
 
     def install(self):
         compiler = sandalphon.SandalphonCompiler("../client/compiledViews", "dev")
@@ -91,6 +94,7 @@ def initDevRoutes():
     root = RootController()
     d.connect(name='root', route='', controller=root, action='read')
     d.connect(name='rootSandbox', route='sandbox', controller=root, action='sandbox')
+    d.connect(name='rootTest', route='test', controller=root, action='test')
     d.connect(name='rootTests', route='tests', controller=root, action='tests')
     d.connect(name='rootInstall', route='install', controller=root, action='install')
     return d
