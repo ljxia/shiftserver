@@ -61,6 +61,7 @@ class RootController:
             preprocessor = preprocess.SSPreProcessor(project="sandalphon", env="sandalphon")
             for f in fileOrder:
                 preprocessor.preprocess(f, out)
+                out.write("\n\n")
             cherrypy.response.headers['Content-Type'] = "text/plain"
             str = out.getvalue()
             out.close()
@@ -94,7 +95,7 @@ def initDevRoutes():
     root = RootController()
     d.connect(name='root', route='', controller=root, action='read')
     d.connect(name='rootSandbox', route='sandbox', controller=root, action='sandbox')
-    d.connect(name='rootTest', route='test', controller=root, action='test')
+    d.connect(name='rootTest', route='test/:test', controller=root, action='test')
     d.connect(name='rootTests', route='tests', controller=root, action='tests')
     d.connect(name='rootInstall', route='install', controller=root, action='install')
     return d
