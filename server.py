@@ -68,6 +68,9 @@ class RootController:
             return str
 
     def tests(self):
+        preprocessor = preprocess.SSPreProcessor(project="sandalphon", env="sandalphon", export=True)
+        preprocessor.preprocess(input="../sandalphon/BootstrapSandalphon.js",
+                                output="../builds/shiftspace.sandalphon.js")
         return serve_file(os.path.join(webroot, 'tests/index.html'))
 
     def install(self):
