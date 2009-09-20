@@ -2,13 +2,17 @@ import os
 import sys
 import time
 import datetime
-import md5
+try:
+    # Python 2.5+
+    from hashlib import md5
+except ImportError:
+    from md5 import new as md5
 
 def domain(url):
     return "http://" + url[7:].split("/")[0]
 
 def md5hash(str):
-    m = md5.new()
+    m = md5()
     m.update(str)
     return m.hexdigest()
 
