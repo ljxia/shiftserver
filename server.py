@@ -13,6 +13,7 @@ import simplejson as json
 from utils.utils import *
 from utils.errors import *
 from utils.decorators import *
+from utils.returnTypes import *
 
 from controllers.user import UserController
 from controllers.shift import ShiftController
@@ -73,13 +74,14 @@ class RootController:
                                 output="../builds/shiftspace.sandalphon.js")
         return serve_file(os.path.join(webroot, 'tests/index.html'))
 
-    def install(self):
+    @jsonencode
+    def build(self):
         compiler = sandalphon.SandalphonCompiler("../client/compiledViews", "dev")
         compiler.compile(inputFile="../client/views/SSConsole/SSConsole.html")
-        preprocessor = preprocess.SSPreProcessor(project="sandbox", env="dev")
+        preprocessor = preprocess.SSPreProcessor(project="shiftspace", env="dev")
         preprocessor.preprocess(input="../client/ShiftSpace.js",
                                 output="../builds/shiftspace.dev.user.js")
-        return serve_file(os.path.join(webroot, 'builds/shiftspace.dev.user.js'))
+        return ack
 
 
 def initAppRoutes():
@@ -100,7 +102,7 @@ def initDevRoutes():
     d.connect(name='rootSandbox', route='sandbox', controller=root, action='sandbox')
     d.connect(name='rootTest', route='test/:test', controller=root, action='test')
     d.connect(name='rootTests', route='tests', controller=root, action='tests')
-    d.connect(name='rootInstall', route='install', controller=root, action='install')
+    d.connect(name='rootBuild', route='build', controller=root, action='build')
     return d
 
 
