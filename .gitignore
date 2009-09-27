@@ -8,3 +8,4 @@
 /sessions/session-*
 /erl_crash.dump
 /deps
+/deps.zip

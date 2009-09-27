@@ -1,6 +1,6 @@
 function (doc)
 {
-  if(doc.type == "all")
+  if(doc.type == "user")
   {
     emit(doc._id, doc);
   }
