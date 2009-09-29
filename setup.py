@@ -42,7 +42,7 @@ def collectDesignDocs(viewDir="views"):
     """
     designDocs = {}
     def collect(path):
-        parts = path.split("/")
+        parts = os.path.split(path)
         designDocName = "_design/%s" % parts[1]
         designDoc = designDocs.get(designDocName)
         if not designDoc:
