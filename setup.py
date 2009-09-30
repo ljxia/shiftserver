@@ -1,5 +1,9 @@
 import os
-import md5
+try:
+    # Python 2.5+
+    from hashlib import md5
+except ImportError:
+    from md5 import new as md5
 import models.core as core
 
 
@@ -42,22 +46,25 @@ def collectDesignDocs(viewDir="views"):
     """
     designDocs = {}
     def collect(path):
-        parts = os.path.split(path)
-        designDocName = "_design/%s" % parts[1]
+        dir, file = os.path.split(path)
+        dir, view = os.path.split(dir)
+        root, design = os.path.split(dir) 
+        if view == "validation":
+            design = "validation"
+        designDocName = "_design/%s" % design
         designDoc = designDocs.get(designDocName)
         if not designDoc:
             designDoc = {"_id": designDocName, "language":"javascript"}
-        view = parts[2]
-        if parts[1] != "validation":
-            key = (parts[1] == "lucene" and "fulltext") or "views"
+        if design != "validation":
+            key = (design == "lucene" and "fulltext") or "views"
             if not designDoc.get(key):
               designDoc[key] = {}
             if not designDoc[key].get(view):
               designDoc[key][view] = {}
-            fn = os.path.splitext(os.path.basename(path))[0]
+            fn = os.path.splitext(file)[0]
             designDoc[key][view][fn] = open(path).read()
         else:
-            view = os.path.splitext(os.path.basename(path))[0]
+            view = os.path.splitext(file)[0]
             designDoc[view] = open(path).read()
         designDocs[designDocName] = designDoc
     walk(viewDir, collect)
