@@ -71,7 +71,7 @@ def collectDesignDocs(viewDir="views"):
     return designDocs
 
 def md5hash(str):
-    m = md5.new()
+    m = md5()
     m.update(str)
     return m.hexdigest()
 
